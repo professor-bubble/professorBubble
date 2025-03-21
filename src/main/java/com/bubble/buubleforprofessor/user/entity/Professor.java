@@ -1,14 +1,13 @@
 package com.bubble.buubleforprofessor.user.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Table(name ="professors")
+@Builder
 public class Professor {
 
     @Id
@@ -26,5 +25,22 @@ public class Professor {
     private boolean isApproved;
 
     private String department;
+
+    // 승인 여부를 변경하는 메서드
+    public void approve() {
+        if (!isApproved) {
+            this.isApproved = true;
+        }
+    }
+
+    @Builder
+    public Professor(Long id, User user, String description, int professorNum, boolean isApproved, String department) {
+        this.id = id;
+        this.user = user;
+        this.description = description;
+        this.professorNum = professorNum;
+        this.isApproved = isApproved;
+        this.department = department;
+    }
 
 }

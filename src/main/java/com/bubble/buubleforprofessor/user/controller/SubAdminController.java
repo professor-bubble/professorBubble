@@ -1,16 +1,14 @@
 package com.bubble.buubleforprofessor.user.controller;
 
-import com.bubble.buubleforprofessor.global.config.CustomException;
-import com.bubble.buubleforprofessor.global.config.ErrorCode;
 import com.bubble.buubleforprofessor.user.dto.ApprovalRequestDto;
 import com.bubble.buubleforprofessor.user.service.ProfessorService;
-import com.bubble.buubleforprofessor.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 
@@ -21,27 +19,49 @@ import java.util.UUID;
 public class SubAdminController {
 
     public final ProfessorService professorService;
-    public final UserService userService;
 
     //컨트롤러에서는 디코딩된 userId 값이 들어오는거.
+    //교수 승인요청 리스트를 모두 봄
+    //todo 페이징 처리로 바꿀것
     @GetMapping("/approve-requests")
-    public ResponseEntity<List<ApprovalRequestDto>> approveRequests(
-            @RequestHeader(value = "X-USER-ID",required = true) UUID userId) {
-        if(userId == null || userId.toString().isBlank()) {
-            throw new CustomException(ErrorCode.INVALID_USERID);
-        }
-        if(!userService.isExist(userId))
-        {
-            throw new CustomException(ErrorCode.INVALID_USERID);
-        }
+    public ResponseEntity<Page<ApprovalRequestDto>> approveRequests(
+            @RequestHeader(value = "X-USER-ID",required = true) UUID userId,
+            @RequestParam int pageNum) {
 
-        List<ApprovalRequestDto> requests = professorService.getApproveRequests();
+        if(pageNum<0)
+        {
+            pageNum=0;
+        }
+        PageRequest pageable= PageRequest.of(pageNum, 10);
+        Page<ApprovalRequestDto> requests = professorService.getApproveRequests(pageable);
         if(requests == null || requests.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(requests);
     }
+    //교수 승인 요청을 수락
+    @PatchMapping(value = "/{userId}/approve", produces = "application/json")
+    public ResponseEntity<Boolean> approveRequest(@RequestHeader(value = "X-USER-ID",required = true) UUID jwtUserId,
+                                                  @PathVariable UUID userId) {
 
+       professorService.setApprovalStatus(userId);
 
+       return ResponseEntity.ok(true);
+    }
+    //교수 승인요청을 거절
+    @DeleteMapping(value = "/{userId}/approve" , produces = "application/json")
+    public ResponseEntity<Boolean> deleteApproveRequest(@RequestHeader(value = "X-USER-ID",required = true) UUID jwtUserId,
+                                                        @PathVariable UUID userId) {
+        professorService.deleteApprovalById(userId);
+        return ResponseEntity.ok(true);
+    }
+
+    // 교수를 일반유저로 변경. 사용안하지만 일단 구현해둠.
+    @DeleteMapping(value = "/{userId}/professor" , produces = "application/json")
+    public ResponseEntity<Boolean> DeleteProfessor(@RequestHeader(value = "X-USER-ID",required = true) UUID jwtUserId,
+                                                        @PathVariable UUID userId) {
+        professorService.deleteById(userId);
+        return ResponseEntity.ok(true);
+    }
 
 }

@@ -1,25 +1,23 @@
-package com.bubble.buubleforprofessor.university.entity;
+package com.bubble.buubleforprofessor.user.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class University {
-
+public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "role_id" )
     private int id;
 
     private String name;
 
-    public University(String name) {
+    public Role(String name) {
         this.name = name;
     }
 }

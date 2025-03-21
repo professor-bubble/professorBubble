@@ -33,6 +33,12 @@ public enum ErrorCode {
     // 적절하지 않은 사용자 아이디
     INVALID_USERID("적절하지 않은 사용자 아이디입니다.",HttpStatus.BAD_REQUEST),
 
+    // 존재하지않는 교수
+    NON_EXISTENT_PROFESSOR("존재하지 않는 교수입니다", HttpStatus.NOT_FOUND),
+
+    // 존재하지않는 권한입니다.
+    NON_EXISTENT_ROLE("존재하지 않는 권한입니다.", HttpStatus.NOT_FOUND),
+
     /**
      * UNIVERSITY
      */

@@ -20,14 +20,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean isExist(UUID userId) {
 
-        if(userId == null || userId.toString().isBlank())
-        {
-            throw new CustomException(ErrorCode.INVALID_USERID);
-        }
-        if(!userRepository.existsById(userId))
-        {
-            throw new CustomException(ErrorCode.NON_EXISTENT_USER);
-        }
         return userRepository.existsById(userId);
     }
 }
