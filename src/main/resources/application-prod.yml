@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: jdbc:mariadb://localhost:3306/bubbleforprofessor_dev
+    driver-class-name: org.mariadb.jdbc.Driver
+    username: dev_user
+    password: dev_password
+  jpa:
+    #defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MariaDBDialect
+        format_sql: true
+        show-sql: true

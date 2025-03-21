@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: bubbleforprofessor
+
+  profiles:
+    active: local
+    group:
+        "prod": "prod, secret"
+        "local" : "local, secret"
+
+
+server:
+  port: 8080
+
+# ?? ??
+logging:
+  level:
+    root: INFO
+    com.hellouni: DEBUG
