@@ -1,4 +1,4 @@
-package hellouni.bubbleforprofessor.global.config;
+package com.bubble.buubleforprofessor.global.config;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
