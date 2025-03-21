@@ -16,4 +16,4 @@ server:
 logging:
   level:
     root: INFO
-    com.hellouni: DEBUG
+    com.bubble.buubleforprofessor: DEBUG
