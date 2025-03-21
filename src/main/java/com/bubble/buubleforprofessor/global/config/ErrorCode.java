@@ -1,4 +1,4 @@
-package hellouni.bubbleforprofessor.global.config;
+package com.bubble.buubleforprofessor.global.config;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
@@ -29,6 +29,9 @@ public enum ErrorCode {
 
     //권한 없음
     USER_UNAUTHORIZED("사용자가 권한이없음",HttpStatus.UNAUTHORIZED),
+
+    // 적절하지 않은 사용자 아이디
+    INVALID_USERID("적절하지 않은 사용자 아이디입니다.",HttpStatus.BAD_REQUEST),
 
     /**
      * UNIVERSITY

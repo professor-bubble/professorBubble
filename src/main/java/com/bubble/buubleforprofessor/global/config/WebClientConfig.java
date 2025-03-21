@@ -1,4 +1,4 @@
-package hellouni.bubbleforprofessor.global.config;
+package com.bubble.buubleforprofessor.global.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
