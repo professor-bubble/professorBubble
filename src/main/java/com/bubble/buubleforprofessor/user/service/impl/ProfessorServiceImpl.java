@@ -58,6 +58,18 @@ public class ProfessorServiceImpl implements ProfessorService {
         Professor professor = professorRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NON_EXISTENT_USER));
 
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NON_EXISTENT_USER));
+
+        Optional<Role> role = roleRepository.findByName("ROLE_PROFESSOR");
+        if (!role.isPresent()) {
+            throw new CustomException(ErrorCode.NON_EXISTENT_ROLE);
+        }
+
+        user.modifyRole(role.get());
+
+        userRepository.save(user);
+
         professor.approve();
         professorRepository.save(professor);
     }
@@ -90,20 +102,20 @@ public class ProfessorServiceImpl implements ProfessorService {
         user.modifyRole(role.get());
 
         professorRepository.deleteById(userId);
+        userRepository.save(user);
     }
 //  교수승인 요청하면 일단 교수데이터 저장.
     @Override
     public void createProfessor(UUID userId, ApprovalRequestCreateDto approvalRequestCreateDto) {
-        Optional<User> user = userRepository.findById(userId);
-        if(user.isEmpty()) {
-            throw new CustomException(ErrorCode.NON_EXISTENT_USER);
-        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NON_EXISTENT_USER));
+
         if(professorRepository.existsById(userId)) {
            throw new CustomException(ErrorCode.EXISTENT_PROFESSOR);
         }
 
         Professor professor = Professor.builder()
-                .user(user.get())
+                .user(user)
                 .description(approvalRequestCreateDto.getDescription())
                 .isApproved(false)
                 .professorNum(approvalRequestCreateDto.getProfessorNum())

@@ -80,7 +80,8 @@ class ProfessorServiceImplTest {
     void testSetApprovalStatus_Success() {
         // given
         when(professorRepository.findById(userId)).thenReturn(Optional.of(professor));
-
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(roleRepository.findByName("ROLE_PROFESSOR")).thenReturn(Optional.of(professorRole));
         // when
         professorService.setApprovalStatus(userId);
 

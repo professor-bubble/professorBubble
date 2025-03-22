@@ -3,6 +3,7 @@ package com.bubble.buubleforprofessor.user.controller;
 import com.bubble.buubleforprofessor.user.dto.ApprovalRequestCreateDto;
 import com.bubble.buubleforprofessor.user.service.ProfessorService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -35,6 +36,7 @@ class UserControllerTest {
         mockMvc = MockMvcBuilders.standaloneSetup(userController).build();
     }
 
+    @DisplayName("교수 승인요청 성공")
     @Test
     void testApproveRequest() throws Exception {
         UUID jwtUserId = UUID.randomUUID();
@@ -59,7 +61,7 @@ class UserControllerTest {
         // Verify that the service method was called once
         verify(professorService, times(1)).createProfessor(userId, approvalRequestCreateDto);
     }
-
+    @DisplayName("교수 승인요청 유효성검사 실패")
     @Test
     void testApproveRequest_ValidationFails() throws Exception {
         UUID jwtUserId = UUID.randomUUID();
