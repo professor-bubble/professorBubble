@@ -2,6 +2,7 @@ package com.bubble.buubleforprofessor.user.service.impl;
 
 import com.bubble.buubleforprofessor.global.config.CustomException;
 import com.bubble.buubleforprofessor.global.config.ErrorCode;
+import com.bubble.buubleforprofessor.user.dto.ApprovalRequestCreateDto;
 import com.bubble.buubleforprofessor.user.dto.ApprovalRequestDto;
 import com.bubble.buubleforprofessor.user.entity.Professor;
 import com.bubble.buubleforprofessor.user.entity.Role;
@@ -66,7 +67,6 @@ class ProfessorServiceImplTest {
                 .build();
 
         professor = Professor.builder()
-                .id(1L)
                 .user(user)
                 .description("Test Professor")
                 .department("Computer Science")
@@ -202,4 +202,28 @@ class ProfessorServiceImplTest {
         CustomException exception = assertThrows(CustomException.class, () -> professorService.deleteById(userId));
         assertEquals(ErrorCode.NON_EXISTENT_ROLE, exception.getErrorCode());
     }
+
+    @DisplayName("교수 승인 요청 성공 - 교수 데이터 Create")
+    @Test
+    void testCreateProfessor_Success() {
+        // 목 객체 생성
+        Professor professor = mock(Professor.class);
+
+        // 목 객체의 메서드 호출 시 동작 정의
+        when(professorRepository.existsById(userId)).thenReturn(false);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(professorRepository.save(any(Professor.class))).thenReturn(professor);
+
+        ApprovalRequestCreateDto approvalRequestCreateDto = new ApprovalRequestCreateDto();
+        approvalRequestCreateDto.setProfessorNum(12345);
+        approvalRequestCreateDto.setDescription("컴공교수");
+        approvalRequestCreateDto.setDepartment("컴퓨터공학과");
+
+        // 서비스 메서드 호출
+        professorService.createProfessor(userId, approvalRequestCreateDto);
+
+        // 메서드 호출 검증
+        verify(professorRepository, times(1)).save(any(Professor.class));
+    }
+
 }

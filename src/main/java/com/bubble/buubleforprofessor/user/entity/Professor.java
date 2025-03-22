@@ -7,7 +7,6 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Table(name ="professors")
-@Builder
 public class Professor {
 
     @Id
@@ -18,12 +17,14 @@ public class Professor {
     @JoinColumn(name = "professor_id", referencedColumnName = "user_id")
     private User user;
 
+    @Column(columnDefinition = "TEXT",nullable = true)
     private String description;
 
+    @Column(nullable = false)
     private int professorNum;
-
-    private boolean isApproved;
-
+    @Column(nullable = false)
+    private boolean isApproved=false;
+    @Column(length = 20, nullable = false)
     private String department;
 
     // 승인 여부를 변경하는 메서드
@@ -34,8 +35,7 @@ public class Professor {
     }
 
     @Builder
-    public Professor(Long id, User user, String description, int professorNum, boolean isApproved, String department) {
-        this.id = id;
+    public Professor(User user, String description, int professorNum, boolean isApproved, String department) {
         this.user = user;
         this.description = description;
         this.professorNum = professorNum;

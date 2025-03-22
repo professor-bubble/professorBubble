@@ -36,6 +36,9 @@ public enum ErrorCode {
     // 존재하지않는 교수
     NON_EXISTENT_PROFESSOR("존재하지 않는 교수입니다", HttpStatus.NOT_FOUND),
 
+    // 이미 존재하는 교수
+    EXISTENT_PROFESSOR("이미 존재하는 교수입니다", HttpStatus.CONFLICT),
+
     // 존재하지않는 권한입니다.
     NON_EXISTENT_ROLE("존재하지 않는 권한입니다.", HttpStatus.NOT_FOUND),
 
