@@ -20,6 +20,14 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
+/*
+Mono<T> :  최대 1개의 데이터를 비동기로 감싸는 컨테이너
+subscribeOn : 오래걸리는 작업을 메인스레드가 별도의 스레드(boundedElastic)에서 실행하게 함
+flatMap : Mono 안에 또 다른 Mono를 반환하는 함수, 비동기 작업 안에서 또 다른 비동기 작업을 할 때 사용
+ */
+
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -28,6 +36,7 @@ public class UniversityServiceImpl implements UniversityService {
     private final UniversityRepository universityRepository;
     private final WebClient webClient;
 
+//  빈생성, DI 완료 직후 실행, void, 매서드파라미터 없어야함
     @PostConstruct
     public void init(){
         log.info("초기 실행시 대학교 데이터 초기 로드 시작");
@@ -73,22 +82,31 @@ public class UniversityServiceImpl implements UniversityService {
                     int totalCount = initResponse.getBody().getTotalCount();
                     log.info("Total count: {}", totalCount);
 
-                    // Step 2: numOfRows를 totalCount로 설정
-                    uniRequest.setNumOfRows(totalCount);
+                    // 기존 데이터 삭제
+                    return Mono.fromCallable(() -> {
+                                universityRepository.deleteAll(); // 삭제
+                                return null;
+                            })
+                            .subscribeOn(Schedulers.boundedElastic())
+                            // Step 2: numOfRows를 totalCount로 설정
+                            .then(Mono.just(totalCount))
+                            .flatMap(count -> {
+                                uniRequest.setNumOfRows(count);
 
-                    // Step 3: 전체 데이터 요청
-                    return webClient.get()
-                            .uri(uriBuilder -> uriBuilder
-                                    .path("/data/getUniversity.do")
-                                    .queryParam("serviceKey", uniRequest.getServiceKey())
-                                    .queryParam("pageNo", uniRequest.getPageNo())
-                                    .queryParam("numOfRows", uniRequest.getNumOfRows())
-                                    .queryParam("dataType", uniRequest.getDataType())
-                                    .queryParam("Fclty_Cd", uniRequest.getFcltyCd())
-                                    .build())
-                            .retrieve()
-                            .bodyToMono(UniversityApiResponse.class);
-                })
+                                // Step 3: 전체 데이터 요청
+                                return webClient.get()
+                                        .uri(uriBuilder -> uriBuilder
+                                                .path("/data/getUniversity.do")
+                                                .queryParam("serviceKey", uniRequest.getServiceKey())
+                                                .queryParam("pageNo", uniRequest.getPageNo())
+                                                .queryParam("numOfRows", uniRequest.getNumOfRows())
+                                                .queryParam("dataType", uniRequest.getDataType())
+                                                .queryParam("Fclty_Cd", uniRequest.getFcltyCd())
+                                                .build())
+                                        .retrieve()
+                                        .bodyToMono(UniversityApiResponse.class);
+                            });
+                }) // 첫 번째 flatMap 닫힘
                 .flatMap(fullResponse -> {
                     // null 체크
                     if (fullResponse == null) {
@@ -107,10 +125,10 @@ public class UniversityServiceImpl implements UniversityService {
 
                     // JPA 동기 호출을 비동기화
                     return Mono.fromCallable(() -> {
-                                universityRepository.saveAll(universities); // 동기 JPA 호출
-                                return null; // Void 반환을 위해
+                                universityRepository.saveAll(universities);
+                                return null;
                             })
-                            .subscribeOn(Schedulers.boundedElastic()) // 블록킹 작업 별도 스레드에서 실행
+                            .subscribeOn(Schedulers.boundedElastic())
                             .doOnSuccess(v -> log.info("저장갯수 {} universities to DB", universities.size()))
                             .then();
                 });
