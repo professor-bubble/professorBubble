@@ -1,5 +1,6 @@
-package hellouni.bubbleforprofessor.global.config;
+package com.bubble.buubleforprofessor.global.config;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -17,7 +18,10 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(errorCode.getMsg(), errorCode.getStatus().value(), timeStamp);
         return new ResponseEntity<>(errorResponse, errorCode.getStatus());
 
+
+
         //todo illlecpxtipn 추가
 
     }
+
 }

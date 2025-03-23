@@ -1,15 +1,34 @@
-package hellouni.bubbleforprofessor.global.config;
+package com.bubble.buubleforprofessor.global.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.netty.http.client.HttpClient;
 
+@Slf4j
 @Configuration
 public class WebClientConfig {
+
     @Bean
     public WebClient webClient() {
-        return WebClient.builder()
-                .baseUrl("http://safemap.go.kr/openApiService/data")
+        // HTTP 클라이언트 설정: 리다이렉션 허용
+        HttpClient httpClient = HttpClient.create()
+                .followRedirect(true);
+
+        // WebClient 빌더로 구성
+        WebClient webClient = WebClient.builder()
+                .baseUrl("http://safemap.go.kr/openApiService")
+                .clientConnector(new ReactorClientHttpConnector(httpClient))
+                .codecs(configurer -> {
+                    log.info("Configuring Jaxb2XmlDecoder for WebClient");
+                    configurer.defaultCodecs().jaxb2Decoder(new Jaxb2XmlDecoder());
+                })
                 .build();
+
+        log.info("WebClient initialized with base URL: {}", "http://safemap.go.kr/openApiService");
+        return webClient;
     }
 }
