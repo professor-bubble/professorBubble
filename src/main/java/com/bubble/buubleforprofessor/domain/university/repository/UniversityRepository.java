@@ -1,4 +1,4 @@
-package com.bubble.buubleforprofessor.domain.university.repositoy;
+package com.bubble.buubleforprofessor.domain.university.repository;
 
 import com.bubble.buubleforprofessor.domain.university.entity.University;
 import org.springframework.data.jpa.repository.JpaRepository;

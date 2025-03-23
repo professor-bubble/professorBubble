@@ -19,7 +19,12 @@ import lombok.Setter;
 @XmlRootElement(name = "response")
 @Getter
 @Setter
-@XmlAccessorType(XmlAccessType.FIELD)
+@XmlAccessorType(XmlAccessType.FIELD) //모든 필드에 접근하도록 설정
+/*
+* @XmlAccessorType는 JAXB가 XML 데이터를 Java 객체에 넣을 때 어디를 통해 접근할지 정하는 규칙
+기본값: 만약 아무것도 안 쓰면, JAXB는 public 필드나 public getter/setter만 확인함 private은 무시
+XmlAccessType.FIELD: 모든 필드(심지어 private도 포함)를 직접 접근해서 데이터를 넣어줘, getter/setter가 없어도 필드 자체를 사용할 수 있게 해줌
+* */
 @NoArgsConstructor
 public class UniversityApiResponse {
     @XmlElement(name = "header")

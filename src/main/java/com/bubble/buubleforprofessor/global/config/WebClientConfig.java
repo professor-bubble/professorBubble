@@ -23,12 +23,11 @@ public class WebClientConfig {
                 .baseUrl("http://safemap.go.kr/openApiService")
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .codecs(configurer -> {
-                    log.info("Configuring Jaxb2XmlDecoder for WebClient");
                     configurer.defaultCodecs().jaxb2Decoder(new Jaxb2XmlDecoder());
+                    configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024); // 버퍼 크기 256-> 10MB로 증가
                 })
                 .build();
 
-        log.info("WebClient initialized with base URL: {}", "http://safemap.go.kr/openApiService");
         return webClient;
     }
 }

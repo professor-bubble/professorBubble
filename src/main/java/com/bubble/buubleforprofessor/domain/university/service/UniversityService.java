@@ -4,6 +4,6 @@ import com.bubble.buubleforprofessor.domain.university.dto.request.UniversityApi
 import reactor.core.publisher.Mono;
 
 public interface UniversityService {
-    void saveAllUniversities(UniversityApiRequest uniRequest);
+    Mono<Void> saveAllUniversities(UniversityApiRequest uniRequest);
     Mono<Integer> onelist(UniversityApiRequest request);
 }

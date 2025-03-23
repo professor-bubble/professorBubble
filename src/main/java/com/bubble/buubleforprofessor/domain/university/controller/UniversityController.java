@@ -23,12 +23,12 @@ public class UniversityController {
     private final UniversityService universityService;
 
     @GetMapping("/list")
-    public ResponseEntity<String> universityList() {
+    public Mono<ResponseEntity<String>> universityList() {
         log.info("컨트롤러  : universityList 시작");
         UniversityApiRequest uniRequest = new UniversityApiRequest();
-        universityService.saveAllUniversities(uniRequest);
-        log.info("컨트롤러  : universityList 완료");
-        return ResponseEntity.ok("성공");
+        return universityService.saveAllUniversities(uniRequest)
+                .doOnSuccess(v -> log.info("컨트롤러  : universityList 완료"))
+                .thenReturn(ResponseEntity.ok("성공"));
     }
 
     @GetMapping("/totalCount")
