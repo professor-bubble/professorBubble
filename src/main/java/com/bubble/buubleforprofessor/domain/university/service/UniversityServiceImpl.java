@@ -6,14 +6,17 @@ import com.bubble.buubleforprofessor.domain.university.entity.University;
 import com.bubble.buubleforprofessor.domain.university.repository.UniversityRepository;
 import com.bubble.buubleforprofessor.global.config.CustomException;
 import com.bubble.buubleforprofessor.global.config.ErrorCode;
+import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,6 +28,20 @@ public class UniversityServiceImpl implements UniversityService {
     private final UniversityRepository universityRepository;
     private final WebClient webClient;
 
+    @PostConstruct
+    public void init(){
+        log.info("초기 실행시 대학교 데이터 초기 로드 시작");
+        saveAllUniversities(new UniversityApiRequest()).subscribe();
+    }
+
+    @Scheduled(cron ="0 0 0 22 11 *") //매년 11월 22일 00:00에 실행
+    public void universityUpdate(){
+        LocalDate today = LocalDate.now();
+        if(today.getMonthValue() == 11 && today.getDayOfMonth() == 22){
+            log.info("11월 22일 대학교 데이터 업데이트 시작");
+            saveAllUniversities(new UniversityApiRequest()).subscribe();
+        }
+    }
 
     @Transactional
     @Override
