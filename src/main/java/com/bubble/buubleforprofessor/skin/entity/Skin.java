@@ -29,7 +29,7 @@ public class Skin {
     private boolean isDelete=false;
 
     @ManyToOne
-    @Column(nullable = false)
+    @JoinColumn(nullable = false)
     private Category category;
 
     public void delete()

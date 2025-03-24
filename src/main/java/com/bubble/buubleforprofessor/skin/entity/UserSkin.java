@@ -17,11 +17,11 @@ public class UserSkin {
     private long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @Column(nullable = false)
+    @JoinColumn(nullable = false)
     private Skin skin;
 
     @ManyToOne
-    @Column(nullable = false)
+    @JoinColumn(nullable = false)
     private User user;
     @Column(nullable = false)
     private boolean active=false;

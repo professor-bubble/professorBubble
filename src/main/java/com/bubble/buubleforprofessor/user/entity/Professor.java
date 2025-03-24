@@ -3,6 +3,8 @@ package com.bubble.buubleforprofessor.user.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.UUID;
+
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -10,7 +12,7 @@ import lombok.*;
 public class Professor {
 
     @Id
-    private Long id;
+    private UUID id;
 
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
