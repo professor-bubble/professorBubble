@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -40,9 +42,17 @@ public class Skin {
     {
         isDelete=false;
     }
+
+    @OneToMany(mappedBy = "skin", fetch = FetchType.LAZY)
+    private List<SkinImage> skinImages;
+
+    public void modifySkinImages(List<SkinImage> skinImages)
+    {
+        this.skinImages=skinImages;
+    }
+
     @Builder
-    public Skin(int id, String name, int price, String description, boolean isDelete, Category category) {
-        this.id = id;
+    public Skin(String name, int price, String description, boolean isDelete, Category category) {
         this.name = name;
         this.price = price;
         this.description = description;
