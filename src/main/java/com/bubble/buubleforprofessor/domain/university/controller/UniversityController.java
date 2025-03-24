@@ -31,6 +31,7 @@ public class UniversityController {
                 .thenReturn(ResponseEntity.ok("성공"));
     }
 
+    //테스트 용
     @GetMapping("/totalCount")
     public Mono<ResponseEntity<Integer>> test() {
         UniversityApiRequest request = new UniversityApiRequest();
