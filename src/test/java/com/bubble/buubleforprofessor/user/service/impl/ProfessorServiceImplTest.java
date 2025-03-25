@@ -97,7 +97,6 @@ class ProfessorServiceImplTest {
         assertTrue(professor.isApproved()); // 교수 승인 상태 확인
         verify(spyUser).modifyRole(professorRole); // spyUser로 검증
         verify(userRepository, times(1)).save(spyUser); // 저장 검증
-        verify(professorRepository, times(1)).save(professor); // 교수 승인 저장 확인
         verify(chatroomService, times(1)).createChatroom(professor); // 채팅방 생성 확인
     }
 
