@@ -119,4 +119,31 @@ class SkinServiceImplTest {
             skinService.getSkinsByUserId(userId, pageRequest);
         });
     }
+    @DisplayName("스킨 적용 상태 변경 성공")
+    @Test
+    void modifySkinStatus_Success() {
+        // Arrange
+        int skinId = skin.getId();  // 테스트할 skinId
+        when(userSkinRepository.findByUserIdAndSkinId(userId, skinId)).thenReturn(userSkin);
+
+        // Act
+        skinService.modifySkinStatus(userId, skinId);
+
+        // Assert
+        assertTrue(userSkin.isActive());  // 상태가 변경되었는지 확인
+    }
+
+    @DisplayName("스킨 적용 상태 변경 실패 - 유저가 해당 스킨을 소유하지 않음")
+    @Test
+    void modifySkinStatus_UserSkinNotFound() {
+        // Arrange
+        int skinId = skin.getId();  // 테스트할 skinId
+        when(userSkinRepository.findByUserIdAndSkinId(userId, skinId)).thenReturn(null);
+
+        // Act & Assert
+        assertThrows(CustomException.class, () -> {
+            skinService.modifySkinStatus(userId, skinId);
+        });
+    }
+
 }

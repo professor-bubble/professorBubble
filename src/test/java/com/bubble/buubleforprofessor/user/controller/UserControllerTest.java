@@ -3,6 +3,7 @@ package com.bubble.buubleforprofessor.user.controller;
 import com.bubble.buubleforprofessor.skin.dto.SkinResponseDto;
 import com.bubble.buubleforprofessor.skin.service.SkinService;
 import com.bubble.buubleforprofessor.user.dto.ApprovalRequestCreateDto;
+import com.bubble.buubleforprofessor.user.repository.UserRepository;
 import com.bubble.buubleforprofessor.user.service.ProfessorService;
 import com.bubble.buubleforprofessor.user.service.impl.ProfessorServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,8 +30,7 @@ import java.util.UUID;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(UserController.class)
@@ -73,7 +73,7 @@ class UserControllerTest {
                         .with(csrf())
                         .contentType("application/json")
                         .content("{\"description\":\"Request to approve professor\", \"professorNum\":12345, \"department\":\"Computer Science\"}"))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
 
         // Verify that the service method was called once
         verify(professorService, times(1)).createProfessor(userId, approvalRequestCreateDto);
@@ -153,4 +153,26 @@ class UserControllerTest {
                         .with(csrf()))
                 .andExpect(status().isNoContent());
     }
+    @DisplayName("스킨 적용 여부 변경 성공")
+    @WithMockUser(roles = "USER")
+    @Test
+    void testModifySkinStatus_Success() throws Exception {
+        UUID jwtUserId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        int skinId = 1;
+
+        // skinService.modifySkinStatus(userId, skinId)가 호출되어 아무 예외가 발생하지 않음을 가정
+        doNothing().when(skinService).modifySkinStatus(userId, skinId);
+
+        // PATCH 요청 수행 및 검증
+        mockMvc.perform(patch("/api/users/{userId}/skin/{skinId}", userId, skinId)
+                        .header("X-USER-ID", jwtUserId.toString())
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(content().string("true"));
+
+        // 서비스 메서드가 정확히 한 번 호출되었는지 검증
+        verify(skinService, times(1)).modifySkinStatus(userId, skinId);
+    }
+
 }
