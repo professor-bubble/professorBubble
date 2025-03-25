@@ -13,6 +13,7 @@ import com.bubble.buubleforprofessor.skin.service.SkinService;
 import com.bubble.buubleforprofessor.user.entity.User;
 import com.bubble.buubleforprofessor.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,10 +23,11 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class SkinServiceImpl implements SkinService {
 
-    private UserSkinRepository userSkinRepository;
-    private UserRepository userRepository;
+    private final UserSkinRepository userSkinRepository;
+    private final UserRepository userRepository;
 
     @Override
     public Page<SkinResponseDto> getSkinsByUserId(UUID userId, Pageable pageable) {
