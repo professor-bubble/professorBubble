@@ -10,4 +10,5 @@ import java.util.UUID;
 
 public interface SkinService {
     Page<SkinResponseDto> getSkinsByUserId(UUID userId, Pageable pageable);
+    void modifySkinStatus(UUID userId, int skinId);
 }

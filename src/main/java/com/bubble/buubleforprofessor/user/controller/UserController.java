@@ -1,15 +1,15 @@
 package com.bubble.buubleforprofessor.user.controller;
 
 import com.bubble.buubleforprofessor.skin.dto.SkinResponseDto;
-import com.bubble.buubleforprofessor.skin.entity.Skin;
 import com.bubble.buubleforprofessor.skin.service.SkinService;
 import com.bubble.buubleforprofessor.user.dto.ApprovalRequestCreateDto;
-import com.bubble.buubleforprofessor.user.dto.ApprovalRequestDto;
+
 import com.bubble.buubleforprofessor.user.service.ProfessorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
@@ -36,10 +36,10 @@ public class UserController {
             return ResponseEntity.badRequest().build();
         }
         professorService.createProfessor(userId, approvalRequestCreateDto);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @GetMapping("{userId}/skin")
+    @GetMapping("/{userId}/skin")
     public ResponseEntity<Page<SkinResponseDto>> findSkinsByUserId(@RequestHeader(value = "X-USER-ID",required = true) UUID jwtUserId,
                                                         @PathVariable(value = "userId",required = true)UUID userId,
                                                         @RequestParam(value = "pageNum",defaultValue = "0") int pageNum)
@@ -52,4 +52,14 @@ public class UserController {
         }
         return ResponseEntity.ok(skins);
     }
+    //스킨 적용 여부 변경
+    @PatchMapping(value = "/{userId}/skin/{skinId}",produces = "application/json")
+    public ResponseEntity<Boolean> modifySkinStatus(@RequestHeader(value = "X-USER-ID",required = true) UUID jwtUserId,
+                                                    @PathVariable(required = true) UUID userId,
+                                                    @PathVariable(required = true) int skinId)
+    {
+        skinService.modifySkinStatus(userId,skinId);
+        return ResponseEntity.ok(true);
+    }
+
 }

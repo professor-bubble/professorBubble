@@ -46,12 +46,15 @@ public enum ErrorCode {
      * UNIVERSITY
      */
     UNIVERSITY_API_CALL_FAILED("대학교 외부 API 호출에 실패했습니다", HttpStatus.BAD_REQUEST),
-    INVALID_REQUEST("요청이 유효하지 않습니다", HttpStatus.BAD_REQUEST);
+    INVALID_REQUEST("요청이 유효하지 않습니다", HttpStatus.BAD_REQUEST),
 
     /**
     * skin
      */
-
+    // 존재하지않는 스킨입니다.
+    NON_EXISTENT_SKIN("존재하지 않는 스킨입니다.", HttpStatus.NOT_FOUND),
+    // 가지고있지 않은 스킨 입니다.
+    NON_EXISTENT_USER_SKIN("가지고있지 않은 스킨입니다.", HttpStatus.NOT_FOUND);
     /**
      * payment
      */

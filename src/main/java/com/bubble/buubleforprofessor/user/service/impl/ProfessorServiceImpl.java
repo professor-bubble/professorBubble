@@ -62,7 +62,7 @@ public class ProfessorServiceImpl implements ProfessorService {
                 .orElseThrow(() -> new CustomException(ErrorCode.NON_EXISTENT_USER));
 
         Optional<Role> role = roleRepository.findByName("ROLE_PROFESSOR");
-        if (!role.isPresent()) {
+        if (role.isEmpty()) {
             throw new CustomException(ErrorCode.NON_EXISTENT_ROLE);
         }
 

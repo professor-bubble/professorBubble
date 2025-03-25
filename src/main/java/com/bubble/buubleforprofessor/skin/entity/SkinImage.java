@@ -17,7 +17,7 @@ public class SkinImage {
     private int id;
 
     @ManyToOne
-    @JoinColumn(name = "skin_id")
+    @JoinColumn(name = "skin_id", referencedColumnName = "skin_id")
     private Skin skin;
 
     private String imageURL;

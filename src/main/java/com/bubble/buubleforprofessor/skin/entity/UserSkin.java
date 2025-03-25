@@ -19,11 +19,11 @@ public class UserSkin {
     private long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
+    @JoinColumn(name = "skin_id", referencedColumnName = "skin_id", nullable = false)
     private Skin skin;
 
     @ManyToOne
-    @JoinColumn(nullable = false)
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
     private User user;
     @Column(nullable = false)
     private boolean active=false;
@@ -32,6 +32,10 @@ public class UserSkin {
     public UserSkin(Skin skin, User user, boolean active) {
         this.skin = skin;
         this.user = user;
+        this.active = active;
+    }
+
+    public void modifyActive(boolean active) {
         this.active = active;
     }
 }

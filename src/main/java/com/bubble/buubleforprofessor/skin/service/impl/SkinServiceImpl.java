@@ -12,11 +12,11 @@ import com.bubble.buubleforprofessor.skin.repository.UserSkinRepository;
 import com.bubble.buubleforprofessor.skin.service.SkinService;
 import com.bubble.buubleforprofessor.user.entity.User;
 import com.bubble.buubleforprofessor.user.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,7 +28,9 @@ public class SkinServiceImpl implements SkinService {
 
     private final UserSkinRepository userSkinRepository;
     private final UserRepository userRepository;
+    private final SkinRepository skinRepository;
 
+    @Transactional(readOnly= true)
     @Override
     public Page<SkinResponseDto> getSkinsByUserId(UUID userId, Pageable pageable) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.INVALID_USERID));
@@ -48,5 +50,15 @@ public class SkinServiceImpl implements SkinService {
                     .skinUrl(skinUrlList)  // SkinImage URL 리스트를 SkinResponseDto에 포함
                     .build();
         });
+    }
+    @Transactional
+    @Override
+    public void modifySkinStatus(UUID userId, int skinId) {
+        UserSkin userSkin = userSkinRepository.findByUserIdAndSkinId(userId,skinId);
+        if (userSkin == null) {
+            throw new CustomException(ErrorCode.NON_EXISTENT_USER_SKIN);
+        }
+        userSkin.modifyActive(!userSkin.isActive());
+        userSkinRepository.save(userSkin);
     }
 }

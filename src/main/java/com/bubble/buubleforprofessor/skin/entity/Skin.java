@@ -27,11 +27,11 @@ public class Skin {
     @Column(nullable = true,columnDefinition = "TEXT")
     private String description;
 
-    @Column(nullable = false)
+    @Column(name="is_delete",nullable = false)
     private boolean isDelete=false;
 
     @ManyToOne
-    @JoinColumn(nullable = false)
+    @JoinColumn(name="category_id", referencedColumnName = "category_id", nullable = false)
     private Category category;
 
     public void delete()
