@@ -46,6 +46,13 @@ public class User {
         this.role = role;
     }
 
+    @OneToOne(mappedBy = "user",cascade = CascadeType.ALL)
+    private Professor professor;
+
+    public void modifyProfessor(Professor professor) {
+        this.professor = professor;
+    }
+
     // 🔥 모든 필드를 받는 생성자를 추가 (Builder를 사용하려면 필요)
     @Builder
     public User(UUID id, String loginId, String password,Timestamp createdAt

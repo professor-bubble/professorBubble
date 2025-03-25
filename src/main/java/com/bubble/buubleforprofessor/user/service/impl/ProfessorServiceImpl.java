@@ -70,10 +70,12 @@ public class ProfessorServiceImpl implements ProfessorService {
 
         user.modifyRole(role.get());
 
+        professor.approve();
+
+        user.modifyProfessor(professor);
+
         userRepository.save(user);
 
-        professor.approve();
-        professorRepository.save(professor);
 
         // 교수 승인하면 채팅방 생성
         chatroomService.createChatroom(professor);
