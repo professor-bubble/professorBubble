@@ -1,7 +1,6 @@
 package com.bubble.buubleforprofessor.domain.university.controller;
 
 import com.bubble.buubleforprofessor.domain.university.dto.request.UniversityApiRequest;
-import com.bubble.buubleforprofessor.domain.university.dto.response.UniversityApiResponse;
 import com.bubble.buubleforprofessor.domain.university.entity.University;
 import com.bubble.buubleforprofessor.domain.university.service.UniversityService;
 import com.bubble.buubleforprofessor.global.config.CustomException;

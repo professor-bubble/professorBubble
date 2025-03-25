@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
 @EnableJpaRepositories(basePackages = "com.bubble.buubleforprofessor.domain.university.repository.jpa")
-@EnableElasticsearchRepositories(basePackages = "com.bubble.buubleforprofessor.domain.university.repository.elasticsearch")
+@EnableElasticsearchRepositories(basePackages = "com.bubble.buubleforprofessor.domain.university.repository.es")
 public class BuubleforprofessorApplication {
 
 	public static void main(String[] args) {

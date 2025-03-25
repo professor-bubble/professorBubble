@@ -3,15 +3,14 @@ package com.bubble.buubleforprofessor.domain.university.service;
 import com.bubble.buubleforprofessor.domain.university.dto.request.UniversityApiRequest;
 import com.bubble.buubleforprofessor.domain.university.dto.response.UniversityApiResponse;
 import com.bubble.buubleforprofessor.domain.university.entity.University;
+import com.bubble.buubleforprofessor.domain.university.repository.es.ElasticSearchRepository;
 import com.bubble.buubleforprofessor.domain.university.repository.jpa.UniversityRepository;
-import com.bubble.buubleforprofessor.domain.university.repository.elasticsearch.UniversitySearchRepository;
 import com.bubble.buubleforprofessor.global.config.CustomException;
 import com.bubble.buubleforprofessor.global.config.ErrorCode;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -35,12 +34,11 @@ flatMap : Mono 안에 또 다른 Mono를 반환하는 함수, 비동기 작업 �
 @RequiredArgsConstructor
 public class UniversityServiceImpl implements UniversityService {
 
-    @Qualifier("UniversityRepository")
     private final UniversityRepository universityRepository;
 
     private final WebClient webClient;
-    @Qualifier("UniversitySearchRepository")
-    private final UniversitySearchRepository universitySearchRepository;
+
+    private final ElasticSearchRepository esSearchRepository;
 
 //  빈생성, DI 완료 직후 실행, void, 매서드파라미터 없어야함
     @PostConstruct
@@ -146,16 +144,16 @@ public class UniversityServiceImpl implements UniversityService {
 
     //대학교list DB -> Elasticsearch에 저장
     private void indexUniversityies(List<University> universities){
-        universitySearchRepository.saveAll(universities);
+        esSearchRepository.saveAll(universities);
         log.info("색인된 대학교 갯수 : {} ", universities.size());
     }
 
     //검색 메서드
-    public List<University> searchUniversity(String name){
-        if (name == null || name.trim().isEmpty()) { //null 확인 및  앞뒤 공백을 제거한 후 빈 문자열인지 확인
+    public List<University> searchUniversity(String uniname){
+        if (uniname == null || uniname.trim().isEmpty()) { //null 확인 및  앞뒤 공백을 제거한 후 빈 문자열인지 확인
             throw new CustomException(ErrorCode.UNIVERSITYNAME_INVALID_REQUEST);
         }
-        List<University> universities = universitySearchRepository.findByUniversityName(name);
+        List<University> universities = esSearchRepository.findByUniversityNameContaining(uniname);
         if (universities.isEmpty()) {
             throw new CustomException(ErrorCode.UNIVERSITY_NOT_FOUND);
         }
