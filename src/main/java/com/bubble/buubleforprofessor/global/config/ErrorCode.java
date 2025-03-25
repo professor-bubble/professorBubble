@@ -36,9 +36,9 @@ public enum ErrorCode {
     UNIVERSITY_API_CALL_FAILED("대학교 외부 API 호출에 실패했습니다", HttpStatus.BAD_REQUEST),
     INVALID_REQUEST("요청이 유효하지 않습니다", HttpStatus.BAD_REQUEST),
     UNI_API_RESPONSE_NULL("대학교 외부API 응답이 없습니다", HttpStatus.INTERNAL_SERVER_ERROR),
-    BODY_MISSING("대학교 이름이 응답 본문이 없습니다", HttpStatus.BAD_GATEWAY);
-
-
+    BODY_MISSING("대학교 이름이 응답 본문이 없습니다", HttpStatus.BAD_GATEWAY),
+    UNIVERSITYNAME_INVALID_REQUEST("검색어(universityName)는 필수입니다", HttpStatus.BAD_REQUEST),
+    UNIVERSITY_NOT_FOUND("해당 검색어에 맞는 대학교를 찾을 수 없습니다",HttpStatus.NOT_FOUND);
 
     /**
     * skin

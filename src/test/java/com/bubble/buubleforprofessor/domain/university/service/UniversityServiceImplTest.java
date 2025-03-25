@@ -5,7 +5,7 @@ import com.bubble.buubleforprofessor.domain.university.dto.request.UniversityApi
 import com.bubble.buubleforprofessor.domain.university.dto.response.Body;
 import com.bubble.buubleforprofessor.domain.university.dto.response.UniversityApiResponse;
 import com.bubble.buubleforprofessor.domain.university.dto.response.UniversityList;
-import com.bubble.buubleforprofessor.domain.university.repository.UniversityRepository;
+import com.bubble.buubleforprofessor.domain.university.repository.jpa.UniversityRepository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
