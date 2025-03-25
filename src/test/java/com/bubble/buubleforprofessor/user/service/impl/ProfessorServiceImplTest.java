@@ -1,5 +1,6 @@
 package com.bubble.buubleforprofessor.user.service.impl;
 
+import com.bubble.buubleforprofessor.chatroom.service.ChatroomService;
 import com.bubble.buubleforprofessor.global.config.CustomException;
 import com.bubble.buubleforprofessor.global.config.ErrorCode;
 import com.bubble.buubleforprofessor.user.dto.ApprovalRequestCreateDto;
@@ -43,6 +44,9 @@ class ProfessorServiceImplTest {
     @Mock
     private RoleRepository roleRepository;
 
+    @Mock
+    private ChatroomService chatroomService;
+
     @InjectMocks
     private ProfessorServiceImpl professorService;
 
@@ -79,15 +83,22 @@ class ProfessorServiceImplTest {
     @Test
     void testSetApprovalStatus_Success() {
         // given
+        User spyUser = spy(user); // 기존 user 객체를 spy로 감싸기
         when(professorRepository.findById(userId)).thenReturn(Optional.of(professor));
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(spyUser)); // spyUser 사용
         when(roleRepository.findByName("ROLE_PROFESSOR")).thenReturn(Optional.of(professorRole));
+
+        doNothing().when(chatroomService).createChatroom(professor);
+
         // when
         professorService.setApprovalStatus(userId);
 
         // then
-        assertTrue(professor.isApproved());
-        verify(professorRepository, times(1)).save(professor);
+        assertTrue(professor.isApproved()); // 교수 승인 상태 확인
+        verify(spyUser).modifyRole(professorRole); // spyUser로 검증
+        verify(userRepository, times(1)).save(spyUser); // 저장 검증
+        verify(professorRepository, times(1)).save(professor); // 교수 승인 저장 확인
+        verify(chatroomService, times(1)).createChatroom(professor); // 채팅방 생성 확인
     }
 
     @DisplayName("교수 ID가 존재하지 않는 경우 예외 발생 테스트")
