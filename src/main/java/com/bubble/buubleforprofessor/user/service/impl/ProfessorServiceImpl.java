@@ -2,6 +2,7 @@ package com.bubble.buubleforprofessor.user.service.impl;
 
 
 
+import com.bubble.buubleforprofessor.chatroom.service.ChatroomService;
 import com.bubble.buubleforprofessor.global.config.CustomException;
 import com.bubble.buubleforprofessor.global.config.ErrorCode;
 import com.bubble.buubleforprofessor.user.dto.ApprovalRequestCreateDto;
@@ -33,6 +34,7 @@ public class ProfessorServiceImpl implements ProfessorService {
     private final ProfessorRepository professorRepository;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final ChatroomService chatroomService;
 
     //todo fetch type eager로 가져오면됨. queryDSL과 성능비교? ngrinder
 //    교수 승인 요청 리스트 반환
@@ -72,6 +74,10 @@ public class ProfessorServiceImpl implements ProfessorService {
 
         professor.approve();
         professorRepository.save(professor);
+
+        // 교수 승인하면 채팅방 생성
+        chatroomService.createChatroom(professor);
+
     }
 //  승인거절하면 교수데이터 삭제
     @Override
@@ -122,5 +128,6 @@ public class ProfessorServiceImpl implements ProfessorService {
                 .department(approvalRequestCreateDto.getDepartment())
                 .build();
         professorRepository.save(professor);
+
     }
 }

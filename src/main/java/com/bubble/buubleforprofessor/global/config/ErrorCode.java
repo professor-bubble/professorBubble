@@ -54,7 +54,7 @@ public enum ErrorCode {
     // 존재하지않는 스킨입니다.
     NON_EXISTENT_SKIN("존재하지 않는 스킨입니다.", HttpStatus.NOT_FOUND),
     // 가지고있지 않은 스킨 입니다.
-    NON_EXISTENT_USER_SKIN("가지고있지 않은 스킨입니다.", HttpStatus.NOT_FOUND);
+    NON_EXISTENT_USER_SKIN("가지고있지 않은 스킨입니다.", HttpStatus.NOT_FOUND),
     /**
      * payment
      */
@@ -62,7 +62,8 @@ public enum ErrorCode {
     /**
      * chat
      */
-
+    // 이미 존재하는 채팅방입니다.
+    EXISTENT_CHATROOM("이미 존재하는 채팅방입니다.", HttpStatus.CONFLICT);
 
     private final String msg;
     private final HttpStatus status;
