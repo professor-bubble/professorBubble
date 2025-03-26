@@ -1,8 +1,13 @@
 package com.bubble.buubleforprofessor.user.controller;
 
+import com.bubble.buubleforprofessor.chatroom.dto.ChatroomResponseDto;
+import com.bubble.buubleforprofessor.chatroom.dto.MessageDto;
+import com.bubble.buubleforprofessor.chatroom.service.ChatroomService;
 import com.bubble.buubleforprofessor.skin.dto.SkinResponseDto;
 import com.bubble.buubleforprofessor.skin.service.SkinService;
 import com.bubble.buubleforprofessor.user.dto.ApprovalRequestCreateDto;
+import com.bubble.buubleforprofessor.user.dto.ProfessorResponseDto;
+import com.bubble.buubleforprofessor.user.dto.UserSimpleResponseDto;
 import com.bubble.buubleforprofessor.user.repository.UserRepository;
 import com.bubble.buubleforprofessor.user.service.ProfessorService;
 import com.bubble.buubleforprofessor.user.service.impl.ProfessorServiceImpl;
@@ -25,6 +30,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -46,6 +53,9 @@ class UserControllerTest {
 
     @MockitoBean
     private SkinService skinService;
+
+    @MockitoBean
+    private ChatroomService chatroomService;
 
     @BeforeEach
     void setUp() {
@@ -153,6 +163,65 @@ class UserControllerTest {
                         .with(csrf()))
                 .andExpect(status().isNoContent());
     }
+    @DisplayName("채팅방 조회 성공")
+    @WithMockUser(roles = "USER")
+    @Test
+    void testGetChatroom_Success() throws Exception {
+        // 테스트에 사용할 UUID와 채팅방 ID를 생성합니다.
+        UUID jwtUserId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        int chatroomId = 1;
+
+        // 모의 데이터를 생성합니다.
+        ProfessorResponseDto professorDto = ProfessorResponseDto.builder()
+                .professorId(UUID.randomUUID())
+                .professorName("교수 이름")
+                .professorImageUrl("http://example.com/image.jpg")
+                .build();
+
+        UserSimpleResponseDto userDto = UserSimpleResponseDto.builder()
+                .userId(UUID.randomUUID())
+                .userName("사용자 이름")
+                .build();
+
+        MessageDto messageDto = MessageDto.builder()
+                .messageId(1L)
+                .sendUser(userDto)
+                .sendTime(LocalDateTime.now())
+                .content("메시지 내용")
+                .build();
+
+        ChatroomResponseDto chatroomResponse = ChatroomResponseDto.builder()
+                .chatroomId(chatroomId)
+                .professorDto(professorDto)
+                .createdAt(LocalDateTime.now())
+                .users(Collections.singletonList(userDto))
+                .messages(Collections.singletonList(messageDto))
+                .build();
+
+        // chatroomService의 findByUserIdAndChatRoomId 메서드가 호출될 때, 모의 데이터를 반환하도록 설정합니다.
+        when(chatroomService.findByUserIdAndChatRoomId(userId, chatroomId)).thenReturn(chatroomResponse);
+
+        // GET 요청을 수행하고 응답을 검증합니다.
+        mockMvc.perform(get("/api/users/{userId}/chatroom/{chatroomId}", userId, chatroomId)
+                        .header("X-USER-ID", jwtUserId.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.chatroomId").value(chatroomId))
+                .andExpect(jsonPath("$.professorDto.professorId").value(professorDto.getProfessorId().toString()))
+                .andExpect(jsonPath("$.professorDto.professorName").value(professorDto.getProfessorName()))
+                .andExpect(jsonPath("$.professorDto.professorImageUrl").value(professorDto.getProfessorImageUrl()))
+                .andExpect(jsonPath("$.users[0].userId").value(userDto.getUserId().toString()))
+                .andExpect(jsonPath("$.users[0].userName").value(userDto.getUserName()))
+                .andExpect(jsonPath("$.messages[0].messageId").value(messageDto.getMessageId()))
+                .andExpect(jsonPath("$.messages[0].sendUser.userId").value(userDto.getUserId().toString()))
+                .andExpect(jsonPath("$.messages[0].sendUser.userName").value(userDto.getUserName()))
+                .andExpect(jsonPath("$.messages[0].content").value(messageDto.getContent()));
+
+        // chatroomService의 findByUserIdAndChatRoomId 메서드가 정확히 한 번 호출되었는지 검증합니다.
+        verify(chatroomService, times(1)).findByUserIdAndChatRoomId(userId, chatroomId);
+    }
+
+
     @DisplayName("스킨 적용 여부 변경 성공")
     @WithMockUser(roles = "USER")
     @Test
