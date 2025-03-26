@@ -3,6 +3,7 @@ package com.bubble.buubleforprofessor.chatroom.entity;
 import com.bubble.buubleforprofessor.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -28,4 +29,11 @@ public class Message {
     private LocalDateTime sendTime;
 
     private String content;
+
+    @Builder
+    public Message(ChatroomUser chatroomUser, LocalDateTime sendTime, String content) {
+        this.chatroomUser = chatroomUser;
+        this.sendTime = sendTime;
+        this.content = content;
+    }
 }

@@ -7,7 +7,7 @@ import java.util.UUID;
 
 @Data
 @Builder
-public class ProfessorDto {
+public class ProfessorResponseDto {
     private UUID professorId;
     private String professorName;
     private String professorImageUrl;

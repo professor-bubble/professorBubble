@@ -29,6 +29,13 @@ public class Professor {
     @Column(length = 20, nullable = false)
     private String department;
 
+    @OneToOne(mappedBy = "professor")
+    private ProfessorImage professorImage;
+
+    public void modifyProfessorImage(ProfessorImage professorImage) {
+        this.professorImage = professorImage;
+    }
+
     // 승인 여부를 변경하는 메서드
     public void approve() {
         if (!isApproved) {

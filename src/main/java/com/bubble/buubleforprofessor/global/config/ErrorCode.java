@@ -63,7 +63,13 @@ public enum ErrorCode {
      * chat
      */
     // 이미 존재하는 채팅방입니다.
-    EXISTENT_CHATROOM("이미 존재하는 채팅방입니다.", HttpStatus.CONFLICT);
+    EXISTENT_CHATROOM("이미 존재하는 채팅방입니다.", HttpStatus.CONFLICT),
+
+    // 존재하지않는 채팅방입니다.
+    NON_EXISTENT_CHATROOM("존재하지 않는 채팅방입니다.", HttpStatus.NOT_FOUND),
+
+    //내 채팅방이 아닌경우
+    NON_EXISTENT_CHATROOM_USER("내가 존재하는 채팅방이 아닙니다.",HttpStatus.NOT_FOUND);
 
     private final String msg;
     private final HttpStatus status;

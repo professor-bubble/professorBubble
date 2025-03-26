@@ -1,5 +1,7 @@
 package com.bubble.buubleforprofessor.user.controller;
 
+import com.bubble.buubleforprofessor.chatroom.dto.ChatroomResponseDto;
+import com.bubble.buubleforprofessor.chatroom.service.ChatroomService;
 import com.bubble.buubleforprofessor.skin.dto.SkinResponseDto;
 import com.bubble.buubleforprofessor.skin.service.SkinService;
 import com.bubble.buubleforprofessor.user.dto.ApprovalRequestCreateDto;
@@ -25,6 +27,7 @@ public class UserController {
 
     private final ProfessorService professorService;
     private final SkinService skinService;
+    private final ChatroomService chatroomService;
 
     //교수 승인 요청. 교수데이터생성
     @PostMapping("/{userId}/approve-request")
@@ -62,4 +65,11 @@ public class UserController {
         return ResponseEntity.ok(true);
     }
 
+    @GetMapping("/{userId}/chatroom/{chatroomId}")
+    public ResponseEntity<ChatroomResponseDto> getChatroom(@RequestHeader(value = "X-USER-ID",required = true) UUID jwtUserId,
+                                                           @PathVariable UUID userId,
+                                                           @PathVariable int chatroomId) {
+        ChatroomResponseDto chatroomDto = chatroomService.findByUserIdAndChatRoomId(userId,chatroomId);
+        return ResponseEntity.ok(chatroomDto);
+    }
 }

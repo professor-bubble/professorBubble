@@ -38,10 +38,10 @@ public class ChatroomUser {
 @Embeddable
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 class ChatroomUserId implements Serializable {
-    private long chatroomId;
+    private int chatroomId;
     private UUID userId;
 
-    public ChatroomUserId(long chatroomId, UUID userId) {
+    public ChatroomUserId(int chatroomId, UUID userId) {
         this.chatroomId = chatroomId;
         this.userId = userId;
     }
