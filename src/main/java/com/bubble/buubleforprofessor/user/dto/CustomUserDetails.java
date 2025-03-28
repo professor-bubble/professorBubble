@@ -13,6 +13,14 @@ public class CustomUserDetails implements UserDetails {
 
     private final User user;
 
+    public String getUserId() {
+        return user.getId().toString();
+    }
+
+    public String getRole() {
+        return user.getRole().getName();
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
 
@@ -21,7 +29,7 @@ public class CustomUserDetails implements UserDetails {
         collection.add(new GrantedAuthority() {
             @Override
             public String getAuthority() {
-                return "ADMIN";
+                return "ROLE_ADMIN";
 //                return user.getRole().getName();
             }
         });

@@ -49,13 +49,14 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         CustomUserDetails userDetails = (CustomUserDetails) authResult.getPrincipal();
 
         String username = userDetails.getUsername();
+        String userId = userDetails.getUserId();
 
         Collection<? extends GrantedAuthority> authorities = authResult.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
         GrantedAuthority auth = iterator.next();
         String role = auth.getAuthority();
 
-        String token = jwtUtil.createJwt(username, role, 60 * 60 * 100L);
+        String token = jwtUtil.createJwt(username, role, userId,60 * 60 * 100L);
 
         response.addHeader("Authorization", "Bearer " + token);
     }

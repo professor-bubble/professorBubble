@@ -1,6 +1,7 @@
 package com.bubble.buubleforprofessor.global.jwt;
 
 import com.bubble.buubleforprofessor.user.dto.CustomUserDetails;
+import com.bubble.buubleforprofessor.user.entity.Role;
 import com.bubble.buubleforprofessor.user.entity.User;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -13,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 public class JWTFilter extends OncePerRequestFilter {
@@ -48,11 +50,13 @@ public class JWTFilter extends OncePerRequestFilter {
         // 토큰에서 username과 role을 획득
         String username = jwtUtil.getUsername(token);
         String role = jwtUtil.getRole(token);
+        String userId = jwtUtil.getUserId(token);
 
         // userEntity 생성
         User user = User.builder()
+                .id(UUID.fromString(userId))
                 .loginId(username)
-                .role(null)
+                .role(new Role(role))
                 .build();
 
         // UserDetails에 회원정보 객체 담기
