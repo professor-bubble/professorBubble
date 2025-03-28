@@ -54,8 +54,7 @@ public class UserController {
 
     //교수 승인 요청. 교수데이터생성
     @PostMapping("/{userId}/approve-request")
-    public ResponseEntity<Void> approveRequest(@RequestHeader(value = "X-USER-ID") UUID jwtUserId,
-                                               @PathVariable("userId") UUID userId,
+    public ResponseEntity<Void> approveRequest(@PathVariable("userId") UUID userId,
                                                @Valid @RequestBody ApprovalRequestCreateDto approvalRequestCreateDto,
                                                BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -67,8 +66,7 @@ public class UserController {
 
 
     @GetMapping("/{userId}/skin")
-    public ResponseEntity<Page<SkinResponseDto>> findSkinsByUserId(@RequestHeader(value = "X-USER-ID",required = true) UUID jwtUserId,
-                                                                   @PathVariable(value = "userId",required = true)UUID userId,
+    public ResponseEntity<Page<SkinResponseDto>> findSkinsByUserId(@PathVariable(value = "userId",required = true)UUID userId,
                                                                    @RequestParam(value = "pageNum",defaultValue = "0") int pageNum)
     {
         PageRequest pageRequest=PageRequest.of(pageNum, 10);
@@ -82,8 +80,7 @@ public class UserController {
 
     //스킨 적용 여부 변경
     @PatchMapping(value = "/{userId}/skin/{skinId}",produces = "application/json")
-    public ResponseEntity<Boolean> modifySkinStatus(@RequestHeader(value = "X-USER-ID",required = true) UUID jwtUserId,
-                                                    @PathVariable(required = true) UUID userId,
+    public ResponseEntity<Boolean> modifySkinStatus(@PathVariable(required = true) UUID userId,
                                                     @PathVariable(required = true) int skinId)
     {
         skinService.modifySkinStatus(userId,skinId);
@@ -91,8 +88,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/chatroom/{chatroomId}")
-    public ResponseEntity<ChatroomResponseDto> getChatroom(@RequestHeader(value = "X-USER-ID",required = true) UUID jwtUserId,
-                                                           @PathVariable UUID userId,
+    public ResponseEntity<ChatroomResponseDto> getChatroom(@PathVariable UUID userId,
                                                            @PathVariable int chatroomId) {
         ChatroomResponseDto chatroomDto = chatroomService.findByUserIdAndChatRoomId(userId,chatroomId);
         return ResponseEntity.ok(chatroomDto);

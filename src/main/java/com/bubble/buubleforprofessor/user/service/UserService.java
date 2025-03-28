@@ -6,5 +6,4 @@ import java.util.UUID;
 
 public interface UserService {
     String createUser(JoinRequestDto joinRequestDto);
-    boolean isExist(UUID userId);
 }
