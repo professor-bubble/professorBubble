@@ -1,10 +1,8 @@
 package com.bubble.buubleforprofessor.chatroom.service.impl;
 
 import com.bubble.buubleforprofessor.chatroom.dto.ChatroomResponseDto;
-import com.bubble.buubleforprofessor.chatroom.dto.MessageDto;
+import com.bubble.buubleforprofessor.chatroom.dto.MessageResponseDto;
 import com.bubble.buubleforprofessor.chatroom.entity.Chatroom;
-import com.bubble.buubleforprofessor.chatroom.entity.ChatroomUser;
-import com.bubble.buubleforprofessor.chatroom.entity.Message;
 import com.bubble.buubleforprofessor.chatroom.repository.ChatroomRepository;
 import com.bubble.buubleforprofessor.chatroom.repository.ChatroomUserRepository;
 import com.bubble.buubleforprofessor.chatroom.repository.MessageRepository;
@@ -14,7 +12,6 @@ import com.bubble.buubleforprofessor.global.config.ErrorCode;
 import com.bubble.buubleforprofessor.user.dto.ProfessorResponseDto;
 import com.bubble.buubleforprofessor.user.dto.UserSimpleResponseDto;
 import com.bubble.buubleforprofessor.user.entity.Professor;
-import com.bubble.buubleforprofessor.user.entity.User;
 import com.bubble.buubleforprofessor.user.repository.ProfessorRepository;
 import com.bubble.buubleforprofessor.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -62,8 +58,8 @@ public class ChatroomServiceImpl implements ChatroomService {
                         .userId(chatroomUser.getUser().getId())
                         .userName(chatroomUser.getUser().getName()).build())
                 .toList();
-        List<MessageDto> messages =messageRepository.findByChatroomUser_Chatroom(chatroom).stream()
-                .map(message -> MessageDto.builder()
+        List<MessageResponseDto> messages =messageRepository.findByChatroomUser_Chatroom(chatroom).stream()
+                .map(message -> MessageResponseDto.builder()
                         .messageId(message.getId())
                         .sendUser(UserSimpleResponseDto.builder()
                                 .userId(message.getChatroomUser().getUser().getId())

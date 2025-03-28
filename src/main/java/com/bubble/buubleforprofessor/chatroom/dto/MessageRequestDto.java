@@ -1,16 +1,15 @@
 package com.bubble.buubleforprofessor.chatroom.dto;
 
 import com.bubble.buubleforprofessor.user.dto.UserSimpleResponseDto;
-import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
-@Builder
-public class MessageDto {
-    private long messageId;
-    private UserSimpleResponseDto sendUser;
-    private LocalDateTime sendTime;
+public class MessageRequestDto {
+    private int chatRoomId;
+    private UUID userId;
+    private String userName;
     private String content;
 }

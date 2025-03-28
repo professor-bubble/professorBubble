@@ -29,6 +29,7 @@ public class UserController {
     private final SkinService skinService;
     private final ChatroomService chatroomService;
 
+    //todo 헤더대신 AuthenticationPrincipal 에서 가져올것
     //교수 승인 요청. 교수데이터생성
     @PostMapping("/{userId}/approve-request")
     public ResponseEntity<Void> approveRequest(@RequestHeader(value = "X-USER-ID") UUID jwtUserId,

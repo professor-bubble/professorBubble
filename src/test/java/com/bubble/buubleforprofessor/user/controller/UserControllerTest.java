@@ -1,34 +1,27 @@
 package com.bubble.buubleforprofessor.user.controller;
 
 import com.bubble.buubleforprofessor.chatroom.dto.ChatroomResponseDto;
-import com.bubble.buubleforprofessor.chatroom.dto.MessageDto;
+import com.bubble.buubleforprofessor.chatroom.dto.MessageResponseDto;
 import com.bubble.buubleforprofessor.chatroom.service.ChatroomService;
 import com.bubble.buubleforprofessor.skin.dto.SkinResponseDto;
 import com.bubble.buubleforprofessor.skin.service.SkinService;
 import com.bubble.buubleforprofessor.user.dto.ApprovalRequestCreateDto;
 import com.bubble.buubleforprofessor.user.dto.ProfessorResponseDto;
 import com.bubble.buubleforprofessor.user.dto.UserSimpleResponseDto;
-import com.bubble.buubleforprofessor.user.repository.UserRepository;
 import com.bubble.buubleforprofessor.user.service.ProfessorService;
-import com.bubble.buubleforprofessor.user.service.impl.ProfessorServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -184,7 +177,7 @@ class UserControllerTest {
                 .userName("사용자 이름")
                 .build();
 
-        MessageDto messageDto = MessageDto.builder()
+        MessageResponseDto messageDto = MessageResponseDto.builder()
                 .messageId(1L)
                 .sendUser(userDto)
                 .sendTime(LocalDateTime.now())

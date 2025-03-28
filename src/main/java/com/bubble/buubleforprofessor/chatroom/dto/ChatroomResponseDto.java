@@ -15,5 +15,5 @@ public class ChatroomResponseDto {
     private ProfessorResponseDto professorDto;
     private LocalDateTime createdAt;
     private List<UserSimpleResponseDto> users;
-    private List<MessageDto> messages;
+    private List<MessageResponseDto> messages;
 }
