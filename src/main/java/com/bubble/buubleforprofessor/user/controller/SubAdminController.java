@@ -25,7 +25,6 @@ public class SubAdminController {
     //todo 페이징 처리로 바꿀것
     @GetMapping("/approve-requests")
     public ResponseEntity<Page<ApprovalRequestDto>> approveRequests(
-            @RequestHeader(value = "X-USER-ID",required = true) UUID userId,
             @RequestParam int pageNum) {
 
         if(pageNum<0)
@@ -41,8 +40,7 @@ public class SubAdminController {
     }
     //교수 승인 요청을 수락
     @PatchMapping(value = "/{userId}/approve", produces = "application/json")
-    public ResponseEntity<Boolean> approveRequest(@RequestHeader(value = "X-USER-ID",required = true) UUID jwtUserId,
-                                                  @PathVariable UUID userId) {
+    public ResponseEntity<Boolean> approveRequest(@PathVariable UUID userId) {
 
        professorService.setApprovalStatus(userId);
 
@@ -50,16 +48,14 @@ public class SubAdminController {
     }
     //교수 승인요청을 거절
     @DeleteMapping(value = "/{userId}/approve" , produces = "application/json")
-    public ResponseEntity<Boolean> deleteApproveRequest(@RequestHeader(value = "X-USER-ID",required = true) UUID jwtUserId,
-                                                        @PathVariable UUID userId) {
+    public ResponseEntity<Boolean> deleteApproveRequest(@PathVariable UUID userId) {
         professorService.deleteApprovalById(userId);
         return ResponseEntity.ok(true);
     }
 
     // 교수를 일반유저로 변경. 사용안하지만 일단 구현해둠.
     @DeleteMapping(value = "/{userId}/professor" , produces = "application/json")
-    public ResponseEntity<Boolean> DeleteProfessor(@RequestHeader(value = "X-USER-ID",required = true) UUID jwtUserId,
-                                                        @PathVariable UUID userId) {
+    public ResponseEntity<Boolean> DeleteProfessor(@PathVariable UUID userId) {
         professorService.deleteById(userId);
         return ResponseEntity.ok(true);
     }

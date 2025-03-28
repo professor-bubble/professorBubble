@@ -50,6 +50,9 @@ class UserControllerTest {
     @MockitoBean
     private ChatroomService chatroomService;
 
+    @MockitoBean
+    private UserService userService;
+
     @BeforeEach
     void setUp() {
     }
@@ -72,7 +75,6 @@ class UserControllerTest {
 
         // When & Then
         mockMvc.perform(post("/api/users/{userId}/approve-request", userId)
-                        .header("X-USER-ID", jwtUserId.toString())
                         .with(csrf())
                         .contentType("application/json")
                         .content("{\"description\":\"Request to approve professor\", \"professorNum\":12345, \"department\":\"Computer Science\"}"))
@@ -96,7 +98,6 @@ class UserControllerTest {
 
         // When & Then
         mockMvc.perform(post("/api/users/{userId}/approve-request", userId)
-                        .header("X-USER-ID", jwtUserId.toString())
                         .contentType("application/json")
                         .with(csrf())
                         .content("{\"description\":\"Request to approve professor\", \"professorNum\":0, \"department\":\"A very long department name that exceeds the limit\"}"))
@@ -124,7 +125,6 @@ class UserControllerTest {
 
         // When & Then
         mockMvc.perform(get("/api/users/{userId}/skin",userId)
-                        .header("X-USER-ID", jwtUserId.toString())
                         .param("pageNum", "0")
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(csrf()))
@@ -150,7 +150,6 @@ class UserControllerTest {
 
         // When & Then
         mockMvc.perform(get("/api/users/{userId}/skin",userId)
-                        .header("X-USER-ID", jwtUserId.toString())
                         .param("pageNum", "0")
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(csrf()))
@@ -197,7 +196,7 @@ class UserControllerTest {
 
         // GET 요청을 수행하고 응답을 검증합니다.
         mockMvc.perform(get("/api/users/{userId}/chatroom/{chatroomId}", userId, chatroomId)
-                        .header("X-USER-ID", jwtUserId.toString()))
+                        )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.chatroomId").value(chatroomId))
                 .andExpect(jsonPath("$.professorDto.professorId").value(professorDto.getProfessorId().toString()))
@@ -228,7 +227,6 @@ class UserControllerTest {
 
         // PATCH 요청 수행 및 검증
         mockMvc.perform(patch("/api/users/{userId}/skin/{skinId}", userId, skinId)
-                        .header("X-USER-ID", jwtUserId.toString())
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(content().string("true"));

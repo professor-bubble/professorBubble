@@ -75,7 +75,6 @@ class SubAdminControllerTest {
 
         // Then: 반환된 JSON 객체 내 "content" 배열의 각 필드 값이 기대한 값과 일치하는지 비교
         mockMvc.perform(get("/api/sub-admin/approve-requests")
-                        .header("X-USER-ID", userId.toString())
                         .param("pageNum", "0")
                         .accept(MediaType.APPLICATION_JSON)
                         .with(csrf()))
@@ -103,7 +102,6 @@ class SubAdminControllerTest {
 
         // When & Then
         mockMvc.perform(get("/api/sub-admin/approve-requests")
-                        .header("X-USER-ID", userId.toString())
                         .param("pageNum", "0")
                         .with(csrf()))
                 .andExpect(status().isNoContent());
@@ -120,7 +118,6 @@ class SubAdminControllerTest {
 
         // When
         mockMvc.perform(patch("/api/sub-admin/{userId}/approve", userId)
-                        .header("X-USER-ID", jwtUserId.toString())
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(content().string("true"));
@@ -140,25 +137,10 @@ class SubAdminControllerTest {
 
         // When
         mockMvc.perform(patch("/api/sub-admin/{userId}/approve", invalidUserId)
-                        .header("X-USER-ID", jwtUserId.toString())
                         .with(csrf()))
                 .andExpect(status().isBadRequest());
     }
 
-    // 테스트: approveRequest 엔드포인트 (유효하지 않은 X-USER-ID)
-    @DisplayName("교수 승인 실패 - 잘못된 X-USER-ID")
-    @WithMockUser(username = "testUser", roles = {"SUB_ADMIN"})
-    @Test
-    void testApproveRequest_InvalidXUserId() throws Exception {
-        // Given
-        UUID invalidUserId = UUID.randomUUID();
-
-        // When
-        mockMvc.perform(patch("/api/sub-admin/{userId}/approve", invalidUserId)
-                        .header("X-USER-ID", "invalid")
-                        .with(csrf()))
-                .andExpect(status().isBadRequest());
-    }
 
     // 교수 승인 삭제 요청 성공
     @DisplayName("교수 승인 삭제 성공")
@@ -169,7 +151,6 @@ class SubAdminControllerTest {
         UUID userId = UUID.randomUUID();
 
         mockMvc.perform(delete("/api/sub-admin/{userId}/approve", userId)
-                        .header("X-USER-ID", jwtUserId.toString())
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(content().string("true"));
@@ -186,7 +167,6 @@ class SubAdminControllerTest {
         UUID userId = UUID.randomUUID();
 
         mockMvc.perform(delete("/api/sub-admin/{userId}/professor", userId)
-                        .header("X-USER-ID", jwtUserId.toString())
                         .with(csrf())) // CSRF 토큰을 포함
                 .andExpect(status().isOk())
                 .andExpect(content().string("true"));
@@ -203,7 +183,6 @@ class SubAdminControllerTest {
         UUID invalidUserId = null;
 
         mockMvc.perform(delete("/api/sub-admin/{userId}/professor", invalidUserId)
-                        .header("X-USER-ID", jwtUserId.toString())
                         .with(csrf()))
                 .andExpect(status().isBadRequest());
     }
