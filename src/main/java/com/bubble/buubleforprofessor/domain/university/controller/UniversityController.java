@@ -38,12 +38,8 @@ public class UniversityController {
                 .thenReturn(ResponseEntity.ok("성공"));
     }
 
-//    @GetMapping("/search")
-//    public ResponseEntity<List<University>> universitySearch(@RequestParam String Uniname) {
-//        log.info("대학교 검색");
-//        List<University> universities = universityService.searchUniversity(Uniname);
-//        return ResponseEntity.ok(universities);
-//    }
+
+
 
     @GetMapping("/search")
     public ResponseEntity<Map<String, Object>> universitySearch(@RequestParam String uniname) {

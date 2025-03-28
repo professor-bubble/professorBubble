@@ -19,6 +19,7 @@ import reactor.core.scheduler.Schedulers;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -40,11 +41,13 @@ public class UniversityServiceImpl implements UniversityService {
 
     private final ElasticSearchRepository esSearchRepository;
 
-//  빈생성, DI 완료 직후 실행, void, 매서드파라미터 없어야함
+
     @PostConstruct
     public void init(){
         log.info("초기 실행시 대학교 데이터 초기 로드 시작");
-        saveAllUniversities(new UniversityApiRequest()).subscribe();
+        saveAllUniversities(new UniversityApiRequest())
+                .subscribe(null,  // onSuccess: Void이므로 null
+                        error -> log.error("초기 로드 중 오류 발생: {}", error.getMessage()));
     }
 
     @Scheduled(cron ="0 0 0 22 11 *") //매년 11월 22일 00:00에 실행
@@ -52,13 +55,12 @@ public class UniversityServiceImpl implements UniversityService {
         LocalDate today = LocalDate.now();
         if(today.getMonthValue() == 11 && today.getDayOfMonth() == 22){
             log.info("11월 22일 대학교 데이터 업데이트 시작");
-            saveAllUniversities(new UniversityApiRequest()).subscribe();
+            saveAllUniversities(new UniversityApiRequest()).subscribe(null,
+                    error -> log.error("업데이트 중 오류 발생: {}", error.getMessage())  // 오류 처리
+            );
         }
     }
 
-
-
-    @Transactional
     @Override
     public Mono<Void> saveAllUniversities(UniversityApiRequest uniRequest) {
         // Step 1: 초기 값 요청으로 totalCount 가져오기
@@ -87,32 +89,21 @@ public class UniversityServiceImpl implements UniversityService {
                     // totalCount 추출
                     int totalCount = initResponse.getBody().getTotalCount();
                     log.info("Total count: {}", totalCount);
+                    uniRequest.setNumOfRows(totalCount);
 
-                    // 기존 데이터 삭제
-                    return Mono.fromCallable(() -> {
-                                universityRepository.deleteAll(); // 삭제
-                                return null;
-                            })
-                            .subscribeOn(Schedulers.boundedElastic())
-                            // Step 2: numOfRows를 totalCount로 설정
-                            .then(Mono.just(totalCount))
-                            .flatMap(count -> {
-                                uniRequest.setNumOfRows(count);
-
-                                // Step 3: 전체 데이터 요청
-                                return webClient.get()
-                                        .uri(uriBuilder -> uriBuilder
-                                                .path("/data/getUniversity.do")
-                                                .queryParam("serviceKey", uniRequest.getServiceKey())
-                                                .queryParam("pageNo", uniRequest.getPageNo())
-                                                .queryParam("numOfRows", uniRequest.getNumOfRows())
-                                                .queryParam("dataType", uniRequest.getDataType())
-                                                .queryParam("Fclty_Cd", uniRequest.getFcltyCd())
-                                                .build())
-                                        .retrieve()
-                                        .bodyToMono(UniversityApiResponse.class);
-                            });
-                }) // 첫 번째 flatMap 닫힘
+                // Step 3: 전체 데이터 요청
+                return webClient.get()
+                        .uri(uriBuilder -> uriBuilder
+                                .path("/data/getUniversity.do")
+                                .queryParam("serviceKey", uniRequest.getServiceKey())
+                                .queryParam("pageNo", uniRequest.getPageNo())
+                                .queryParam("numOfRows", uniRequest.getNumOfRows())
+                                .queryParam("dataType", uniRequest.getDataType())
+                                .queryParam("Fclty_Cd", uniRequest.getFcltyCd())
+                                .build())
+                        .retrieve()
+                        .bodyToMono(UniversityApiResponse.class);
+            })
                 .flatMap(fullResponse -> {
                     // null 체크
                     if (fullResponse == null) {
@@ -125,21 +116,39 @@ public class UniversityServiceImpl implements UniversityService {
                     // Step 4: DB에 저장
                     List<University> universities = fullResponse.getBody().getItems().stream()
                             .map(items -> University.builder()
+                                    .universityId(items.getObjectId())
                                     .universityName(items.getUniversityName())
+                                    .isDeleted(false)
                                     .build())
                             .collect(Collectors.toList());
 
-                    // JPA 동기 호출을 비동기화
-                    return Mono.fromCallable(() -> {
-                                universityRepository.saveAll(universities);
-                                indexUniversityies(universities);
-                                return null;
-                            })
+                    return Mono.fromRunnable(() -> saveToDb(universities))
                             .subscribeOn(Schedulers.boundedElastic())
-                            .doOnSuccess(v -> log.info("저장갯수 {} universities to DB", universities.size()))
-                            .then();
-                });
+                            .onErrorResume(e -> {
+                                log.error("DB 저장 중 오류 발생: {}", e.getMessage());
+                                return Mono.empty();
+                            });
+                })
+                .then();
     }
+
+    @Transactional
+    protected void saveToDb(List<University> universities){
+        Set<Long> apiIds = universities.stream()
+                .map(University::getUniversityId)
+                .collect(Collectors.toSet());
+
+        List<University> existUniversities = universityRepository.findAll();
+        if(!existUniversities.isEmpty()){
+            universityRepository.deleteNotIn(apiIds);
+        }
+        universityRepository.saveAll(universities);
+        List<University> finalUniversities = universityRepository.findAll(); // 최종 DB 데이터 가져오기indexUniversityies(finalUniversities);
+        indexUniversityies(finalUniversities);
+        log.info("저장된 대학교 갯수: {}",universities.size());
+    }
+
+
 
 
     //대학교list DB -> Elasticsearch에 저장
@@ -147,6 +156,7 @@ public class UniversityServiceImpl implements UniversityService {
         esSearchRepository.saveAll(universities);
         log.info("색인된 대학교 갯수 : {} ", universities.size());
     }
+
 
     //검색 메서드
     public List<University> searchUniversity(String uniname){

@@ -39,7 +39,6 @@ public enum ErrorCode {
     BODY_MISSING("대학교 이름이 응답 본문이 없습니다", HttpStatus.BAD_GATEWAY),
     UNIVERSITYNAME_INVALID_REQUEST("검색어(universityName)는 필수입니다", HttpStatus.BAD_REQUEST),
     UNIVERSITY_NOT_FOUND("해당 검색어에 맞는 대학교를 찾을 수 없습니다",HttpStatus.NOT_FOUND);
-
     /**
     * skin
      */

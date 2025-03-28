@@ -17,10 +17,12 @@ public class University {
 
     @Id
     @jakarta.persistence.Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="university_id")
-    private int universityId;
+    private Long universityId;
 
     @Column(name="university_name", nullable = false)
     private String universityName;
+
+    @Column(name="is_deleted", nullable = false)
+    private boolean isDeleted;
 }

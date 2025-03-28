@@ -8,7 +8,6 @@ spring:
         "prod": "prod, secret"
         "local" : "local, secret"
 
-
 server:
   port: 8080
 
