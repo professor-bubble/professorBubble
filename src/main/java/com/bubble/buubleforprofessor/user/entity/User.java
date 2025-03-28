@@ -2,6 +2,7 @@ package com.bubble.buubleforprofessor.user.entity;
 
 import com.bubble.buubleforprofessor.university.entity.University;
 import com.bubble.buubleforprofessor.user.converter.UUIDConverter;
+import com.bubble.buubleforprofessor.user.dto.JoinRequestDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -9,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -68,6 +70,20 @@ public class User {
         this.email = email;
         this.university = university;
         this.role = role;
+    }
+
+    public User userFromDto(JoinRequestDto joinRequestDto) {
+        this.loginId = joinRequestDto.getLoginId();
+        this.password = joinRequestDto.getPassword();
+        this.createdAt = java.sql.Timestamp.valueOf(LocalDateTime.now());
+        this.lastLoginAt = java.sql.Timestamp.valueOf(LocalDateTime.now());
+        this.name = "nameTest";
+        this.phoneNumber = "010-1234-1234";
+        this.email = "email@email.com";
+        this.university = null;
+        this.role = null;
+
+        return this;
     }
 
 }
