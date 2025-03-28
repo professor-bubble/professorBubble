@@ -18,8 +18,11 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -75,10 +78,10 @@ public class UniversityServiceImpl implements UniversityService {
                         .queryParam("dataType", uniRequest.getDataType())
                         .queryParam("Fclty_Cd", uniRequest.getFcltyCd())
                         .build())
-                .retrieve()
+                .retrieve()//비동기시작, 응답 받아오기
                 .bodyToMono(UniversityApiResponse.class)
                 .flatMap(initResponse -> {
-                    // null 체크
+                    // null 체크 비동기 요청이 완료료 되면 호출
                     if (initResponse == null) {
                         return Mono.error(new CustomException(ErrorCode.UNI_API_RESPONSE_NULL));
                     }
@@ -133,19 +136,48 @@ public class UniversityServiceImpl implements UniversityService {
     }
 
     @Transactional
-    protected void saveToDb(List<University> universities){
-        Set<Long> apiIds = universities.stream()
+    protected void saveToDb(List<University> newUniversities){
+        Set<Long> apiUniversityIds = newUniversities.stream()
                 .map(University::getUniversityId)
                 .collect(Collectors.toSet());
 
         List<University> existUniversities = universityRepository.findAll();
-        if(!existUniversities.isEmpty()){
-            universityRepository.deleteNotIn(apiIds);
+        Map<Long, University> dbUniversityMap = existUniversities.stream()
+                .collect(Collectors.toMap(University::getUniversityId, Function.identity()));
+
+        List<University> universitiesToSave = new ArrayList<>();
+
+
+        for (University apiUniversity : newUniversities) {
+            University dbUniversity = dbUniversityMap.get(apiUniversity.getUniversityId());
+
+            if (dbUniversity == null) {
+                universitiesToSave.add(apiUniversity);
+            } else {
+                // 대학이름 변경될시 업데이트
+                if (!dbUniversity.getUniversityName().equals(apiUniversity.getUniversityName())) {
+                    dbUniversity.setUniversityName(apiUniversity.getUniversityName());
+                }
+                // Soft Delete 복구 (만약 삭제되었다면 다시 활성화)
+                if (dbUniversity.isDeleted()) {
+                    dbUniversity.setDeleted(false);
+                }
+                universitiesToSave.add(dbUniversity);
+                dbUniversityMap.remove(apiUniversity.getUniversityId());
+            }
         }
-        universityRepository.saveAll(universities);
-        List<University> finalUniversities = universityRepository.findAll(); // 최종 DB 데이터 가져오기indexUniversityies(finalUniversities);
-        indexUniversityies(finalUniversities);
-        log.info("저장된 대학교 갯수: {}",universities.size());
+
+        // DB에만 존재하고 API에서 사라진 데이터 → Soft Delete 적용
+        for (University deletedUniversity : dbUniversityMap.values()) {
+            deletedUniversity.setDeleted(true);
+            universitiesToSave.add(deletedUniversity);
+        }
+
+        universityRepository.saveAll(universitiesToSave);
+        indexUniversityies(universitiesToSave);
+
+        log.info("저장된 대학교 갯수: {}, 삭제된 대학교 갯수: {}",
+                universitiesToSave.size(), dbUniversityMap.size());
     }
 
 
