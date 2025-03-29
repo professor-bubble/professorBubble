@@ -1,25 +1,24 @@
-package com.bubble.buubleforprofessor.user.entity;
+package com.bubble.buubleforprofessor.skin.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@Table(name = "roles")
-public class Role {
+@Table(name = "categories")
+public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "role_id" )
+    @Column(name = "category_id")
     private int id;
 
-    @Column(length = 20,unique = true , nullable = false)
+    @Column(length = 15,nullable = false, unique = true)
     private String name;
 
-    public Role(String name) {
+    public Category(String name) {
         this.name = name;
     }
 }

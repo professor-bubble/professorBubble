@@ -36,6 +36,9 @@ public enum ErrorCode {
     // 존재하지않는 교수
     NON_EXISTENT_PROFESSOR("존재하지 않는 교수입니다", HttpStatus.NOT_FOUND),
 
+    // 이미 존재하는 교수
+    EXISTENT_PROFESSOR("이미 존재하는 교수입니다", HttpStatus.CONFLICT),
+
     // 존재하지않는 권한입니다.
     NON_EXISTENT_ROLE("존재하지 않는 권한입니다.", HttpStatus.NOT_FOUND),
 
@@ -43,12 +46,15 @@ public enum ErrorCode {
      * UNIVERSITY
      */
     UNIVERSITY_API_CALL_FAILED("대학교 외부 API 호출에 실패했습니다", HttpStatus.BAD_REQUEST),
-    INVALID_REQUEST("요청이 유효하지 않습니다", HttpStatus.BAD_REQUEST);
+    INVALID_REQUEST("요청이 유효하지 않습니다", HttpStatus.BAD_REQUEST),
 
     /**
     * skin
      */
-
+    // 존재하지않는 스킨입니다.
+    NON_EXISTENT_SKIN("존재하지 않는 스킨입니다.", HttpStatus.NOT_FOUND),
+    // 가지고있지 않은 스킨 입니다.
+    NON_EXISTENT_USER_SKIN("가지고있지 않은 스킨입니다.", HttpStatus.NOT_FOUND),
     /**
      * payment
      */
@@ -56,7 +62,14 @@ public enum ErrorCode {
     /**
      * chat
      */
+    // 이미 존재하는 채팅방입니다.
+    EXISTENT_CHATROOM("이미 존재하는 채팅방입니다.", HttpStatus.CONFLICT),
 
+    // 존재하지않는 채팅방입니다.
+    NON_EXISTENT_CHATROOM("존재하지 않는 채팅방입니다.", HttpStatus.NOT_FOUND),
+
+    //내 채팅방이 아닌경우
+    NON_EXISTENT_CHATROOM_USER("내가 존재하는 채팅방이 아닙니다.",HttpStatus.NOT_FOUND);
 
     private final String msg;
     private final HttpStatus status;

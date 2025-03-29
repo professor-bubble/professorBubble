@@ -10,7 +10,6 @@ public class ApprovalRequestCreateDto {
     private String description;
     @NotNull(message = "Professor number cannot be null")
     private int professorNum;
-    private boolean approved;
     @Size(max = 20, message = "Department name cannot exceed 20 characters")
     private String department;
 }

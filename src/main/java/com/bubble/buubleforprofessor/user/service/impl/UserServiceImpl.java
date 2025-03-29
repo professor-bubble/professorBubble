@@ -38,9 +38,5 @@ public class UserServiceImpl implements UserService {
         return "join Success";
     }
 
-    @Override
-    public boolean isExist(UUID userId) {
 
-        return userRepository.existsById(userId);
-    }
 }

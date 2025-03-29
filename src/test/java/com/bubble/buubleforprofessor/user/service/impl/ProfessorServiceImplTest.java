@@ -1,7 +1,9 @@
 package com.bubble.buubleforprofessor.user.service.impl;
 
+import com.bubble.buubleforprofessor.chatroom.service.ChatroomService;
 import com.bubble.buubleforprofessor.global.config.CustomException;
 import com.bubble.buubleforprofessor.global.config.ErrorCode;
+import com.bubble.buubleforprofessor.user.dto.ApprovalRequestCreateDto;
 import com.bubble.buubleforprofessor.user.dto.ApprovalRequestDto;
 import com.bubble.buubleforprofessor.user.entity.Professor;
 import com.bubble.buubleforprofessor.user.entity.Role;
@@ -42,6 +44,9 @@ class ProfessorServiceImplTest {
     @Mock
     private RoleRepository roleRepository;
 
+    @Mock
+    private ChatroomService chatroomService;
+
     @InjectMocks
     private ProfessorServiceImpl professorService;
 
@@ -66,7 +71,6 @@ class ProfessorServiceImplTest {
                 .build();
 
         professor = Professor.builder()
-                .id(1L)
                 .user(user)
                 .description("Test Professor")
                 .department("Computer Science")
@@ -79,14 +83,21 @@ class ProfessorServiceImplTest {
     @Test
     void testSetApprovalStatus_Success() {
         // given
+        User spyUser = spy(user); // 기존 user 객체를 spy로 감싸기
         when(professorRepository.findById(userId)).thenReturn(Optional.of(professor));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(spyUser)); // spyUser 사용
+        when(roleRepository.findByName("ROLE_PROFESSOR")).thenReturn(Optional.of(professorRole));
+
+        doNothing().when(chatroomService).createChatroom(professor);
 
         // when
         professorService.setApprovalStatus(userId);
 
         // then
-        assertTrue(professor.isApproved());
-        verify(professorRepository, times(1)).save(professor);
+        assertTrue(professor.isApproved()); // 교수 승인 상태 확인
+        verify(spyUser).modifyRole(professorRole); // spyUser로 검증
+        verify(userRepository, times(1)).save(spyUser); // 저장 검증
+        verify(chatroomService, times(1)).createChatroom(professor); // 채팅방 생성 확인
     }
 
     @DisplayName("교수 ID가 존재하지 않는 경우 예외 발생 테스트")
@@ -202,4 +213,28 @@ class ProfessorServiceImplTest {
         CustomException exception = assertThrows(CustomException.class, () -> professorService.deleteById(userId));
         assertEquals(ErrorCode.NON_EXISTENT_ROLE, exception.getErrorCode());
     }
+
+    @DisplayName("교수 승인 요청 성공 - 교수 데이터 Create")
+    @Test
+    void testCreateProfessor_Success() {
+        // 목 객체 생성
+        Professor professor = mock(Professor.class);
+
+        // 목 객체의 메서드 호출 시 동작 정의
+        when(professorRepository.existsById(userId)).thenReturn(false);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(professorRepository.save(any(Professor.class))).thenReturn(professor);
+
+        ApprovalRequestCreateDto approvalRequestCreateDto = new ApprovalRequestCreateDto();
+        approvalRequestCreateDto.setProfessorNum(12345);
+        approvalRequestCreateDto.setDescription("컴공교수");
+        approvalRequestCreateDto.setDepartment("컴퓨터공학과");
+
+        // 서비스 메서드 호출
+        professorService.createProfessor(userId, approvalRequestCreateDto);
+
+        // 메서드 호출 검증
+        verify(professorRepository, times(1)).save(any(Professor.class));
+    }
+
 }

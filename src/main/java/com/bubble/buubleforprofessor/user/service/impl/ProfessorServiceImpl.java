@@ -2,8 +2,10 @@ package com.bubble.buubleforprofessor.user.service.impl;
 
 
 
+import com.bubble.buubleforprofessor.chatroom.service.ChatroomService;
 import com.bubble.buubleforprofessor.global.config.CustomException;
 import com.bubble.buubleforprofessor.global.config.ErrorCode;
+import com.bubble.buubleforprofessor.user.dto.ApprovalRequestCreateDto;
 import com.bubble.buubleforprofessor.user.dto.ApprovalRequestDto;
 import com.bubble.buubleforprofessor.user.entity.Professor;
 import com.bubble.buubleforprofessor.university.entity.University;
@@ -32,8 +34,10 @@ public class ProfessorServiceImpl implements ProfessorService {
     private final ProfessorRepository professorRepository;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final ChatroomService chatroomService;
 
     //todo fetch type eager로 가져오면됨. queryDSL과 성능비교? ngrinder
+//    교수 승인 요청 리스트 반환
     @Override
     public Page<ApprovalRequestDto> getApproveRequests(Pageable pageable) {
         return professorRepository.findAllByIsApprovedFalse(pageable)
@@ -50,16 +54,34 @@ public class ProfessorServiceImpl implements ProfessorService {
                         .build());
     }
 
-
+//승인 수락하면 true로 바꿔주며 승인처리
     @Override
     public void setApprovalStatus(UUID userId) {
         Professor professor = professorRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NON_EXISTENT_USER));
 
-        professor.approve();
-        professorRepository.save(professor);
-    }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NON_EXISTENT_USER));
 
+        Optional<Role> role = roleRepository.findByName("ROLE_PROFESSOR");
+        if (role.isEmpty()) {
+            throw new CustomException(ErrorCode.NON_EXISTENT_ROLE);
+        }
+
+        user.modifyRole(role.get());
+
+        professor.approve();
+
+        user.modifyProfessor(professor);
+
+        userRepository.save(user);
+
+
+        // 교수 승인하면 채팅방 생성
+        chatroomService.createChatroom(professor);
+
+    }
+//  승인거절하면 교수데이터 삭제
     @Override
     public void deleteApprovalById(UUID userId) {
 
@@ -69,7 +91,7 @@ public class ProfessorServiceImpl implements ProfessorService {
 
         professorRepository.deleteById(userId);
     }
-
+//  교수 삭제 후 일반유저로 변경
     @Override
     public void deleteById(UUID userId) {
 
@@ -88,5 +110,26 @@ public class ProfessorServiceImpl implements ProfessorService {
         user.modifyRole(role.get());
 
         professorRepository.deleteById(userId);
+        userRepository.save(user);
+    }
+//  교수승인 요청하면 일단 교수데이터 저장.
+    @Override
+    public void createProfessor(UUID userId, ApprovalRequestCreateDto approvalRequestCreateDto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NON_EXISTENT_USER));
+
+        if(professorRepository.existsById(userId)) {
+           throw new CustomException(ErrorCode.EXISTENT_PROFESSOR);
+        }
+
+        Professor professor = Professor.builder()
+                .user(user)
+                .description(approvalRequestCreateDto.getDescription())
+                .isApproved(false)
+                .professorNum(approvalRequestCreateDto.getProfessorNum())
+                .department(approvalRequestCreateDto.getDepartment())
+                .build();
+        professorRepository.save(professor);
+
     }
 }

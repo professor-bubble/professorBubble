@@ -47,7 +47,7 @@ public class SecurityConfig {
         // 경로별 인가작업
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/join", "/").permitAll()
+                        .requestMatchers("/api/users/login", "/api/users/join", "/").permitAll()
                         .requestMatchers(PathRequest.toH2Console()).permitAll()
                         .anyRequest().authenticated()
                 );

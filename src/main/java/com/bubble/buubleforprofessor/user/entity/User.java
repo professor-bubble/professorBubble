@@ -17,26 +17,25 @@ import java.util.UUID;
 @Getter
 @Table(name = "users")
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // 🔥 JPA를 위한 기본 생성자 추가
-@Builder
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID) // UUID 자동 생성 전략 적용
     @Convert(converter = UUIDConverter.class)  // UUID ↔ BINARY(16) 변환 적용
     @Column(name="user_id",columnDefinition = "BINARY(16)", updatable = false, nullable = false)
     private UUID id;
-
+    @Column(length = 50, nullable = false,unique = true)
     private String loginId;
-
+    @Column( nullable = false)
     private String password;
-
+    @Column(nullable = false)
     private Timestamp createdAt;
-
+    @Column(nullable = true)
     private Timestamp lastLoginAt;
-
+    @Column(length = 20, nullable = false)
     private String name;
-
+    @Column(length = 15, nullable = false,unique = true)
     private String phoneNumber;
-
+    @Column(length = 50, nullable = false,unique = true)
     private String email;
 
     @ManyToOne
@@ -47,6 +46,13 @@ public class User {
 
     public void modifyRole(Role role) {
         this.role = role;
+    }
+
+    @OneToOne(mappedBy = "user",cascade = CascadeType.ALL)
+    private Professor professor;
+
+    public void modifyProfessor(Professor professor) {
+        this.professor = professor;
     }
 
     // 🔥 모든 필드를 받는 생성자를 추가 (Builder를 사용하려면 필요)
