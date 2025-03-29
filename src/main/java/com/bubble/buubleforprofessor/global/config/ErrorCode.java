@@ -1,4 +1,4 @@
-package hellouni.bubbleforprofessor.global.config;
+package com.bubble.buubleforprofessor.global.config;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
