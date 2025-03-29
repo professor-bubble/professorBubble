@@ -2,11 +2,13 @@ package com.bubble.buubleforprofessor.domain.university.dto.request;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Value;
 
 @Getter
 @Setter
 public class UniversityApiRequest {
-    private String serviceKey = "W9J4P7PW-W9J4-W9J4-W9J4-W9J4P7PW4Y";
+    @Value("${universityApi.serviceKey}")
+    private String serviceKey;
     private int pageNo = 1;
     private int numOfRows;
     private String dataType ="xml";
