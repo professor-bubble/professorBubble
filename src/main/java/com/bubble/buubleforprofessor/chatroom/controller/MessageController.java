@@ -5,6 +5,7 @@ import com.bubble.buubleforprofessor.chatroom.dto.MessageSimpleDto;
 import com.bubble.buubleforprofessor.chatroom.entity.Message;
 import com.bubble.buubleforprofessor.chatroom.repository.MessageRepository;
 import com.bubble.buubleforprofessor.chatroom.service.ChatroomUserService;
+import com.bubble.buubleforprofessor.chatroom.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -21,29 +22,22 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class MessageController {
     private final SimpMessageSendingOperations messagingTemplate;
-    private final MessageRepository messageRepository;
+    private final MessageService messageService;
     private final ChatroomUserService chatRoomUserService;
 
-    //todo 카프카 이용해서 데이터 저장하는 기능 추가할것.
-    //todo 이미지도 되도록 해야함.
+    //todo 카프카 이용해야함
     @MessageMapping("/message")
     public void sendMessage(@Payload MessageRequestDto message) {
         chatRoomUserService.exists(message.getUserId(),message.getChatRoomId());
 
-        //아래 주석의 과정을 카프카로 넘겨야함.
-        Message message1= Message.builder()
-                        .chatroomUser(chatRoomUserService.getUserByUserIdAndChatroomId(message.getUserId(), message.getChatRoomId()))
-                                .sendTime(LocalDateTime.now())
-                                        .content(message.getContent()).build();
+        Message message1 = messageService.save(message);
 
-        messageRepository.save(message1);
-        //
 
         MessageSimpleDto simpleDto = new MessageSimpleDto();
         simpleDto.setUserName(message.getUserName());
-        simpleDto.setContent(message.getContent());
+        simpleDto.setContent(message1.getContent());
         simpleDto.setCreateAt(message1.getSendTime());
-
+        System.out.println(message1.getContent());
         messagingTemplate.convertAndSend("/sub/chatroom/" + message.getChatRoomId(), simpleDto);
     }
 }

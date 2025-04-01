@@ -51,8 +51,6 @@ public class UserController {
         return userService.createUser(joinRequestDto);
     }
 
-
-    //todo 헤더대신 AuthenticationPrincipal 에서 가져올것
     //교수 승인 요청. 교수데이터생성
     @PostMapping("/{userId}/approve-request")
     public ResponseEntity<Void> approveRequest(@PathVariable("userId") UUID userId,

@@ -9,6 +9,7 @@ import com.bubble.buubleforprofessor.user.dto.ApprovalRequestCreateDto;
 import com.bubble.buubleforprofessor.user.dto.ProfessorResponseDto;
 import com.bubble.buubleforprofessor.user.dto.UserSimpleResponseDto;
 import com.bubble.buubleforprofessor.user.service.ProfessorService;
+import com.bubble.buubleforprofessor.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
