@@ -38,7 +38,6 @@ public class MessageController {
         simpleDto.setUserName(message.getUserName());
         simpleDto.setContent(message1.getContent());
         simpleDto.setCreateAt(message1.getSendTime());
-        System.out.println(message1.getContent());
         messagingTemplate.convertAndSend("/sub/chatroom/" + message.getChatRoomId(), simpleDto);
     }
 }

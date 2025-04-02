@@ -86,13 +86,6 @@ public class MessageServiceImpl implements MessageService {
             }
         }
 
-        // chatroomUser 조회 및 메시지 엔티티 생성 기존에 사용하던 RDB에 저장
-//        Message messageEntity = Message.builder()
-//                .chatroomUser(chatroomUserRepository.findByUserIdAndChatroomId(message.getUserId(), message.getChatRoomId())
-//                        .orElseThrow(() -> new CustomException(ErrorCode.NON_EXISTENT_CHATROOM_USER)))
-//                .sendTime(LocalDateTime.now())
-//                .content(content)
-//                .build();
         //todo 메세지 마다 쿼리를 계속 날리는 현상. 성능 괜찮?
         ChatroomUser chatroomUser = chatroomUserService.getUserByUserIdAndChatroomId(message.getUserId(),message.getChatRoomId());
 
@@ -100,6 +93,7 @@ public class MessageServiceImpl implements MessageService {
         MessageMongo messageMongo = MessageMongo.builder()
                 .userId(chatroomUser.getUser().getId())
                 .chatroomId(chatroomUser.getChatroom().getId())
+                .userName(chatroomUser.getUser().getName())
                 .sendTime(LocalDateTime.now())
                 .content(content)
                 .build();

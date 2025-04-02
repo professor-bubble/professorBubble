@@ -5,6 +5,7 @@ import com.bubble.buubleforprofessor.chatroom.dto.MessageResponseDto;
 import com.bubble.buubleforprofessor.chatroom.entity.Chatroom;
 import com.bubble.buubleforprofessor.chatroom.repository.ChatroomRepository;
 import com.bubble.buubleforprofessor.chatroom.repository.ChatroomUserRepository;
+import com.bubble.buubleforprofessor.chatroom.repository.MessageMongoRepository;
 import com.bubble.buubleforprofessor.chatroom.repository.MessageRepository;
 import com.bubble.buubleforprofessor.chatroom.service.ChatroomService;
 import com.bubble.buubleforprofessor.global.config.CustomException;
@@ -12,6 +13,7 @@ import com.bubble.buubleforprofessor.global.config.ErrorCode;
 import com.bubble.buubleforprofessor.user.dto.ProfessorResponseDto;
 import com.bubble.buubleforprofessor.user.dto.UserSimpleResponseDto;
 import com.bubble.buubleforprofessor.user.entity.Professor;
+import com.bubble.buubleforprofessor.user.entity.User;
 import com.bubble.buubleforprofessor.user.repository.ProfessorRepository;
 import com.bubble.buubleforprofessor.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +33,7 @@ public class ChatroomServiceImpl implements ChatroomService {
     private final ChatroomUserRepository chatroomUserRepository;
     private final UserRepository userRepository;
     private final MessageRepository messageRepository;
+    private final MessageMongoRepository messageMongoRepository;
 
     @Override
     @Transactional
@@ -58,15 +61,28 @@ public class ChatroomServiceImpl implements ChatroomService {
                         .userId(chatroomUser.getUser().getId())
                         .userName(chatroomUser.getUser().getName()).build())
                 .toList();
-        List<MessageResponseDto> messages =messageRepository.findByChatroomUser_Chatroom(chatroom).stream()
+
+//        List<MessageResponseDto> messages =messageRepository.findByChatroomUser_Chatroom(chatroom).stream()
+//                .map(message -> MessageResponseDto.builder()
+//                        .messageId(message.getId())
+//                        .sendUser(UserSimpleResponseDto.builder()
+//                                .userId(message.getChatroomUser().getUser().getId())
+//                                .userName(message.getChatroomUser().getUser().getName()).build())
+//                        .sendTime(message.getSendTime())
+//                        .content(message.getContent()).build())
+//                .toList();
+
+        //N+1 쿼리문제를 해결하려고 보니 message에서 userName을 가지고 있어야함.
+        List<MessageResponseDto> messages = messageMongoRepository.findMessagesByChatroomId(chatRoomId).stream()
                 .map(message -> MessageResponseDto.builder()
-                        .messageId(message.getId())
                         .sendUser(UserSimpleResponseDto.builder()
-                                .userId(message.getChatroomUser().getUser().getId())
-                                .userName(message.getChatroomUser().getUser().getName()).build())
+                                .userId(message.getUserId())
+                                .userName(message.getUserName()).build())
                         .sendTime(message.getSendTime())
-                        .content(message.getContent()).build())
-                .toList();
+                        .content(message.getContent())
+                        .build()
+                ).toList();
+
 
         ChatroomResponseDto chatroomResponseDto= ChatroomResponseDto.builder()
                 .chatroomId(chatRoomId)

@@ -10,4 +10,5 @@ import java.util.List;
 @Repository
 public interface MessageMongoRepository extends MongoRepository<MessageMongo,String> {
     List<MessageMongo> findBySendTimeBetween(LocalDateTime sendTime, LocalDateTime now);
+    List<MessageMongo> findMessagesByChatroomId(int chatroomId);
 }

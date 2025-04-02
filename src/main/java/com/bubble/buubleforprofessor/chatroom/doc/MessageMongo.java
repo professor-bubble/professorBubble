@@ -20,15 +20,17 @@ public class MessageMongo {
 
     private UUID userId;
     private int chatroomId;
+    private String userName;
 
     private LocalDateTime sendTime;
 
     private String content;
 
     @Builder
-    public MessageMongo(UUID userId,int chatroomId, LocalDateTime sendTime, String content) {
+    public MessageMongo(UUID userId,int chatroomId, String userName,LocalDateTime sendTime, String content) {
         this.userId = userId;
         this.chatroomId = chatroomId;
+        this.userName = userName;
         this.sendTime = sendTime;
         this.content = content;
     }
