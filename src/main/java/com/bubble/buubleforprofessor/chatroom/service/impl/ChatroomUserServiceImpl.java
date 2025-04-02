@@ -6,6 +6,7 @@ import com.bubble.buubleforprofessor.chatroom.service.ChatroomUserService;
 import com.bubble.buubleforprofessor.global.config.CustomException;
 import com.bubble.buubleforprofessor.global.config.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +25,7 @@ public class ChatroomUserServiceImpl implements ChatroomUserService {
             throw new CustomException(ErrorCode.NON_EXISTENT_CHATROOM_USER);
         }
     }
-
+    @Cacheable(value = "chatroom_users", key = "#userId + '_' + #chatroomId")
     @Override
     public ChatroomUser getUserByUserIdAndChatroomId(UUID userId, int chatroomId) {
         ChatroomUser chatroomUser=chatroomUserRepository.findByUserIdAndChatroomId(userId,chatroomId)

@@ -1,5 +1,6 @@
 package com.bubble.buubleforprofessor.chatroom.controller;
 
+import com.bubble.buubleforprofessor.chatroom.doc.MessageMongo;
 import com.bubble.buubleforprofessor.chatroom.dto.MessageRequestDto;
 import com.bubble.buubleforprofessor.chatroom.dto.MessageSimpleDto;
 import com.bubble.buubleforprofessor.chatroom.entity.Message;
@@ -30,7 +31,7 @@ public class MessageController {
     public void sendMessage(@Payload MessageRequestDto message) {
         chatRoomUserService.exists(message.getUserId(),message.getChatRoomId());
 
-        Message message1 = messageService.save(message);
+        MessageMongo message1 = messageService.save(message);
 
 
         MessageSimpleDto simpleDto = new MessageSimpleDto();
