@@ -178,7 +178,6 @@ class UserControllerTest {
                 .build();
 
         MessageResponseDto messageDto = MessageResponseDto.builder()
-                .messageId(1L)
                 .sendUser(userDto)
                 .sendTime(LocalDateTime.now())
                 .content("메시지 내용")
@@ -205,7 +204,6 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.professorDto.professorImageUrl").value(professorDto.getProfessorImageUrl()))
                 .andExpect(jsonPath("$.users[0].userId").value(userDto.getUserId().toString()))
                 .andExpect(jsonPath("$.users[0].userName").value(userDto.getUserName()))
-                .andExpect(jsonPath("$.messages[0].messageId").value(messageDto.getMessageId()))
                 .andExpect(jsonPath("$.messages[0].sendUser.userId").value(userDto.getUserId().toString()))
                 .andExpect(jsonPath("$.messages[0].sendUser.userName").value(userDto.getUserName()))
                 .andExpect(jsonPath("$.messages[0].content").value(messageDto.getContent()));

@@ -6,6 +6,7 @@ import com.bubble.buubleforprofessor.chatroom.entity.ChatroomUser;
 import com.bubble.buubleforprofessor.chatroom.entity.Message;
 import com.bubble.buubleforprofessor.chatroom.repository.ChatroomRepository;
 import com.bubble.buubleforprofessor.chatroom.repository.ChatroomUserRepository;
+import com.bubble.buubleforprofessor.chatroom.repository.MessageMongoRepository;
 import com.bubble.buubleforprofessor.chatroom.repository.MessageRepository;
 import com.bubble.buubleforprofessor.global.config.CustomException;
 import com.bubble.buubleforprofessor.global.config.ErrorCode;
@@ -48,6 +49,9 @@ class ChatroomServiceImplTest {
 
     @Mock
     private ChatroomUserRepository chatroomUserRepository;
+
+    @Mock
+    private MessageMongoRepository messageMongoRepository;
 
     @Mock
     private MessageRepository messageRepository;
@@ -131,7 +135,7 @@ class ChatroomServiceImplTest {
         when(chatroomUserRepository.existsByUserIdAndChatroomId(userId, chatRoomId)).thenReturn(true);
         when(chatroomRepository.findById(chatRoomId)).thenReturn(Optional.of(chatroom));
         when(chatroomUserRepository.findByChatroomId(chatRoomId)).thenReturn(Collections.emptyList());
-        when(messageRepository.findByChatroomUser_Chatroom(chatroom)).thenReturn(Collections.emptyList());
+        when(messageMongoRepository.findMessagesByChatroomId(chatroom.getId())).thenReturn(Collections.emptyList());
 
         // when
         ChatroomResponseDto response = chatroomService.findByUserIdAndChatRoomId(userId, chatRoomId);
@@ -142,7 +146,7 @@ class ChatroomServiceImplTest {
         verify(chatroomUserRepository, times(1)).existsByUserIdAndChatroomId(userId, chatRoomId);
         verify(chatroomRepository, times(1)).findById(chatRoomId);
         verify(chatroomUserRepository, times(1)).findByChatroomId(chatRoomId);
-        verify(messageRepository, times(1)).findByChatroomUser_Chatroom(chatroom);
+        verify(messageMongoRepository, times(1)).findMessagesByChatroomId(chatroom.getId());
     }
 
     @DisplayName("채팅방 사용자 존재하지 않을 시 예외 발생 테스트")
