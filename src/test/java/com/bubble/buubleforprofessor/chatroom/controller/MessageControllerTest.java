@@ -1,12 +1,13 @@
 package com.bubble.buubleforprofessor.chatroom.controller;
 
+import com.bubble.buubleforprofessor.chatroom.doc.MessageMongo;
 import com.bubble.buubleforprofessor.chatroom.dto.MessageRequestDto;
 import com.bubble.buubleforprofessor.chatroom.dto.MessageSimpleDto;
 import com.bubble.buubleforprofessor.chatroom.entity.Chatroom;
 import com.bubble.buubleforprofessor.chatroom.entity.ChatroomUser;
-import com.bubble.buubleforprofessor.chatroom.entity.Message;
-import com.bubble.buubleforprofessor.chatroom.repository.MessageRepository;
+
 import com.bubble.buubleforprofessor.chatroom.service.ChatroomUserService;
+import com.bubble.buubleforprofessor.chatroom.service.MessageService;
 import com.bubble.buubleforprofessor.user.entity.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,7 +15,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -38,15 +38,18 @@ public class MessageControllerTest {
     private SimpMessageSendingOperations messagingTemplate;
 
     @MockitoBean
-    private MessageRepository messageRepository;
+    private MessageService messageService;
 
     @MockitoBean
     private ChatroomUserService chatRoomUserService;
+
 
     private MessageRequestDto request;
     private User dummyUser;
     private Chatroom dummyChatroom;
     private ChatroomUser dummyChatroomUser;
+
+
 
     @BeforeEach
     public void setUp() {
@@ -77,18 +80,15 @@ public class MessageControllerTest {
 
     @Test
     public void testSendMessage() {
-        // chatRoomUserService가 더미 ChatroomUser를 반환하도록 설정
-        when(chatRoomUserService.getUserByUserIdAndChatroomId(any(UUID.class), anyInt()))
-                .thenReturn(dummyChatroomUser);
-
         // MessageRepository.save()가 저장된 Message 객체를 반환하도록 설정
         LocalDateTime now = LocalDateTime.now();
-        Message savedMessage = Message.builder()
-                .chatroomUser(dummyChatroomUser)
+        MessageMongo savedMessage = MessageMongo.builder()
+                .userId(dummyChatroomUser.getUser().getId())
+                .chatroomId(dummyChatroomUser.getChatroom().getId())
                 .sendTime(now)
                 .content(request.getContent())
                 .build();
-        when(messageRepository.save(any(Message.class))).thenReturn(savedMessage);
+        when(messageService.save(request)).thenReturn(savedMessage);
 
         // sendMessage() 호출
         messageController.sendMessage(request);
