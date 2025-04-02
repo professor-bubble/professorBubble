@@ -3,21 +3,16 @@ package com.bubble.buubleforprofessor.chatroom.controller;
 import com.bubble.buubleforprofessor.chatroom.doc.MessageMongo;
 import com.bubble.buubleforprofessor.chatroom.dto.MessageRequestDto;
 import com.bubble.buubleforprofessor.chatroom.dto.MessageSimpleDto;
-import com.bubble.buubleforprofessor.chatroom.entity.Message;
-import com.bubble.buubleforprofessor.chatroom.repository.MessageRepository;
+
 import com.bubble.buubleforprofessor.chatroom.service.ChatroomUserService;
 import com.bubble.buubleforprofessor.chatroom.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.RequestHeader;
+
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -36,8 +31,10 @@ public class MessageController {
 
         MessageSimpleDto simpleDto = new MessageSimpleDto();
         simpleDto.setUserName(message.getUserName());
+        simpleDto.setType(message1.getMessageType());
         simpleDto.setContent(message1.getContent());
         simpleDto.setCreateAt(message1.getSendTime());
+        System.out.println(message1.getMessageType());
         messagingTemplate.convertAndSend("/sub/chatroom/" + message.getChatRoomId(), simpleDto);
     }
 }

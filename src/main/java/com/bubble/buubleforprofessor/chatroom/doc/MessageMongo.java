@@ -1,6 +1,7 @@
 package com.bubble.buubleforprofessor.chatroom.doc;
 
 import com.bubble.buubleforprofessor.chatroom.entity.ChatroomUser;
+import com.bubble.buubleforprofessor.chatroom.entity.Message;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,15 +23,17 @@ public class MessageMongo {
     private int chatroomId;
     private String userName;
 
+    private Message.MessageType messageType;
     private LocalDateTime sendTime;
 
     private String content;
 
     @Builder
-    public MessageMongo(UUID userId,int chatroomId, String userName,LocalDateTime sendTime, String content) {
+    public MessageMongo(UUID userId,int chatroomId, String userName,Message.MessageType messageType,LocalDateTime sendTime, String content) {
         this.userId = userId;
         this.chatroomId = chatroomId;
         this.userName = userName;
+        this.messageType = messageType;
         this.sendTime = sendTime;
         this.content = content;
     }

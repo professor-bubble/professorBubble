@@ -1,6 +1,5 @@
 package com.bubble.buubleforprofessor.chatroom.entity;
 
-import com.bubble.buubleforprofessor.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -30,10 +29,17 @@ public class Message {
 
     private String content;
 
+    private MessageType messageType;
     @Builder
-    public Message(ChatroomUser chatroomUser, LocalDateTime sendTime, String content) {
+    public Message(ChatroomUser chatroomUser, LocalDateTime sendTime, String content,MessageType messageType) {
         this.chatroomUser = chatroomUser;
         this.sendTime = sendTime;
         this.content = content;
+        this.messageType = messageType;
+    }
+
+    public enum MessageType {
+        TEXT,
+        IMAGE
     }
 }

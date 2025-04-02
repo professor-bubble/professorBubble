@@ -4,8 +4,9 @@ import com.bubble.buubleforprofessor.chatroom.doc.MessageMongo;
 import com.bubble.buubleforprofessor.chatroom.dto.MessageRequestDto;
 import com.bubble.buubleforprofessor.chatroom.entity.ChatroomUser;
 import com.bubble.buubleforprofessor.chatroom.entity.Message;
+import com.bubble.buubleforprofessor.chatroom.entity.MessageImage;
 import com.bubble.buubleforprofessor.chatroom.repository.ChatroomUserRepository;
-import com.bubble.buubleforprofessor.chatroom.repository.MessageImageMongoRepository;
+import com.bubble.buubleforprofessor.chatroom.repository.MessageImageRepository;
 import com.bubble.buubleforprofessor.chatroom.repository.MessageMongoRepository;
 import com.bubble.buubleforprofessor.chatroom.repository.MessageRepository;
 import com.bubble.buubleforprofessor.chatroom.service.ChatroomUserService;
@@ -39,11 +40,12 @@ public class MessageServiceImpl implements MessageService {
     private final ChatroomUserService chatroomUserService;
 
     private final MessageMongoRepository messageMongoRepository;
-    private final MessageImageMongoRepository messageImageMongoRepository;
 
+    private final MessageImageRepository messageImageRepository;
     @Override
     public MessageMongo save(MessageRequestDto message) {
         String content = message.getContent();
+        Message.MessageType messageType=Message.MessageType.valueOf("TEXT");
         //object스토리지로 저장해야할거같음
         // content가 이미지 파일 데이터 (Base64 인코딩된 문자열)인지 확인합니다.
         if (content != null && content.startsWith("data:image/")) {
@@ -79,6 +81,7 @@ public class MessageServiceImpl implements MessageService {
 
                     //임시로 서버에 저장하고 , 상대경로로 가져오도록 해둠.
                     content = "/uploads/" + uniqueFileName;
+                    messageType=Message.MessageType.valueOf("IMAGE");
                 }
             } catch (IOException e) {
                 throw new CustomException(ErrorCode.NON_EXISTENT_MESSAGE);
@@ -94,6 +97,7 @@ public class MessageServiceImpl implements MessageService {
                 .userId(chatroomUser.getUser().getId())
                 .chatroomId(chatroomUser.getChatroom().getId())
                 .userName(chatroomUser.getUser().getName())
+                .messageType(messageType)
                 .sendTime(LocalDateTime.now())
                 .content(content)
                 .build();
@@ -132,7 +136,7 @@ public class MessageServiceImpl implements MessageService {
                         cu -> cu.getUser().getId().toString() + "_" + cu.getChatroom().getId(),
                         Function.identity()
                 ));
-
+        List<MessageImage> messageImages =new ArrayList<>();
         // 4. 각 MessageMongo를 Message 엔티티로 변환 (매핑 과정에서 Map을 사용)
         List<Message> messages = recentMessages.stream()
                 .map(messageMongo -> {
@@ -141,16 +145,27 @@ public class MessageServiceImpl implements MessageService {
                     if (chatroomUser == null) {
                         throw new CustomException(ErrorCode.NON_EXISTENT_CHATROOM_USER);
                     }
-                    return Message.builder()
+                    Message message = Message.builder()
                             .chatroomUser(chatroomUser)
+                            .messageType(messageMongo.getMessageType())
                             .sendTime(messageMongo.getSendTime())
                             .content(messageMongo.getContent())
                             .build();
+                    if(messageMongo.getMessageType()==Message.MessageType.IMAGE)
+                    {
+                        messageImages.add(MessageImage.builder()
+                                .message(message)
+                                .url(message.getContent())
+                                .build());
+                    }
+                    return message;
                 }).toList();
 
 
         // 5. 배치로 RDB에 저장 (한 번에 saveAll 호출)
         messageRepository.saveAll(messages);
+
+        messageImageRepository.saveAll(messageImages);
     }
 
 
