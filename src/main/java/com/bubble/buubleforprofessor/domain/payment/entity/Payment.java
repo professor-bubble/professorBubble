@@ -2,6 +2,7 @@ package com.bubble.buubleforprofessor.domain.payment.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -30,6 +31,9 @@ public class Payment {
     @Column(name = "payment_time")
     private LocalDateTime paymentTime;
 
+    @Column(name = "canceled_at")
+    private LocalDateTime canceledAt;
+
     @Column(name = "payment_key", nullable = false, length = 255)
     private String paymentKey;
 
@@ -37,14 +41,23 @@ public class Payment {
     @Column(name = "payment_method", nullable = false, length = 50)
     private String paymentMethod;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "payment_status", nullable = false)
-    private PaymentStatus paymentStatus = PaymentStatus.PENDING;
-}
+    private String paymentStatus = "PENDING";
 
-enum PaymentStatus {
-    PENDING,    // 결제 대기
-    SUCCEEDED,  // 결제 성공
-    FAILED,     // 결제 실패
-    CANCELED    // 결제 취소 (환불 등)
+    public void updatePaymentStatus(String status) {
+        this.paymentStatus = status;
+        if ("DONE".equals(status) || "FAILED".equals(status)) {
+            this.paymentTime = LocalDateTime.now();
+        }else if ("CANCELED".equals(status)) {
+            this.canceledAt = LocalDateTime.now();
+        }
+    }
+
+    @Builder
+    public Payment(Order order, Integer amount, String paymentKey, String paymentMethod) {
+        this.order = order;
+        this.amount = amount;
+        this.paymentKey = paymentKey;
+        this.paymentMethod = paymentMethod;
+    }
 }
