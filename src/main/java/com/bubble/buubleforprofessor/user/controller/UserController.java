@@ -10,7 +10,6 @@ import com.bubble.buubleforprofessor.user.service.ProfessorService;
 import jakarta.validation.Valid;
 import com.bubble.buubleforprofessor.user.dto.CustomUserDetails;
 import com.bubble.buubleforprofessor.user.dto.JoinRequestDto;
-import com.bubble.buubleforprofessor.user.dto.LoginRequestDto;
 import com.bubble.buubleforprofessor.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,8 +20,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,12 +39,11 @@ public class UserController {
 
     @GetMapping("/user")
     public String mainPage(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        return "user controller - " + userDetails.getUserId() + " - " + userDetails.getPassword() + " - " + userDetails.getRole();
+        return "user controller - " + userDetails.getUserId() + " - " + userDetails.getUsername() + " - " + userDetails.getRole();
     }
 
     @PostMapping("/join")
-    public String join(JoinRequestDto joinRequestDto) {
-
+    public String join(@ModelAttribute JoinRequestDto joinRequestDto) {
         return userService.createUser(joinRequestDto);
     }
 

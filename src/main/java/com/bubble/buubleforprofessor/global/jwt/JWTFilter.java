@@ -22,6 +22,13 @@ public class JWTFilter extends OncePerRequestFilter {
     private final JWTUtil jwtUtil;
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getRequestURI();
+        System.out.println("요청 경로: " + request.getRequestURI());
+        return path.equals("/api/users/join");
+    }
+
+    @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         // request에서 Authorization 헤더 추출
         String authorization = request.getHeader("Authorization");
