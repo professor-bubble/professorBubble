@@ -43,6 +43,7 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = false)
     private List<OrderDetail> orderDetails = new ArrayList<>();
 
+
     public void updateOrderStatus(OrderStatus status) {
         this.orderStatus = status;
     }
@@ -61,8 +62,8 @@ public class Order {
 //USER의 주문 활성 및 취소 상태표시
 //즉, 유저1이 주문을 넣었다가 취소할 수 있다는 가정하여 ORDER DB에서 주문을 삭제하지않고 아래 ENUM으로 수정
 enum OrderStatus {
-    PENDING,        //결제 대기
-    COMPLETED,      //결제 완료
-    FAILED,         //결제 실패
-    CANCELED        //결제 취소
+    PENDING,        //주문 대기
+    SUCCEEDED,      //주문 완료
+    FAILED,         //주문 실패
+    CANCELED        //주문 취소
 }
