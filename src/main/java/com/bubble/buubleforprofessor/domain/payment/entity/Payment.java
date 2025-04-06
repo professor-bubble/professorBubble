@@ -37,7 +37,7 @@ public class Payment {
     @Column(name = "payment_key", nullable = false, length = 255)
     private String paymentKey;
 
-    //카카오페, 토스페이 등등 결제 방식
+    //카카오페이, 토스페이 등등 결제 방식
     @Column(name = "payment_method", nullable = false, length = 50)
     private String paymentMethod;
 
