@@ -31,8 +31,6 @@ public class Payment {
     @Column(name = "payment_time")
     private LocalDateTime paymentTime;
 
-    @Column(name = "canceled_at")
-    private LocalDateTime canceledAt;
 
     @Column(name = "payment_key", nullable = false, length = 255)
     private String paymentKey;
@@ -49,7 +47,7 @@ public class Payment {
         if ("DONE".equals(status) || "FAILED".equals(status)) {
             this.paymentTime = LocalDateTime.now();
         }else if ("CANCELED".equals(status)) {
-            this.canceledAt = LocalDateTime.now();
+            this.paymentTime = LocalDateTime.now();
         }
     }
 
