@@ -3,6 +3,7 @@ package com.bubble.buubleforprofessor.global.config;
 import com.bubble.buubleforprofessor.global.jwt.JWTFilter;
 import com.bubble.buubleforprofessor.global.jwt.JWTUtil;
 import com.bubble.buubleforprofessor.global.jwt.LoginFilter;
+import com.bubble.buubleforprofessor.global.oauth2.CustomSuccessHandler;
 import com.bubble.buubleforprofessor.user.service.impl.CustomOAuth2UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
@@ -21,9 +22,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
+    private final AuthenticationConfiguration authenticationConfiguration;
     private final CustomOAuth2UserServiceImpl customOAuth2UserService;
+    private final CustomSuccessHandler customSuccessHandler;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
@@ -60,6 +62,8 @@ public class SecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig
                                 .userService(customOAuth2UserService))
+                        .successHandler(customSuccessHandler)
+                        .failureUrl("/login?error")
                 );
 
         // h2 console

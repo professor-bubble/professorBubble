@@ -51,7 +51,6 @@ public class CustomOAuth2UserServiceImpl extends DefaultOAuth2UserService {
         String username = oAuth2ResponseDto.getProvider() + " " + oAuth2ResponseDto.getProviderId();
 
         User existData = userRepository.findByLoginId(username);
-        System.out.println("user : " + existData);
 
         if (Objects.isNull(existData)) {
             User newUser = User.builder()
@@ -61,7 +60,7 @@ public class CustomOAuth2UserServiceImpl extends DefaultOAuth2UserService {
                     .password(username)
                     .phoneNumber("000-0000-0000")
                     .email(oAuth2ResponseDto.getEmail())
-                    .role(new Role("ROLE_USER"))
+//                    .role(new Role("ROLE_USER"))
                     .createdAt(new Timestamp(System.currentTimeMillis()))
                     .build();
 
