@@ -1,5 +1,6 @@
 package com.bubble.buubleforprofessor.user.service.impl;
 
+import com.bubble.buubleforprofessor.user.dto.CustomOAuth2User;
 import com.bubble.buubleforprofessor.user.dto.OAuth2ResponseDto;
 import com.bubble.buubleforprofessor.user.dto.impl.GoogleResponseImplDto;
 import com.bubble.buubleforprofessor.user.dto.impl.NaverResponseImplDto;
@@ -25,6 +26,7 @@ public class CustomOAuth2UserServiceImpl extends DefaultOAuth2UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    // SecurityContext에 OAuth2User 객체 담기
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 
@@ -65,13 +67,15 @@ public class CustomOAuth2UserServiceImpl extends DefaultOAuth2UserService {
 
             userRepository.save(newUser);
 
-            return null;
+            CustomOAuth2User customOAuth2User = new CustomOAuth2User(newUser);
+
+            return customOAuth2User;
         } else {
-            // setter 처리
+            // Todo setter 처리
 
+            CustomOAuth2User customOAuth2User = new CustomOAuth2User(existData);
 
-            return null;
+            return customOAuth2User;
         }
-
     }
 }

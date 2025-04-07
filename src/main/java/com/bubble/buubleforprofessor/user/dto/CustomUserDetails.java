@@ -8,10 +8,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.ArrayList;
 import java.util.Collection;
 
-@RequiredArgsConstructor
 public class CustomUserDetails implements UserDetails {
 
     private final User user;
+
+    public CustomUserDetails(User user) {
+        this.user = user;
+    }
 
     public String getUserId() {
         return user.getId().toString();
