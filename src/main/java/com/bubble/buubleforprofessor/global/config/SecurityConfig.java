@@ -3,6 +3,7 @@ package com.bubble.buubleforprofessor.global.config;
 import com.bubble.buubleforprofessor.global.jwt.JWTFilter;
 import com.bubble.buubleforprofessor.global.jwt.JWTUtil;
 import com.bubble.buubleforprofessor.global.jwt.LoginFilter;
+import com.bubble.buubleforprofessor.user.service.impl.CustomOAuth2UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -23,6 +24,7 @@ public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
+    private final CustomOAuth2UserServiceImpl customOAuth2UserService;
 
     @Bean
     BCryptPasswordEncoder passwordEncoder() {
@@ -58,6 +60,13 @@ public class SecurityConfig {
         // loginFilter 등록
         http
                 .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class);
+
+        // OAuth2 설정
+        http
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig
+                                .userService(customOAuth2UserService))
+                );
 
         // h2 console
         http
