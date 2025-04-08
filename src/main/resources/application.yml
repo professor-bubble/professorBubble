@@ -42,3 +42,6 @@ logging:
   level:
     root: INFO
     com.bubble.buubleforprofessor: DEBUG
+
+jwt:
+  expirationtime: 216000

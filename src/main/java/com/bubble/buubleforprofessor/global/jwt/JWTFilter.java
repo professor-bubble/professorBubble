@@ -1,6 +1,6 @@
 package com.bubble.buubleforprofessor.global.jwt;
 
-import com.bubble.buubleforprofessor.user.dto.CustomUserDetails;
+import com.bubble.buubleforprofessor.user.dto.CustomPrincipal;
 import com.bubble.buubleforprofessor.user.entity.Role;
 import com.bubble.buubleforprofessor.user.entity.User;
 import jakarta.servlet.FilterChain;
@@ -67,10 +67,10 @@ public class JWTFilter extends OncePerRequestFilter {
                 .build();
 
         // UserDetails에 회원정보 객체 담기
-        CustomUserDetails customUserDetails = new CustomUserDetails(user);
+        CustomPrincipal customPrincipal = new CustomPrincipal(user);
 
         // 스프링 시큐리티 인증 토큰 생성
-        Authentication authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
+        Authentication authToken = new UsernamePasswordAuthenticationToken(customPrincipal, null, customPrincipal.getAuthorities());
         // 세션에 사용자 등록
         SecurityContextHolder.getContext().setAuthentication(authToken);
 

@@ -1,11 +1,12 @@
 package com.bubble.buubleforprofessor.user.service.impl;
 
-import com.bubble.buubleforprofessor.user.dto.CustomOAuth2User;
+import com.bubble.buubleforprofessor.user.dto.CustomPrincipal;
 import com.bubble.buubleforprofessor.user.dto.OAuth2ResponseDto;
 import com.bubble.buubleforprofessor.user.dto.impl.GoogleResponseImplDto;
 import com.bubble.buubleforprofessor.user.dto.impl.NaverResponseImplDto;
 import com.bubble.buubleforprofessor.user.entity.Role;
 import com.bubble.buubleforprofessor.user.entity.User;
+import com.bubble.buubleforprofessor.user.repository.RoleRepository;
 import com.bubble.buubleforprofessor.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -24,6 +25,7 @@ import java.util.UUID;
 public class CustomOAuth2UserServiceImpl extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     // SecurityContext에 OAuth2User 객체 담기
@@ -53,28 +55,31 @@ public class CustomOAuth2UserServiceImpl extends DefaultOAuth2UserService {
         User existData = userRepository.findByLoginId(username);
 
         if (Objects.isNull(existData)) {
+            Role roleUser = roleRepository.findByName("ROLE_USER").orElseThrow();
+
             User newUser = User.builder()
                     .loginId(username)
                     .name(oAuth2ResponseDto.getName())
-//                    .password(bCryptPasswordEncoder.encode(UUID.randomUUID().toString()))
+                    .password(bCryptPasswordEncoder.encode(UUID.randomUUID().toString()))
                     .password(username)
                     .phoneNumber("000-0000-0000")
                     .email(oAuth2ResponseDto.getEmail())
-//                    .role(new Role("ROLE_USER"))
+                    .role(roleUser)
                     .createdAt(new Timestamp(System.currentTimeMillis()))
+                    .lastLoginAt(new Timestamp(System.currentTimeMillis()))
                     .build();
 
             userRepository.save(newUser);
 
-            CustomOAuth2User customOAuth2User = new CustomOAuth2User(newUser);
+            CustomPrincipal customPrincipal = new CustomPrincipal(newUser);
 
-            return customOAuth2User;
+            return customPrincipal;
         } else {
             // Todo setter 처리
 
-            CustomOAuth2User customOAuth2User = new CustomOAuth2User(existData);
+            CustomPrincipal customPrincipal = new CustomPrincipal(existData);
 
-            return customOAuth2User;
+            return customPrincipal;
         }
     }
 }

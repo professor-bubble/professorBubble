@@ -6,6 +6,7 @@ import com.bubble.buubleforprofessor.global.jwt.LoginFilter;
 import com.bubble.buubleforprofessor.global.oauth2.CustomSuccessHandler;
 import com.bubble.buubleforprofessor.user.service.impl.CustomOAuth2UserServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -45,7 +46,7 @@ public class SecurityConfig {
         // 경로별 인가작업
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/users/login", "/api/users/join", "/").permitAll()
+                        .requestMatchers("/api/users/login", "/api/users", "/").permitAll()
                         .requestMatchers(PathRequest.toH2Console()).permitAll()
                         .anyRequest().authenticated()
                 );

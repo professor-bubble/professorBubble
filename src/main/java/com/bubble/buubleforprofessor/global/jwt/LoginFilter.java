@@ -1,11 +1,12 @@
 package com.bubble.buubleforprofessor.global.jwt;
 
-import com.bubble.buubleforprofessor.user.dto.CustomUserDetails;
+import com.bubble.buubleforprofessor.user.dto.CustomPrincipal;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -23,11 +24,14 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUtil;
 
+    @Value("${jwt.expirationtime}")
+    private Long expirationTime;
+
     public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
 
-        setFilterProcessesUrl("/api/users/login");
+        setFilterProcessesUrl("api/auth/token");
     }
 
     @Override
@@ -48,17 +52,17 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         log.info("successful authentication");
 
         // user 가져오기
-        CustomUserDetails userDetails = (CustomUserDetails) authResult.getPrincipal();
+        CustomPrincipal customPrincipal = (CustomPrincipal) authResult.getPrincipal();
 
-        String username = userDetails.getUsername();
-        String userId = userDetails.getUserId();
+        String username = customPrincipal.getUsername();
+        String userId = customPrincipal.getUserId();
 
         Collection<? extends GrantedAuthority> authorities = authResult.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
         GrantedAuthority auth = iterator.next();
         String role = auth.getAuthority();
 
-        String token = jwtUtil.createJwt(username, role, userId,60 * 60 * 100L);
+        String token = jwtUtil.createJwt(username, role, userId, expirationTime);
 
         response.addHeader("Authorization", "Bearer " + token);
     }
