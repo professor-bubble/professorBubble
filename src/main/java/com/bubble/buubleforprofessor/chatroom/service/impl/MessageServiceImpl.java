@@ -84,12 +84,11 @@ public class MessageServiceImpl implements MessageService {
                     messageType=Message.MessageType.valueOf("IMAGE");
                 }
             } catch (IOException e) {
-                throw new CustomException(ErrorCode.NON_EXISTENT_MESSAGE);
-                //todo 에러코드 만들것
+                throw new CustomException(ErrorCode.IMAGE_UPLOAD_FAILED);
             }
         }
 
-        //todo 메세지 마다 쿼리를 계속 날리는 현상. 성능 괜찮?
+        // 메세지마다 쿼리 날리는현상. 캐싱으로 해결. EnableCaching 또한 붙여주어야함.
         ChatroomUser chatroomUser = chatroomUserService.getUserByUserIdAndChatroomId(message.getUserId(),message.getChatRoomId());
 
         //MongoDB에 저장

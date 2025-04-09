@@ -71,7 +71,11 @@ public enum ErrorCode {
     //내 채팅방이 아닌경우
     NON_EXISTENT_CHATROOM_USER("내가 존재하는 채팅방이 아닙니다.",HttpStatus.NOT_FOUND),
     //존재하지않는 메세지
-    NON_EXISTENT_MESSAGE("메세지가 존재하지 않습니다.",HttpStatus.NOT_FOUND);
+    NON_EXISTENT_MESSAGE("메세지가 존재하지 않습니다.",HttpStatus.NOT_FOUND),
+
+
+    //파일 업로드 중 오류
+    IMAGE_UPLOAD_FAILED("파일 업로드 중 오류",HttpStatus.INTERNAL_SERVER_ERROR);
 
     private final String msg;
     private final HttpStatus status;

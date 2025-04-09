@@ -1,8 +1,10 @@
 package com.bubble.buubleforprofessor.chatroom.service.impl;
 
+import com.bubble.buubleforprofessor.chatroom.doc.MessageMongo;
 import com.bubble.buubleforprofessor.chatroom.dto.ChatroomResponseDto;
 import com.bubble.buubleforprofessor.chatroom.dto.MessageResponseDto;
 import com.bubble.buubleforprofessor.chatroom.entity.Chatroom;
+import com.bubble.buubleforprofessor.chatroom.entity.ChatroomUser;
 import com.bubble.buubleforprofessor.chatroom.repository.ChatroomRepository;
 import com.bubble.buubleforprofessor.chatroom.repository.ChatroomUserRepository;
 import com.bubble.buubleforprofessor.chatroom.repository.MessageMongoRepository;
@@ -22,7 +24,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -46,46 +51,47 @@ public class ChatroomServiceImpl implements ChatroomService {
         chatroomRepository.save(chatroom);
     }
 
-    //todo queryDSL 고려해볼 것 N+1문제 필히 해결해야함.
     @Override
     @Transactional(readOnly = true)
-    public ChatroomResponseDto findByUserIdAndChatRoomId(UUID userId, int chatRoomId) {
-        if(!chatroomUserRepository.existsByUserIdAndChatroomId(userId,chatRoomId))
+    public ChatroomResponseDto findByUserIdAndChatRoomId(UUID userId, int chatroomId) {
+        if(!chatroomUserRepository.existsByUserIdAndChatroomId(userId,chatroomId))
         {
             throw new CustomException(ErrorCode.NON_EXISTENT_CHATROOM_USER);
         }
-        Chatroom chatroom= chatroomRepository.findById(chatRoomId).orElseThrow(()-> new CustomException(ErrorCode.NON_EXISTENT_CHATROOM));
+        Chatroom chatroom= chatroomRepository.findById(chatroomId).orElseThrow(()-> new CustomException(ErrorCode.NON_EXISTENT_CHATROOM));
         Professor professor = chatroom.getProfessor();
-        List<UserSimpleResponseDto> users= chatroomUserRepository.findByChatroomId(chatRoomId).stream()
+        //챗룸 유저와 유저 관계 entityGraph로 N+1 해결
+        //채팅방에 참여하는 유저 모두 반환
+        List<UserSimpleResponseDto> users= chatroomUserRepository.findByChatroomId(chatroomId).stream()
                 .map(chatroomUser -> UserSimpleResponseDto.builder()
                         .userId(chatroomUser.getUser().getId())
-                        .userName(chatroomUser.getUser().getName()).build())
+                        .userName(chatroomUser.getNickName()).build())
                 .toList();
+        //채팅방 내 메세지 모두 조회. N+1 문제를 해결하기위해 Set과 Map 이용
+        List<MessageMongo> messageMongoList = messageMongoRepository.findMessagesByChatroomId(chatroomId);
+        Set<UUID> userIdSet = messageMongoList.stream().map(MessageMongo::getUserId)
+                .collect(Collectors.toSet());
+        List<ChatroomUser> chatroomUserList= chatroomUserRepository.findByUserIdInAndChatroomId(userIdSet,chatroomId);
 
-//        List<MessageResponseDto> messages =messageRepository.findByChatroomUser_Chatroom(chatroom).stream()
-//                .map(message -> MessageResponseDto.builder()
-//                        .messageId(message.getId())
-//                        .sendUser(UserSimpleResponseDto.builder()
-//                                .userId(message.getChatroomUser().getUser().getId())
-//                                .userName(message.getChatroomUser().getUser().getName()).build())
-//                        .sendTime(message.getSendTime())
-//                        .content(message.getContent()).build())
-//                .toList();
+        Map<UUID, String> userNicknameMap = chatroomUserList.stream()
+                .collect(Collectors.toMap(cu -> cu.getUser().getId(), ChatroomUser::getNickName));
 
-        //N+1 쿼리문제를 해결하려고 보니 message에서 userName을 가지고 있어야함.
-        List<MessageResponseDto> messages = messageMongoRepository.findMessagesByChatroomId(chatRoomId).stream()
-                .map(message -> MessageResponseDto.builder()
-                        .sendUser(UserSimpleResponseDto.builder()
-                                .userId(message.getUserId())
-                                .userName(message.getUserName()).build())
-                        .sendTime(message.getSendTime())
-                        .content(message.getContent())
-                        .build()
-                ).toList();
-
+        List<MessageResponseDto> messages=messageMongoList.stream().map(
+                message -> {
+                    String nickName= userNicknameMap.getOrDefault(message.getUserId(), "Unknown User");
+                    return MessageResponseDto.builder()
+                            .sendUser(UserSimpleResponseDto.builder()
+                                    .userId(message.getUserId())
+                                    .userName(nickName)
+                                    .build())
+                            .sendTime(message.getSendTime())
+                            .content(message.getContent())
+                            .build();
+                }
+        ).toList();
 
         ChatroomResponseDto chatroomResponseDto= ChatroomResponseDto.builder()
-                .chatroomId(chatRoomId)
+                .chatroomId(chatroomId)
                 .professorDto(ProfessorResponseDto.builder()
                         .professorId(professor.getId())
                         .professorName(professor.getUser().getName())

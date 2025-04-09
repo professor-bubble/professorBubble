@@ -25,9 +25,11 @@ public class ChatroomUserServiceImpl implements ChatroomUserService {
             throw new CustomException(ErrorCode.NON_EXISTENT_CHATROOM_USER);
         }
     }
+    //todo 이를 이용한 캐싱은 변경감지가 불가능하다. 그래서 CacheEvict과 같은 방법으로 객체가 변경될 시 캐시를 삭제해 주어야함.
     @Cacheable(value = "chatroom_users", key = "#userId + '_' + #chatroomId")
     @Override
     public ChatroomUser getUserByUserIdAndChatroomId(UUID userId, int chatroomId) {
+        System.out.println("DB에서 사용자 정보를 조회합니다. userId="+userId+" chatroomId="+ chatroomId);
         ChatroomUser chatroomUser=chatroomUserRepository.findByUserIdAndChatroomId(userId,chatroomId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NON_EXISTENT_CHATROOM_USER));
         return chatroomUser;

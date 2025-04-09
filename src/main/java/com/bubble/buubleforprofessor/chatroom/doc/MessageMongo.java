@@ -11,7 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Document(collection = "Messages")
+@Document(collection = "messages")
 @NoArgsConstructor
 @Getter
 public class MessageMongo {
