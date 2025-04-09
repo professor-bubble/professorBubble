@@ -56,7 +56,7 @@ public class User {
     }
 
     //user삭제 시 order보존을 위해 cascade에서(PERSIST : 추가, MERGE : 수정만 허용) remove 제외 & 고아값 제거 방지
-    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = false)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Order> orders = new ArrayList<>();
 
 
