@@ -1,8 +1,10 @@
 package com.bubble.buubleforprofessor.user.controller;
 
 import com.bubble.buubleforprofessor.chatroom.dto.ChatroomDetailResponseDto;
+import com.bubble.buubleforprofessor.chatroom.dto.ChatroomEnterRequestDto;
 import com.bubble.buubleforprofessor.chatroom.dto.ChatroomResponseDto;
 import com.bubble.buubleforprofessor.chatroom.service.ChatroomService;
+import com.bubble.buubleforprofessor.chatroom.service.ChatroomUserService;
 import com.bubble.buubleforprofessor.skin.dto.SkinResponseDto;
 import com.bubble.buubleforprofessor.skin.service.SkinService;
 import com.bubble.buubleforprofessor.user.dto.ApprovalRequestCreateDto;
@@ -38,6 +40,7 @@ public class UserController {
     private final SkinService skinService;
     private final ChatroomService chatroomService;
     private final UserService userService;
+    private final ChatroomUserService chatroomUserService;
 
     @PostMapping()
     public String join(@ModelAttribute JoinRequestDto joinRequestDto) {
@@ -96,5 +99,15 @@ public class UserController {
     public ResponseEntity<List<ChatroomResponseDto>> getAllChatroomByUserId(@PathVariable UUID userId) {
         List<ChatroomResponseDto> chatroomResponseDtoList = chatroomService.findAllChatroomByUserId(userId);
         return ResponseEntity.ok(chatroomResponseDtoList);
+    }
+
+    //채팅방 생성(유저 최초 입장)
+    @PostMapping(value ="/{userId}/chatroom/{chatroomId}",produces = "application/json")
+    public ResponseEntity<Boolean> createChatroomUser(@PathVariable UUID userId,
+                                                      @PathVariable int chatroomId,
+                                                      @RequestBody ChatroomEnterRequestDto chatroomEnterRequestDto)
+    {
+        chatroomUserService.createChatroomUser(userId,chatroomId,chatroomEnterRequestDto);
+        return ResponseEntity.ok(true);
     }
 }
