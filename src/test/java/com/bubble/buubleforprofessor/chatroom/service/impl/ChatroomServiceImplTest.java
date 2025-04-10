@@ -1,6 +1,7 @@
 package com.bubble.buubleforprofessor.chatroom.service.impl;
 
 import com.bubble.buubleforprofessor.chatroom.dto.ChatroomDetailResponseDto;
+import com.bubble.buubleforprofessor.chatroom.dto.ChatroomEnterRequestDto;
 import com.bubble.buubleforprofessor.chatroom.dto.ChatroomResponseDto;
 import com.bubble.buubleforprofessor.chatroom.entity.Chatroom;
 import com.bubble.buubleforprofessor.chatroom.entity.ChatroomUser;
@@ -90,7 +91,7 @@ class ChatroomServiceImplTest {
                 .url("abc.png")
                 .professor(professor).build();
         professor.modifyProfessorImage(professorImage);
-        chatroomUser =new ChatroomUser(chatroom,user);
+        chatroomUser =new ChatroomUser(chatroom,user,"코딩 공부 중");
         message = Message.builder()
                         .chatroomUser(chatroomUser)
                                 .sendTime(LocalDateTime.now())
@@ -165,7 +166,7 @@ class ChatroomServiceImplTest {
     void testFindAllChatroomByUserId(){
         //given
         List<ChatroomUser> myChatrooms=new ArrayList<>();
-        ChatroomUser chatroomUser1=new ChatroomUser(chatroom,user);
+        ChatroomUser chatroomUser1=new ChatroomUser(chatroom,user,"코딩 공부 중");
         myChatrooms.add(chatroomUser1);
         when(chatroomUserRepository.findAllByUserId(user.getId())).thenReturn(myChatrooms);
         // when

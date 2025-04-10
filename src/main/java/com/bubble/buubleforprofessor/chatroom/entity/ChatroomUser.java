@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -28,10 +29,22 @@ public class ChatroomUser {
     @JoinColumn(name = "user_id",referencedColumnName = "user_id")
     private User user;
 
-    public ChatroomUser(Chatroom chatroom, User user) {
+    @Column(name="nick_name", nullable=false)
+    private String nickName;
+
+    @Column(name="joined_at", nullable=false)
+    private LocalDateTime joinedAt;
+    @Column(name="leaved_at",nullable=true)
+    private LocalDateTime leavedAt;
+
+    public ChatroomUser(Chatroom chatroom, User user, String nickName) {
         this.chatroom = chatroom;
         this.user = user;
         this.id = new ChatroomUserId(chatroom.getId(), user.getId());  // 복합 키 생성
+
+        this.nickName = nickName;
+        this.joinedAt = LocalDateTime.now();
+        this.leavedAt = null;
     }
 }
 
