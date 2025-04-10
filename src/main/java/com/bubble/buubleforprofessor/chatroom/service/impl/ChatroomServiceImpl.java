@@ -1,10 +1,10 @@
 package com.bubble.buubleforprofessor.chatroom.service.impl;
 
+import com.bubble.buubleforprofessor.chatroom.dto.ChatroomDetailResponseDto;
 import com.bubble.buubleforprofessor.chatroom.dto.ChatroomResponseDto;
 import com.bubble.buubleforprofessor.chatroom.dto.MessageDto;
 import com.bubble.buubleforprofessor.chatroom.entity.Chatroom;
 import com.bubble.buubleforprofessor.chatroom.entity.ChatroomUser;
-import com.bubble.buubleforprofessor.chatroom.entity.Message;
 import com.bubble.buubleforprofessor.chatroom.repository.ChatroomRepository;
 import com.bubble.buubleforprofessor.chatroom.repository.ChatroomUserRepository;
 import com.bubble.buubleforprofessor.chatroom.repository.MessageRepository;
@@ -14,7 +14,6 @@ import com.bubble.buubleforprofessor.global.config.ErrorCode;
 import com.bubble.buubleforprofessor.user.dto.ProfessorResponseDto;
 import com.bubble.buubleforprofessor.user.dto.UserSimpleResponseDto;
 import com.bubble.buubleforprofessor.user.entity.Professor;
-import com.bubble.buubleforprofessor.user.entity.User;
 import com.bubble.buubleforprofessor.user.repository.ProfessorRepository;
 import com.bubble.buubleforprofessor.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -50,7 +48,7 @@ public class ChatroomServiceImpl implements ChatroomService {
     //todo queryDSL 고려해볼 것 N+1문제 필히 해결해야함.
     @Override
     @Transactional(readOnly = true)
-    public ChatroomResponseDto findByUserIdAndChatRoomId(UUID userId, int chatRoomId) {
+    public ChatroomDetailResponseDto findByUserIdAndChatRoomId(UUID userId, int chatRoomId) {
         if(!chatroomUserRepository.existsByUserIdAndChatroomId(userId,chatRoomId))
         {
             throw new CustomException(ErrorCode.NON_EXISTENT_CHATROOM_USER);
@@ -72,7 +70,7 @@ public class ChatroomServiceImpl implements ChatroomService {
                         .content(message.getContent()).build())
                 .toList();
 
-        ChatroomResponseDto chatroomResponseDto= ChatroomResponseDto.builder()
+        ChatroomDetailResponseDto chatroomResponseDto= ChatroomDetailResponseDto.builder()
                 .chatroomId(chatRoomId)
                 .professorDto(ProfessorResponseDto.builder()
                         .professorId(professor.getId())
@@ -84,6 +82,25 @@ public class ChatroomServiceImpl implements ChatroomService {
                 .build();
 
         return chatroomResponseDto;
+    }
+
+    @Override
+    public List<ChatroomResponseDto> findAllChatroomByUserId(UUID userID) {
+        List<ChatroomUser> chatroomList = chatroomUserRepository.findAllByUserId(userID);
+        List<ChatroomResponseDto> chatroomResponseDtoList = chatroomList.stream()
+                .map(chatroomUser ->
+                    ChatroomResponseDto.builder()
+                            .chatroomId(chatroomUser.getChatroom().getId())
+                            .createTime(chatroomUser.getChatroom().getCreatedAt())
+                            .lastSeenAt(chatroomUser.getChatroom().getLastSeenAt())
+                            .professor(ProfessorResponseDto.builder()
+                                    .professorId(userID)
+                                    .professorName(chatroomUser.getChatroom().getProfessor().getUser().getName())
+                                    .professorImageUrl(chatroomUser.getChatroom().getProfessor().getProfessorImage().getUrl())
+                                    .build())
+                            .build()
+                ).toList();
+        return chatroomResponseDtoList;
     }
 
 }

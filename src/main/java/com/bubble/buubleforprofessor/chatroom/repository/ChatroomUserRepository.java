@@ -1,6 +1,7 @@
 package com.bubble.buubleforprofessor.chatroom.repository;
 
 import com.bubble.buubleforprofessor.chatroom.entity.ChatroomUser;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -11,4 +12,6 @@ import java.util.UUID;
 public interface ChatroomUserRepository extends JpaRepository<ChatroomUser, Long> {
     boolean existsByUserIdAndChatroomId(UUID userId, int chatroomId);
     List<ChatroomUser> findByChatroomId(int chatroomId);
+    @EntityGraph(attributePaths = {"chatroom","chatroom.professor","chatroom.professor.user"})
+    List<ChatroomUser> findAllByUserId(UUID userId);
 }

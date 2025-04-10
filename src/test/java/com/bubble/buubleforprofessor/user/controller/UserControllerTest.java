@@ -1,5 +1,6 @@
 package com.bubble.buubleforprofessor.user.controller;
 
+import com.bubble.buubleforprofessor.chatroom.dto.ChatroomDetailResponseDto;
 import com.bubble.buubleforprofessor.chatroom.dto.ChatroomResponseDto;
 import com.bubble.buubleforprofessor.chatroom.dto.MessageDto;
 import com.bubble.buubleforprofessor.chatroom.service.ChatroomService;
@@ -8,29 +9,23 @@ import com.bubble.buubleforprofessor.skin.service.SkinService;
 import com.bubble.buubleforprofessor.user.dto.ApprovalRequestCreateDto;
 import com.bubble.buubleforprofessor.user.dto.ProfessorResponseDto;
 import com.bubble.buubleforprofessor.user.dto.UserSimpleResponseDto;
-import com.bubble.buubleforprofessor.user.repository.UserRepository;
 import com.bubble.buubleforprofessor.user.service.ProfessorService;
 import com.bubble.buubleforprofessor.user.service.UserService;
-import com.bubble.buubleforprofessor.user.service.impl.ProfessorServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -191,7 +186,7 @@ class UserControllerTest {
                 .content("메시지 내용")
                 .build();
 
-        ChatroomResponseDto chatroomResponse = ChatroomResponseDto.builder()
+        ChatroomDetailResponseDto chatroomResponse = ChatroomDetailResponseDto.builder()
                 .chatroomId(chatroomId)
                 .professorDto(professorDto)
                 .createdAt(LocalDateTime.now())
@@ -243,4 +238,26 @@ class UserControllerTest {
         verify(skinService, times(1)).modifySkinStatus(userId, skinId);
     }
 
+    @WithMockUser(roles = "USER")
+    @Test
+    void testGetAllChatroomByUserId() throws Exception{
+        UUID userId = UUID.randomUUID();
+        UUID professorId = UUID.randomUUID();
+        ChatroomResponseDto chatroomResponseDto= ChatroomResponseDto.builder()
+                .chatroomId(1)
+                .lastSeenAt(Timestamp.valueOf(LocalDateTime.now()))
+                .createTime(LocalDateTime.now())
+                .professor(ProfessorResponseDto.builder()
+                        .professorId(professorId)
+                        .professorName("홍길동")
+                        .professorImageUrl("abc.jpg")
+                        .build())
+                .build();
+        when(chatroomService.findAllChatroomByUserId(userId))
+                .thenReturn(List.of(chatroomResponseDto));
+
+        mockMvc.perform(get("/api/users/{userId}/chatrooms",userId)
+                .with(csrf()))
+                .andExpect(status().isOk());
+    }
 }

@@ -1,5 +1,6 @@
 package com.bubble.buubleforprofessor.user.controller;
 
+import com.bubble.buubleforprofessor.chatroom.dto.ChatroomDetailResponseDto;
 import com.bubble.buubleforprofessor.chatroom.dto.ChatroomResponseDto;
 import com.bubble.buubleforprofessor.chatroom.service.ChatroomService;
 import com.bubble.buubleforprofessor.skin.dto.SkinResponseDto;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.UUID;
 
 @RequestMapping("/api/users")
@@ -82,11 +84,17 @@ public class UserController {
         skinService.modifySkinStatus(userId,skinId);
         return ResponseEntity.ok(true);
     }
-
+    //내 특정 채팅방 조회
     @GetMapping("/{userId}/chatroom/{chatroomId}")
-    public ResponseEntity<ChatroomResponseDto> getChatroom(@PathVariable UUID userId,
-                                                           @PathVariable int chatroomId) {
-        ChatroomResponseDto chatroomDto = chatroomService.findByUserIdAndChatRoomId(userId,chatroomId);
+    public ResponseEntity<ChatroomDetailResponseDto> getChatroom(@PathVariable UUID userId,
+                                                                 @PathVariable int chatroomId) {
+        ChatroomDetailResponseDto chatroomDto = chatroomService.findByUserIdAndChatRoomId(userId,chatroomId);
         return ResponseEntity.ok(chatroomDto);
+    }
+    //내 채팅방 리스트 조회
+    @GetMapping("/{userId}/chatrooms")
+    public ResponseEntity<List<ChatroomResponseDto>> getAllChatroomByUserId(@PathVariable UUID userId) {
+        List<ChatroomResponseDto> chatroomResponseDtoList = chatroomService.findAllChatroomByUserId(userId);
+        return ResponseEntity.ok(chatroomResponseDtoList);
     }
 }

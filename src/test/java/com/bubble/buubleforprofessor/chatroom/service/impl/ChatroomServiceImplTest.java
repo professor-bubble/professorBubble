@@ -1,5 +1,6 @@
 package com.bubble.buubleforprofessor.chatroom.service.impl;
 
+import com.bubble.buubleforprofessor.chatroom.dto.ChatroomDetailResponseDto;
 import com.bubble.buubleforprofessor.chatroom.dto.ChatroomResponseDto;
 import com.bubble.buubleforprofessor.chatroom.entity.Chatroom;
 import com.bubble.buubleforprofessor.chatroom.entity.ChatroomUser;
@@ -24,9 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -134,7 +133,7 @@ class ChatroomServiceImplTest {
         when(messageRepository.findByChatroomUser_Chatroom(chatroom)).thenReturn(Collections.emptyList());
 
         // when
-        ChatroomResponseDto response = chatroomService.findByUserIdAndChatRoomId(userId, chatRoomId);
+        ChatroomDetailResponseDto response = chatroomService.findByUserIdAndChatRoomId(userId, chatRoomId);
 
         // then
         assertNotNull(response);
@@ -159,5 +158,22 @@ class ChatroomServiceImplTest {
         verify(chatroomRepository, never()).findById(anyInt());
         verify(chatroomUserRepository, never()).findByChatroomId(anyInt());
         verify(messageRepository, never()).findByChatroomUser_Chatroom(any(Chatroom.class));
+    }
+
+    @DisplayName("유저 아이디에 해당하는 모든 채팅방 가져오기")
+    @Test
+    void testFindAllChatroomByUserId(){
+        //given
+        List<ChatroomUser> myChatrooms=new ArrayList<>();
+        ChatroomUser chatroomUser1=new ChatroomUser(chatroom,user);
+        myChatrooms.add(chatroomUser1);
+        when(chatroomUserRepository.findAllByUserId(user.getId())).thenReturn(myChatrooms);
+        // when
+        List<ChatroomResponseDto> chatroomResponseDtoList = chatroomService.findAllChatroomByUserId(user.getId());
+
+        //then
+        assertNotNull(chatroomResponseDtoList);
+        assertEquals(1,chatroomResponseDtoList.size());
+        assertEquals(chatroomUser1.getChatroom().getId(),chatroomResponseDtoList.get(0).getChatroomId());
     }
 }
