@@ -9,4 +9,7 @@ public class JoinRequestDto {
     String loginId;
     String password;
     String userName;
+    String email;
+    String phoneNumber;
+    int universityId;
 }

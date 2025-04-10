@@ -3,18 +3,21 @@ package com.bubble.buubleforprofessor.user.dto;
 import com.bubble.buubleforprofessor.user.entity.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
-public class CustomUserDetails implements UserDetails {
+public class CustomPrincipal implements OAuth2User, UserDetails {
 
     private final User user;
 
-    public CustomUserDetails(User user) {
+    public CustomPrincipal(User user) {
         this.user = user;
     }
 
+    // Custom
     public String getUserId() {
         return user.getId().toString();
     }
@@ -23,21 +26,32 @@ public class CustomUserDetails implements UserDetails {
         return user.getRole().getName();
     }
 
+    // 공통
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-
-        Collection<GrantedAuthority> collection = new ArrayList<>();
-
-        collection.add(new GrantedAuthority() {
+        Collection<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new GrantedAuthority() {
             @Override
             public String getAuthority() {
                 return user.getRole().getName();
             }
         });
 
-        return collection;
+        return authorities;
     }
 
+    // OAuth2User
+    @Override
+    public Map<String, Object> getAttributes() {
+        return Map.of();
+    }
+
+    @Override
+    public String getName() {
+        return user.getName();
+    }
+
+    // UserDetails
     @Override
     public String getPassword() {
         return user.getPassword();
@@ -68,4 +82,3 @@ public class CustomUserDetails implements UserDetails {
         return true;
     }
 }
-

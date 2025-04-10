@@ -6,11 +6,10 @@ import com.bubble.buubleforprofessor.skin.dto.SkinResponseDto;
 import com.bubble.buubleforprofessor.skin.service.SkinService;
 import com.bubble.buubleforprofessor.user.dto.ApprovalRequestCreateDto;
 
+import com.bubble.buubleforprofessor.user.dto.CustomPrincipal;
 import com.bubble.buubleforprofessor.user.service.ProfessorService;
 import jakarta.validation.Valid;
-import com.bubble.buubleforprofessor.user.dto.CustomUserDetails;
 import com.bubble.buubleforprofessor.user.dto.JoinRequestDto;
-import com.bubble.buubleforprofessor.user.dto.LoginRequestDto;
 import com.bubble.buubleforprofessor.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,8 +20,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -40,15 +37,14 @@ public class UserController {
     private final ChatroomService chatroomService;
     private final UserService userService;
 
-    @GetMapping("/user")
-    public String mainPage(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        return "user controller - " + userDetails.getUserId() + " - " + userDetails.getPassword() + " - " + userDetails.getRole();
+    @PostMapping()
+    public String join(@ModelAttribute JoinRequestDto joinRequestDto) {
+        return userService.createUser(joinRequestDto);
     }
 
-    @PostMapping("/join")
-    public String join(JoinRequestDto joinRequestDto) {
-
-        return userService.createUser(joinRequestDto);
+    @GetMapping("/user")
+    public String mainPage(@AuthenticationPrincipal CustomPrincipal customPrincipal) {
+        return "user controller - " + customPrincipal.getUserId() + " - " + customPrincipal.getUsername() + " - " + customPrincipal.getRole();
     }
 
 
