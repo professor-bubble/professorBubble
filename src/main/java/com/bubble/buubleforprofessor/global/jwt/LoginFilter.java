@@ -6,7 +6,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -23,15 +22,14 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUtil;
+    private final Long expirationTime;
 
-    @Value("${jwt.expirationtime}")
-    private Long expirationTime;
-
-    public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil) {
+    public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil, Long expirationTime) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
+        this.expirationTime = expirationTime;
 
-        setFilterProcessesUrl("api/auth/token");
+        setFilterProcessesUrl("/api/auth/token");
     }
 
     @Override
