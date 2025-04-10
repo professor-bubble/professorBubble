@@ -7,9 +7,9 @@ import com.bubble.buubleforprofessor.skin.dto.SkinResponseDto;
 import com.bubble.buubleforprofessor.skin.service.SkinService;
 import com.bubble.buubleforprofessor.user.dto.ApprovalRequestCreateDto;
 
+import com.bubble.buubleforprofessor.user.dto.CustomPrincipal;
 import com.bubble.buubleforprofessor.user.service.ProfessorService;
 import jakarta.validation.Valid;
-import com.bubble.buubleforprofessor.user.dto.CustomUserDetails;
 import com.bubble.buubleforprofessor.user.dto.JoinRequestDto;
 import com.bubble.buubleforprofessor.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -39,15 +39,14 @@ public class UserController {
     private final ChatroomService chatroomService;
     private final UserService userService;
 
-    @GetMapping("/user")
-    public String mainPage(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        return "user controller - " + userDetails.getUserId() + " - " + userDetails.getPassword() + " - " + userDetails.getRole();
+    @PostMapping()
+    public String join(@ModelAttribute JoinRequestDto joinRequestDto) {
+        return userService.createUser(joinRequestDto);
     }
 
-    @PostMapping("/join")
-    public String join(JoinRequestDto joinRequestDto) {
-
-        return userService.createUser(joinRequestDto);
+    @GetMapping("/user")
+    public String mainPage(@AuthenticationPrincipal CustomPrincipal customPrincipal) {
+        return "user controller - " + customPrincipal.getUserId() + " - " + customPrincipal.getUsername() + " - " + customPrincipal.getRole();
     }
 
 

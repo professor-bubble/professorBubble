@@ -1,6 +1,6 @@
 package com.bubble.buubleforprofessor.user.service.impl;
 
-import com.bubble.buubleforprofessor.user.dto.CustomUserDetails;
+import com.bubble.buubleforprofessor.user.dto.CustomPrincipal;
 import com.bubble.buubleforprofessor.user.entity.User;
 import com.bubble.buubleforprofessor.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +24,6 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
             throw new UsernameNotFoundException(username);
         }
 
-        return new CustomUserDetails(user);
+        return new CustomPrincipal(user);
     }
 }
