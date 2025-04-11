@@ -39,9 +39,11 @@ public class User {
     private String email;
 
     @ManyToOne
+    @JoinColumn(name = "university_id")
     private University university;
 
     @ManyToOne
+    @JoinColumn(name ="role_id")
     private Role role;
 
     public void modifyRole(Role role) {

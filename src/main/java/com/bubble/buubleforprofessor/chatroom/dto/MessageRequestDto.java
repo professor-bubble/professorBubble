@@ -12,4 +12,5 @@ public class MessageRequestDto {
     private UUID userId;
     private String userName;
     private String content;
+    private String role;
 }

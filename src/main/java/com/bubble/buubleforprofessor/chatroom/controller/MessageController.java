@@ -34,6 +34,19 @@ public class MessageController {
         simpleDto.setType(message1.getMessageType());
         simpleDto.setContent(message1.getContent());
         simpleDto.setCreateAt(message1.getSendTime());
-        messagingTemplate.convertAndSend("/sub/chatroom/" + message.getChatRoomId(), simpleDto);
+        //유저는 채팅방 구독 , 자기자신 구독.
+        //교수는 자기자신 구독
+        if(message.getRole().equals("PROFESSOR"))
+        {
+            //교수가 보내는곳. 채팅방과(유저 전체) 교수(자신)
+            messagingTemplate.convertAndSend("/sub/chatroom/" + message.getChatRoomId(), simpleDto);
+            messagingTemplate.convertAndSend("/sub/chatroom/" + message.getChatRoomId()+"/professor", simpleDto);
+        }
+        else
+        {
+            //유저가 보내는곳.교수 유저(자신)
+            messagingTemplate.convertAndSend("/sub/chatroom/" + message.getChatRoomId()+"/professor", simpleDto);
+            messagingTemplate.convertAndSend("/sub/user/" + message.getUserId(),simpleDto);
+        }
     }
 }
