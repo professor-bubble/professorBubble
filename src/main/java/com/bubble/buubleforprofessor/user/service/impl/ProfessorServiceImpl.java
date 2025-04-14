@@ -2,6 +2,9 @@ package com.bubble.buubleforprofessor.user.service.impl;
 
 
 
+import com.bubble.buubleforprofessor.chatroom.entity.Chatroom;
+import com.bubble.buubleforprofessor.chatroom.entity.ChatroomUser;
+import com.bubble.buubleforprofessor.chatroom.repository.ChatroomUserRepository;
 import com.bubble.buubleforprofessor.chatroom.service.ChatroomService;
 import com.bubble.buubleforprofessor.global.config.CustomException;
 import com.bubble.buubleforprofessor.global.config.ErrorCode;
@@ -35,6 +38,7 @@ public class ProfessorServiceImpl implements ProfessorService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final ChatroomService chatroomService;
+    private final ChatroomUserRepository chatroomUserRepository;
 
     //todo fetch type eager로 가져오면됨. queryDSL과 성능비교? ngrinder
 //    교수 승인 요청 리스트 반환
@@ -78,7 +82,10 @@ public class ProfessorServiceImpl implements ProfessorService {
 
 
         // 교수 승인하면 채팅방 생성
-        chatroomService.createChatroom(professor);
+        Chatroom chatroom =chatroomService.createChatroom(professor);
+
+        ChatroomUser chatroomUser=new ChatroomUser(chatroom,user,user.getName());
+        chatroomUserRepository.save(chatroomUser);
 
     }
 //  승인거절하면 교수데이터 삭제

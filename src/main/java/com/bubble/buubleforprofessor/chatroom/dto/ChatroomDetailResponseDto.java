@@ -14,6 +14,6 @@ public class ChatroomDetailResponseDto {
     private int chatroomId;
     private ProfessorResponseDto professorDto;
     private LocalDateTime createdAt;
-    private List<UserSimpleResponseDto> users;
+    private long users;
     private List<MessageDto> messages;
 }

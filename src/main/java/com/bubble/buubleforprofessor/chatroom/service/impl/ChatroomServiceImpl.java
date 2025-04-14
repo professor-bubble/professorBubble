@@ -36,16 +36,17 @@ public class ChatroomServiceImpl implements ChatroomService {
 
     @Override
     @Transactional
-    public void createChatroom(Professor professor) {
+    public Chatroom createChatroom(Professor professor) {
         if(chatroomRepository.existsChatroomByProfessor(professor))
         {
             throw new CustomException(ErrorCode.EXISTENT_CHATROOM);
         }
         Chatroom chatroom = new Chatroom(professor);
-        chatroomRepository.save(chatroom);
+        return chatroomRepository.save(chatroom);
     }
 
-    //todo queryDSL 고려해볼 것 N+1문제 필히 해결해야함.
+    //채팅방 상세 조회 메세지, 유저들 등
+    //todo 리팩토링 필요할 듯
     @Override
     @Transactional(readOnly = true)
     public ChatroomDetailResponseDto findByUserIdAndChatRoomId(UUID userId, int chatRoomId) {
@@ -55,20 +56,34 @@ public class ChatroomServiceImpl implements ChatroomService {
         }
         Chatroom chatroom= chatroomRepository.findById(chatRoomId).orElseThrow(()-> new CustomException(ErrorCode.NON_EXISTENT_CHATROOM));
         Professor professor = chatroom.getProfessor();
-        List<UserSimpleResponseDto> users= chatroomUserRepository.findByChatroomId(chatRoomId).stream()
-                .map(chatroomUser -> UserSimpleResponseDto.builder()
-                        .userId(chatroomUser.getUser().getId())
-                        .userName(chatroomUser.getUser().getName()).build())
-                .toList();
-        List<MessageDto> messages =messageRepository.findByChatroomUser_Chatroom(chatroom).stream()
-                .map(message -> MessageDto.builder()
-                        .messageId(message.getId())
-                        .sendUser(UserSimpleResponseDto.builder()
-                                .userId(message.getChatroomUser().getUser().getId())
-                                .userName(message.getChatroomUser().getUser().getName()).build())
-                        .sendTime(message.getSendTime())
-                        .content(message.getContent()).build())
-                .toList();
+        long userCount= chatroomUserRepository.countByChatroomId(chatRoomId);
+        List<MessageDto> messages;
+        //교수가 채팅방 들어간 것이라면 채팅방 내 모든 데이터
+        if(professorRepository.existsById(userId))
+        {
+            messages =messageRepository.findByChatroomUser_Chatroom(chatroom).stream()
+                    .map(message -> MessageDto.builder()
+                            .messageId(message.getId())
+                            .sendUser(UserSimpleResponseDto.builder()
+                                    .userId(message.getChatroomUser().getUser().getId())
+                                    .userName(message.getChatroomUser().getUser().getName()).build())
+                            .sendTime(message.getSendTime())
+                            .content(message.getContent()).build())
+                    .toList();
+        }
+        //유저라면 유저와 교수의 데이터만
+        else
+        {
+            messages =messageRepository.findByChatroomUser_ChatroomAndChatroomUser_User_IdIn(chatroom,List.of(userId,professor.getId())).stream()
+                    .map(message -> MessageDto.builder()
+                            .messageId(message.getId())
+                            .sendUser(UserSimpleResponseDto.builder()
+                                    .userId(message.getChatroomUser().getUser().getId())
+                                    .userName(message.getChatroomUser().getUser().getName()).build())
+                            .sendTime(message.getSendTime())
+                            .content(message.getContent()).build())
+                    .toList();
+        }
 
         ChatroomDetailResponseDto chatroomResponseDto= ChatroomDetailResponseDto.builder()
                 .chatroomId(chatRoomId)
@@ -77,13 +92,13 @@ public class ChatroomServiceImpl implements ChatroomService {
                         .professorName(professor.getUser().getName())
                         .professorImageUrl(professor.getProfessorImage().getUrl()).build())
                 .createdAt(LocalDateTime.now())
-                .users(users)
+                .users(userCount)
                 .messages(messages)
                 .build();
 
         return chatroomResponseDto;
     }
-
+    //채팅방 리스트 조회
     @Override
     public List<ChatroomResponseDto> findAllChatroomByUserId(UUID userID) {
         List<ChatroomUser> chatroomList = chatroomUserRepository.findAllByUserId(userID);

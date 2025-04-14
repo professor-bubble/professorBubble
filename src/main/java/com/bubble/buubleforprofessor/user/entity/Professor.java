@@ -44,7 +44,8 @@ public class Professor {
     }
 
     @Builder
-    public Professor(User user, String description, int professorNum, boolean isApproved, String department) {
+    public Professor(UUID id,User user, String description, int professorNum, boolean isApproved, String department) {
+        this.id=id;
         this.user = user;
         this.description = description;
         this.professorNum = professorNum;

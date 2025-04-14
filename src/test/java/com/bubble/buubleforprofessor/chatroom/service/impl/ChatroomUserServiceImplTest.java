@@ -9,6 +9,7 @@ import com.bubble.buubleforprofessor.university.entity.University;
 import com.bubble.buubleforprofessor.user.entity.Professor;
 import com.bubble.buubleforprofessor.user.entity.Role;
 import com.bubble.buubleforprofessor.user.entity.User;
+import com.bubble.buubleforprofessor.user.repository.ProfessorRepository;
 import com.bubble.buubleforprofessor.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -42,6 +43,9 @@ class ChatroomUserServiceImplTest {
 
     @InjectMocks
     private ChatroomUserServiceImpl chatroomUserService;
+
+    @Mock
+    private ProfessorRepository professorRepository;
 
     @BeforeEach
     void setUp(){

@@ -1,5 +1,6 @@
 package com.bubble.buubleforprofessor.user.controller;
 
+import com.bubble.buubleforprofessor.chatroom.service.ChatroomService;
 import com.bubble.buubleforprofessor.user.dto.ApprovalRequestDto;
 import com.bubble.buubleforprofessor.user.service.ProfessorService;
 import com.bubble.buubleforprofessor.user.service.UserService;
