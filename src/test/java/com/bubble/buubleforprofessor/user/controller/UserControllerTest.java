@@ -198,7 +198,7 @@ class UserControllerTest {
                 .chatroomId(chatroomId)
                 .professorDto(professorDto)
                 .createdAt(LocalDateTime.now())
-                .users(Collections.singletonList(userDto))
+                .users(1)
                 .messages(Collections.singletonList(messageDto))
                 .build();
 
@@ -213,8 +213,7 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.professorDto.professorId").value(professorDto.getProfessorId().toString()))
                 .andExpect(jsonPath("$.professorDto.professorName").value(professorDto.getProfessorName()))
                 .andExpect(jsonPath("$.professorDto.professorImageUrl").value(professorDto.getProfessorImageUrl()))
-                .andExpect(jsonPath("$.users[0].userId").value(userDto.getUserId().toString()))
-                .andExpect(jsonPath("$.users[0].userName").value(userDto.getUserName()))
+                .andExpect(jsonPath("$.users").value(1))
                 .andExpect(jsonPath("$.messages[0].messageId").value(messageDto.getMessageId()))
                 .andExpect(jsonPath("$.messages[0].sendUser.userId").value(userDto.getUserId().toString()))
                 .andExpect(jsonPath("$.messages[0].sendUser.userName").value(userDto.getUserName()))

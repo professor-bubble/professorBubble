@@ -56,11 +56,7 @@ public class ChatroomServiceImpl implements ChatroomService {
         }
         Chatroom chatroom= chatroomRepository.findById(chatRoomId).orElseThrow(()-> new CustomException(ErrorCode.NON_EXISTENT_CHATROOM));
         Professor professor = chatroom.getProfessor();
-        List<UserSimpleResponseDto> users= chatroomUserRepository.findByChatroomId(chatRoomId).stream()
-                .map(chatroomUser -> UserSimpleResponseDto.builder()
-                        .userId(chatroomUser.getUser().getId())
-                        .userName(chatroomUser.getUser().getName()).build())
-                .toList();
+        long userCount= chatroomUserRepository.countByChatroomId(chatRoomId);
         List<MessageDto> messages;
         //교수가 채팅방 들어간 것이라면 채팅방 내 모든 데이터
         if(professorRepository.existsById(userId))
@@ -96,7 +92,7 @@ public class ChatroomServiceImpl implements ChatroomService {
                         .professorName(professor.getUser().getName())
                         .professorImageUrl(professor.getProfessorImage().getUrl()).build())
                 .createdAt(LocalDateTime.now())
-                .users(users)
+                .users(userCount)
                 .messages(messages)
                 .build();
 

@@ -137,7 +137,6 @@ class ChatroomServiceImplTest {
 
         verify(chatroomUserRepository, times(1)).existsByUserIdAndChatroomId(userId, chatRoomId);
         verify(chatroomRepository, never()).findById(anyInt());
-        verify(chatroomUserRepository, never()).findByChatroomId(anyInt());
         verify(messageRepository, never()).findByChatroomUser_Chatroom(any(Chatroom.class));
     }
 
@@ -146,7 +145,7 @@ class ChatroomServiceImplTest {
     void testFindByUserIdAndChatRoomId_AsProfessor() {
         when(chatroomUserRepository.existsByUserIdAndChatroomId(userId, chatRoomId)).thenReturn(true);
         when(chatroomRepository.findById(chatRoomId)).thenReturn(Optional.of(chatroom));
-        when(chatroomUserRepository.findByChatroomId(chatRoomId)).thenReturn(List.of(chatroomUser));
+        when(chatroomUserRepository.countByChatroomId(chatRoomId)).thenReturn(1L);
         when(professorRepository.existsById(userId)).thenReturn(true);
         when(messageRepository.findByChatroomUser_Chatroom(chatroom)).thenReturn(List.of(message));
 
@@ -155,7 +154,6 @@ class ChatroomServiceImplTest {
         assertNotNull(result);
         assertEquals(chatRoomId, result.getChatroomId());
         assertEquals("Professor Kim", result.getProfessorDto().getProfessorName());
-        assertEquals(1, result.getUsers().size());
         assertEquals(1, result.getMessages().size());
     }
 
@@ -166,8 +164,7 @@ class ChatroomServiceImplTest {
 
         when(chatroomUserRepository.existsByUserIdAndChatroomId(studentId, chatRoomId)).thenReturn(true);
         when(chatroomRepository.findById(chatRoomId)).thenReturn(Optional.of(chatroom));
-        when(chatroomUserRepository.findByChatroomId(chatRoomId)).thenReturn(List.of(chatroomUser));
-        when(professorRepository.existsById(studentId)).thenReturn(false);
+        when(chatroomUserRepository.countByChatroomId(chatRoomId)).thenReturn(1L);
         when(messageRepository.findByChatroomUser_ChatroomAndChatroomUser_User_IdIn(eq(chatroom), anyList()))
                 .thenReturn(List.of(message));
 
