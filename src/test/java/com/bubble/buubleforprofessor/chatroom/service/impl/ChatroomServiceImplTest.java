@@ -78,6 +78,7 @@ class ChatroomServiceImplTest {
 
         // Professor 객체 생성
         professor = Professor.builder()
+                .id(userId)
                 .user(user)
                 .description("Computer Science Professor")
                 .professorNum(12345)
@@ -124,27 +125,6 @@ class ChatroomServiceImplTest {
         verify(chatroomRepository, never()).save(any(Chatroom.class));
     }
 
-    @DisplayName("채팅방 사용자 존재 시 채팅방 정보 조회 성공 테스트")
-    @Test
-    void testFindByUserIdAndChatRoomId_Success() {
-        // given
-        when(chatroomUserRepository.existsByUserIdAndChatroomId(userId, chatRoomId)).thenReturn(true);
-        when(chatroomRepository.findById(chatRoomId)).thenReturn(Optional.of(chatroom));
-        when(chatroomUserRepository.findByChatroomId(chatRoomId)).thenReturn(Collections.emptyList());
-        when(messageRepository.findByChatroomUser_Chatroom(chatroom)).thenReturn(Collections.emptyList());
-
-        // when
-        ChatroomDetailResponseDto response = chatroomService.findByUserIdAndChatRoomId(userId, chatRoomId);
-
-        // then
-        assertNotNull(response);
-        assertEquals(chatRoomId, response.getChatroomId());
-        verify(chatroomUserRepository, times(1)).existsByUserIdAndChatroomId(userId, chatRoomId);
-        verify(chatroomRepository, times(1)).findById(chatRoomId);
-        verify(chatroomUserRepository, times(1)).findByChatroomId(chatRoomId);
-        verify(messageRepository, times(1)).findByChatroomUser_Chatroom(chatroom);
-    }
-
     @DisplayName("채팅방 사용자 존재하지 않을 시 예외 발생 테스트")
     @Test
     void testFindByUserIdAndChatRoomId_UserNotInChatroom() {
@@ -161,20 +141,64 @@ class ChatroomServiceImplTest {
         verify(messageRepository, never()).findByChatroomUser_Chatroom(any(Chatroom.class));
     }
 
-    @DisplayName("유저 아이디에 해당하는 모든 채팅방 가져오기")
     @Test
-    void testFindAllChatroomByUserId(){
-        //given
-        List<ChatroomUser> myChatrooms=new ArrayList<>();
-        ChatroomUser chatroomUser1=new ChatroomUser(chatroom,user,"코딩 공부 중");
-        myChatrooms.add(chatroomUser1);
-        when(chatroomUserRepository.findAllByUserId(user.getId())).thenReturn(myChatrooms);
-        // when
-        List<ChatroomResponseDto> chatroomResponseDtoList = chatroomService.findAllChatroomByUserId(user.getId());
+    @DisplayName("교수인 경우 채팅방 상세 조회 성공")
+    void testFindByUserIdAndChatRoomId_AsProfessor() {
+        when(chatroomUserRepository.existsByUserIdAndChatroomId(userId, chatRoomId)).thenReturn(true);
+        when(chatroomRepository.findById(chatRoomId)).thenReturn(Optional.of(chatroom));
+        when(chatroomUserRepository.findByChatroomId(chatRoomId)).thenReturn(List.of(chatroomUser));
+        when(professorRepository.existsById(userId)).thenReturn(true);
+        when(messageRepository.findByChatroomUser_Chatroom(chatroom)).thenReturn(List.of(message));
 
-        //then
-        assertNotNull(chatroomResponseDtoList);
-        assertEquals(1,chatroomResponseDtoList.size());
-        assertEquals(chatroomUser1.getChatroom().getId(),chatroomResponseDtoList.get(0).getChatroomId());
+        ChatroomDetailResponseDto result = chatroomService.findByUserIdAndChatRoomId(userId, chatRoomId);
+
+        assertNotNull(result);
+        assertEquals(chatRoomId, result.getChatroomId());
+        assertEquals("Professor Kim", result.getProfessorDto().getProfessorName());
+        assertEquals(1, result.getUsers().size());
+        assertEquals(1, result.getMessages().size());
     }
+
+    @Test
+    @DisplayName("교수가 아닌 경우 메시지 제한 조회 성공")
+    void testFindByUserIdAndChatRoomId_AsStudent() {
+        UUID studentId = UUID.randomUUID();
+
+        when(chatroomUserRepository.existsByUserIdAndChatroomId(studentId, chatRoomId)).thenReturn(true);
+        when(chatroomRepository.findById(chatRoomId)).thenReturn(Optional.of(chatroom));
+        when(chatroomUserRepository.findByChatroomId(chatRoomId)).thenReturn(List.of(chatroomUser));
+        when(professorRepository.existsById(studentId)).thenReturn(false);
+        when(messageRepository.findByChatroomUser_ChatroomAndChatroomUser_User_IdIn(eq(chatroom), anyList()))
+                .thenReturn(List.of(message));
+
+        ChatroomDetailResponseDto result = chatroomService.findByUserIdAndChatRoomId(studentId, chatRoomId);
+
+        assertNotNull(result);
+        assertEquals(1, result.getMessages().size());
+    }
+
+    @Test
+    @DisplayName("채팅방 리스트 조회 테스트")
+    void testFindAllChatroomByUserId() {
+        List<ChatroomUser> chatroomUsers = List.of(chatroomUser);
+
+        when(chatroomUserRepository.findAllByUserId(userId)).thenReturn(chatroomUsers);
+
+        // when
+        List<ChatroomResponseDto> response = chatroomService.findAllChatroomByUserId(userId);
+
+        // then
+        assertNotNull(response);
+        assertEquals(1, response.size());
+        ChatroomResponseDto dto = response.get(0);
+        assertEquals(chatroom.getId(), dto.getChatroomId());
+        assertEquals(chatroom.getCreatedAt(), dto.getCreateTime());
+        assertEquals(chatroom.getLastSeenAt(), dto.getLastSeenAt());
+        assertEquals(professor.getUser().getName(), dto.getProfessor().getProfessorName());
+        assertEquals(professorImage.getUrl(), dto.getProfessor().getProfessorImageUrl());
+
+        verify(chatroomUserRepository, times(1)).findAllByUserId(userId);
+    }
+
+
 }
