@@ -4,6 +4,7 @@ import com.bubble.buubleforprofessor.university.entity.University;
 import com.bubble.buubleforprofessor.user.converter.UUIDConverter;
 import com.bubble.buubleforprofessor.user.dto.JoinRequestDto;
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -33,7 +34,7 @@ public class User {
     private Timestamp lastLoginAt;
     @Column(length = 20, nullable = false)
     private String name;
-    @Column(length = 15, nullable = false,unique = true)
+    @Column(length = 15, nullable = false, unique = true)
     private String phoneNumber;
     @Column(length = 50, nullable = false,unique = true)
     private String email;

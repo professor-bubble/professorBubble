@@ -38,7 +38,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping()
-    public String join(@ModelAttribute JoinRequestDto joinRequestDto) {
+    public String join(@Valid @ModelAttribute JoinRequestDto joinRequestDto) {
         return userService.createUser(joinRequestDto);
     }
 
