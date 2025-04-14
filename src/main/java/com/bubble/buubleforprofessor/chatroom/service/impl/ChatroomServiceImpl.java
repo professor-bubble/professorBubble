@@ -36,13 +36,13 @@ public class ChatroomServiceImpl implements ChatroomService {
 
     @Override
     @Transactional
-    public void createChatroom(Professor professor) {
+    public Chatroom createChatroom(Professor professor) {
         if(chatroomRepository.existsChatroomByProfessor(professor))
         {
             throw new CustomException(ErrorCode.EXISTENT_CHATROOM);
         }
         Chatroom chatroom = new Chatroom(professor);
-        chatroomRepository.save(chatroom);
+        return chatroomRepository.save(chatroom);
     }
 
     //todo queryDSL 고려해볼 것 N+1문제 필히 해결해야함.

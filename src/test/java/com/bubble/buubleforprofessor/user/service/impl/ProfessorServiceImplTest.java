@@ -1,5 +1,7 @@
 package com.bubble.buubleforprofessor.user.service.impl;
 
+import com.bubble.buubleforprofessor.chatroom.entity.Chatroom;
+import com.bubble.buubleforprofessor.chatroom.repository.ChatroomUserRepository;
 import com.bubble.buubleforprofessor.chatroom.service.ChatroomService;
 import com.bubble.buubleforprofessor.global.config.CustomException;
 import com.bubble.buubleforprofessor.global.config.ErrorCode;
@@ -50,6 +52,9 @@ class ProfessorServiceImplTest {
     @InjectMocks
     private ProfessorServiceImpl professorService;
 
+    @Mock
+    private ChatroomUserRepository chatroomUserRepository;
+
     private UUID userId;
     private Professor professor;
     private User user;
@@ -88,7 +93,9 @@ class ProfessorServiceImplTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(spyUser)); // spyUser 사용
         when(roleRepository.findByName("ROLE_PROFESSOR")).thenReturn(Optional.of(professorRole));
 
-        doNothing().when(chatroomService).createChatroom(professor);
+        Chatroom chatroom=new Chatroom(professor);
+
+        when(chatroomService.createChatroom(professor)).thenReturn(chatroom);
 
         // when
         professorService.setApprovalStatus(userId);
