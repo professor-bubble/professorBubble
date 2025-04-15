@@ -13,19 +13,17 @@ public class RefreshToken {
     private long id;
 
     private String username;
-    private String refreshToken;
+    private String refresh;
     private String expiration;
 
-    public RefreshToken(String username, String refreshToken, String expiration) {
+    public RefreshToken(String username, String refresh, String expiration) {
         this.username = username;
-        this.refreshToken = refreshToken;
+        this.refresh = refresh;
         this.expiration = expiration;
     }
 
-    public RefreshToken updateRefreshToken(String refreshToken, String expiration) {
-        this.refreshToken = refreshToken;
+    public void updateRefreshToken(String refresh, String expiration) {
+        this.refresh = refresh;
         this.expiration = expiration;
-
-        return this;
     }
 }

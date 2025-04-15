@@ -28,7 +28,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     @Transactional
     public void updateRefreshToken(String username, String refresh, Long expiredMs) {
-        Optional<RefreshToken> optionalRefresh = refreshTokenRepository.findByRefreshToken(refresh);
+        Optional<RefreshToken> optionalRefresh = refreshTokenRepository.findByRefresh(refresh);
 
         if (optionalRefresh.isEmpty()) {
             throw new CustomException(ErrorCode.USER_UNAUTHORIZED);
@@ -36,6 +36,6 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
         Date date = new Date(System.currentTimeMillis()+ expiredMs);
 
-        RefreshToken refreshToken = optionalRefresh.get().updateRefreshToken(refresh, date.toString());
+        optionalRefresh.get().updateRefreshToken(refresh, date.toString());
     }
 }
