@@ -2,6 +2,7 @@ package com.bubble.buubleforprofessor.chatroom.service.impl;
 
 import com.bubble.buubleforprofessor.chatroom.doc.MessageMongo;
 import com.bubble.buubleforprofessor.chatroom.dto.MessageRequestDto;
+import com.bubble.buubleforprofessor.chatroom.dto.MessageSimpleDto;
 import com.bubble.buubleforprofessor.chatroom.entity.ChatroomUser;
 import com.bubble.buubleforprofessor.chatroom.entity.Message;
 import com.bubble.buubleforprofessor.chatroom.entity.MessageImage;
@@ -13,8 +14,10 @@ import com.bubble.buubleforprofessor.chatroom.service.ChatroomUserService;
 import com.bubble.buubleforprofessor.chatroom.service.MessageService;
 import com.bubble.buubleforprofessor.global.config.CustomException;
 import com.bubble.buubleforprofessor.global.config.ErrorCode;
+import com.vane.badwordfiltering.BadWordFiltering;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,6 +45,10 @@ public class MessageServiceImpl implements MessageService {
     private final MessageMongoRepository messageMongoRepository;
 
     private final MessageImageRepository messageImageRepository;
+    private final SimpMessageSendingOperations messagingTemplate;
+    private final BadWordFiltering badWordFiltering;
+
+
     @Override
     public MessageMongo save(MessageRequestDto message) {
         String content = message.getContent();
@@ -104,6 +111,33 @@ public class MessageServiceImpl implements MessageService {
         return messageMongoRepository.save(messageMongo);
     }
 
+    @Override
+    public void send(int chatroomId, String userRole,MessageSimpleDto simpleDto) {
+        //유저는 채팅방 구독 , 자기자신 구독.
+        //교수는 자기자신 구독
+        if(userRole.equals("PROFESSOR"))
+        {
+            //교수가 보내는곳. 채팅방과(유저 전체) 교수(자신)
+            messagingTemplate.convertAndSend("/sub/chatroom/" + chatroomId, simpleDto);
+            messagingTemplate.convertAndSend("/sub/chatroom/" + chatroomId+"/professor", simpleDto);
+        }
+        else
+        {
+            //유저가 보내는곳.교수 유저(자신)
+            messagingTemplate.convertAndSend("/sub/chatroom/" + chatroomId+"/professor", simpleDto);
+            messagingTemplate.convertAndSend("/sub/user/" +simpleDto.getUserId(),simpleDto);
+        }
+    }
+    @Override
+    public MessageRequestDto filtering(MessageRequestDto messageRequestDto)
+    {
+        if(badWordFiltering.blankCheck(messageRequestDto.getContent()))
+        {
+            String changeContent= badWordFiltering.change(messageRequestDto.getContent());
+            messageRequestDto.setContent(changeContent);
+        }
+        return messageRequestDto;
+    }
     @Scheduled(fixedRate = 300000)
     public void transferMessagesToRdb() {
         log.info("transferMessagesToRdb 시작: {}", LocalDateTime.now());
@@ -166,6 +200,7 @@ public class MessageServiceImpl implements MessageService {
 
         messageImageRepository.saveAll(messageImages);
     }
+
 
 
 }

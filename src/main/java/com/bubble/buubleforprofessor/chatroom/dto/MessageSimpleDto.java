@@ -5,9 +5,11 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 public class MessageSimpleDto {
+    private UUID userId;
     private String userName;
     private Message.MessageType type;
     private String content;
