@@ -1,12 +1,13 @@
 package com.bubble.buubleforprofessor.global.config;
 
+import com.bubble.buubleforprofessor.auth.service.RefreshTokenService;
+import com.bubble.buubleforprofessor.global.jwt.CookieUtil;
 import com.bubble.buubleforprofessor.global.jwt.JWTFilter;
 import com.bubble.buubleforprofessor.global.jwt.JWTUtil;
 import com.bubble.buubleforprofessor.global.jwt.LoginFilter;
 import com.bubble.buubleforprofessor.global.oauth2.CustomSuccessHandler;
 import com.bubble.buubleforprofessor.user.service.impl.CustomOAuth2UserServiceImpl;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,12 +26,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JWTUtil jwtUtil;
+    private final CookieUtil cookieUtil;
     private final AuthenticationConfiguration authenticationConfiguration;
     private final CustomOAuth2UserServiceImpl customOAuth2UserService;
     private final CustomSuccessHandler customSuccessHandler;
-
-    @Value("${jwt.expirationtime}")
-    private Long expirationTime;
+    private final RefreshTokenService refreshTokenService;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
@@ -38,7 +38,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, RefreshTokenService refreshTokenService) throws Exception {
 
         http
                 .csrf(auth -> auth.disable());
@@ -55,16 +55,14 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 );
 
-//        // JWT 필터 등록
-//        http
-//                .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
-
+        // JWT 필터 등록
         http
+//                .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
                 .addFilterAfter(new JWTFilter(jwtUtil), OAuth2LoginAuthenticationFilter.class);
 
         // loginFilter 등록
         http
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, expirationTime), UsernamePasswordAuthenticationFilter.class);
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, cookieUtil, refreshTokenService), UsernamePasswordAuthenticationFilter.class);
 
         // OAuth2 설정
         http

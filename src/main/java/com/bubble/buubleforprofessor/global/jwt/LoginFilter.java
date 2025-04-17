@@ -1,11 +1,13 @@
 package com.bubble.buubleforprofessor.global.jwt;
 
+import com.bubble.buubleforprofessor.auth.service.RefreshTokenService;
 import com.bubble.buubleforprofessor.user.dto.CustomPrincipal;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -22,12 +24,14 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUtil;
-    private final Long expirationTime;
+    private final CookieUtil cookieUtil;
+    private final RefreshTokenService refreshTokenService;
 
-    public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil, Long expirationTime) {
+    public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil, CookieUtil cookieUtil, RefreshTokenService refreshTokenService) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
-        this.expirationTime = expirationTime;
+        this.cookieUtil = cookieUtil;
+        this.refreshTokenService = refreshTokenService;
 
         setFilterProcessesUrl("/api/auth/token");
     }
@@ -60,9 +64,17 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         GrantedAuthority auth = iterator.next();
         String role = auth.getAuthority();
 
-        String token = jwtUtil.createJwt(username, role, userId, expirationTime);
+        // 토큰 발행
+        String accessToken = jwtUtil.createAccessToken(username, role, userId);
+        String refreshToken = jwtUtil.createRefreshToken(username, role, userId);
 
-        response.addHeader("Authorization", "Bearer " + token);
+        // 토큰 db 저장
+//        refreshTokenService
+
+        // 응답 설정
+        response.addHeader("access", accessToken);
+        response.addCookie(cookieUtil.createCookie("refresh", refreshToken));
+        response.setStatus(HttpStatus.OK.value());
     }
 
     @Override

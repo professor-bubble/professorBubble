@@ -18,6 +18,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     private final RefreshTokenRepository refreshTokenRepository;
 
+    @Override
     public void addRefreshToken(String username, String refresh, Long expiredMs) {
         Date date = new Date(System.currentTimeMillis()+ expiredMs);
 
@@ -26,6 +27,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         refreshTokenRepository.save(refreshEntity);
     }
 
+    @Override
     @Transactional
     public void updateRefreshToken(String username, String refresh, Long expiredMs) {
         Optional<RefreshToken> optionalRefresh = refreshTokenRepository.findByRefresh(refresh);

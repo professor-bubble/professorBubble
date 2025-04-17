@@ -1,13 +1,15 @@
 package com.bubble.buubleforprofessor.global.jwt;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 @Component
 @ConfigurationProperties(prefix = "jwt.expirationtime")
+@Setter
 @Getter
 public class JWTExpirationProperties {
-    public Long access;
-    public Long refresh;
+    private Long access;
+    private Long refresh;
 }

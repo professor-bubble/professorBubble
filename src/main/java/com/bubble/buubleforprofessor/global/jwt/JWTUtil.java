@@ -2,7 +2,6 @@ package com.bubble.buubleforprofessor.global.jwt;
 
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -48,12 +47,12 @@ public class JWTUtil {
                 .compact();
     }
 
-    public String createAccessToken(String category, String username, String role, String userId) {
-        return createJwt(category, username, role, userId, jwtExpirationProperties.access);
+    public String createAccessToken(String username, String role, String userId) {
+        return createJwt("access", username, role, userId, jwtExpirationProperties.getAccess());
     }
 
-    public String createRefreshToken(String category, String username, String role, String userId) {
-        return createJwt(category, username, role, userId, jwtExpirationProperties.refresh);
+    public String createRefreshToken(String username, String role, String userId) {
+        return createJwt("refresh", username, role, userId, jwtExpirationProperties.getRefresh());
     }
 }
 
