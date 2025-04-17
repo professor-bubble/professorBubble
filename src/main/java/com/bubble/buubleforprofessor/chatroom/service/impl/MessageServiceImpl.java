@@ -6,10 +6,7 @@ import com.bubble.buubleforprofessor.chatroom.dto.MessageSimpleDto;
 import com.bubble.buubleforprofessor.chatroom.entity.ChatroomUser;
 import com.bubble.buubleforprofessor.chatroom.entity.Message;
 import com.bubble.buubleforprofessor.chatroom.entity.MessageImage;
-import com.bubble.buubleforprofessor.chatroom.repository.ChatroomUserRepository;
-import com.bubble.buubleforprofessor.chatroom.repository.MessageImageRepository;
-import com.bubble.buubleforprofessor.chatroom.repository.MessageMongoRepository;
-import com.bubble.buubleforprofessor.chatroom.repository.MessageRepository;
+import com.bubble.buubleforprofessor.chatroom.repository.*;
 import com.bubble.buubleforprofessor.chatroom.service.ChatroomUserService;
 import com.bubble.buubleforprofessor.chatroom.service.MessageService;
 import com.bubble.buubleforprofessor.global.config.CustomException;
@@ -41,6 +38,7 @@ public class MessageServiceImpl implements MessageService {
     private final ChatroomUserRepository chatroomUserRepository;
 
     private final ChatroomUserService chatroomUserService;
+    private final ChatroomRepository chatroomRepository;
 
     private final MessageMongoRepository messageMongoRepository;
 
@@ -112,10 +110,10 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public void send(int chatroomId, String userRole,MessageSimpleDto simpleDto) {
+    public void send(int chatroomId,MessageSimpleDto simpleDto) {
         //유저는 채팅방 구독 , 자기자신 구독.
         //교수는 자기자신 구독
-        if(userRole.equals("PROFESSOR"))
+        if(chatroomRepository.existsByIdAndProfessorId(chatroomId,simpleDto.getUserId()))
         {
             //교수가 보내는곳. 채팅방과(유저 전체) 교수(자신)
             messagingTemplate.convertAndSend("/sub/chatroom/" + chatroomId, simpleDto);

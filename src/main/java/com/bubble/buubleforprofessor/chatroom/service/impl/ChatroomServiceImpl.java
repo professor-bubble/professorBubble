@@ -68,6 +68,9 @@ public class ChatroomServiceImpl implements ChatroomService {
                         .userName(chatroomUser.getNickName()).build())
                 .toList();
         //채팅방 내 메세지 모두 조회. N+1 문제를 해결하기위해 Set과 Map 이용
+        //todo 교수 , 유저 나눠서 유저는 자신과 교수꺼. 교수는 모두의 데이터.
+        //챗룸 레파지토리에서 userId, chatroomId 통해서 존재하면 주인이니까 교수인거 인증.
+        //존재하지 않으면 주인 아니니까 유저로 취급하기.
         List<MessageMongo> messageMongoList = messageMongoRepository.findMessagesByChatroomId(chatroomId);
         Set<UUID> userIdSet = messageMongoList.stream().map(MessageMongo::getUserId)
                 .collect(Collectors.toSet());

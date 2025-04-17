@@ -12,4 +12,5 @@ import java.util.UUID;
 @Repository
 public interface ChatroomRepository extends JpaRepository<Chatroom, Integer> {
     boolean existsChatroomByProfessor(Professor professor);
+    boolean existsByIdAndProfessorId(int chatroomId,UUID professorId);
 }

@@ -55,7 +55,6 @@ public class MessageControllerTest {
         request.setUserId(UUID.fromString("61000000-0000-0000-0000-000000000000"));
         request.setUserName("chang hwan");
         request.setContent("ㅎㅇㅇ");
-        request.setRole("PROFESSOR");
     }
 
     @Test
@@ -80,6 +79,6 @@ public class MessageControllerTest {
         verify(chatRoomUserService).exists(request.getUserId(), request.getChatRoomId());
         verify(messageService).filtering(request);
         verify(messageService).save(request);
-        verify(messageService).send(eq(request.getChatRoomId()), eq(request.getRole()), any(MessageSimpleDto.class));
+        verify(messageService).send(eq(request.getChatRoomId()), any(MessageSimpleDto.class));
     }
 }

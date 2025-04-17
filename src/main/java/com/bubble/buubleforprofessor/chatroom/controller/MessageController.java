@@ -34,7 +34,6 @@ public class MessageController {
         simpleDto.setContent(message1.getContent());
         simpleDto.setCreateAt(message1.getSendTime());
 
-        String userRole = message.getRole();
-        messageService.send(message.getChatRoomId(),userRole,simpleDto);
+        messageService.send(message.getChatRoomId(),simpleDto);
     }
 }

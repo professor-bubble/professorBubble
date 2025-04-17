@@ -10,5 +10,5 @@ import java.util.UUID;
 public interface MessageService {
     MessageRequestDto filtering(MessageRequestDto messageRequestDto);
     MessageMongo save(MessageRequestDto message);
-    void send(int chatroomId,String userRole,MessageSimpleDto messageSimpleDto);
+    void send(int chatroomId,MessageSimpleDto messageSimpleDto);
 }
