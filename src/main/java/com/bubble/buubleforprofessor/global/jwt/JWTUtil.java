@@ -33,6 +33,9 @@ public class JWTUtil {
     public boolean isExpired(String token) {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
     }
+    public Long getRefreshExpiration() {
+        return jwtExpirationProperties.getRefresh();
+    }
 
     // 생성
     private String createJwt(String category, String username, String role, String userId, Long expiredTime) {

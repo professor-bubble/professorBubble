@@ -1,12 +1,14 @@
 package com.bubble.buubleforprofessor.global.oauth2;
 
+import com.bubble.buubleforprofessor.auth.service.RefreshTokenService;
+import com.bubble.buubleforprofessor.global.jwt.CookieUtil;
 import com.bubble.buubleforprofessor.global.jwt.JWTUtil;
 import com.bubble.buubleforprofessor.user.dto.CustomPrincipal;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -21,6 +23,8 @@ import java.util.Iterator;
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final JWTUtil jwtUtil;
+    private final CookieUtil cookieUtil;
+    private final RefreshTokenService refreshTokenService;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
@@ -34,21 +38,16 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         GrantedAuthority auth = iterator.next();
         String role = auth.getAuthority();
 
-        String token = jwtUtil.createAccessToken(username, role, userId);
+        // 토큰 발행
+        String accessToken = jwtUtil.createAccessToken(username, role, userId);
+        String refreshToken = jwtUtil.createRefreshToken(username, role, userId);
 
-        response.addHeader("Authorization", "Bearer " + token);
+        // 토큰 db 저장
+        refreshTokenService.addRefreshToken(username, refreshToken, jwtUtil.getRefreshExpiration());
 
-        response.addCookie(createCookie("Authorization", token));
-        response.sendRedirect("http://localhost:8080/api/users/user");
-    }
-
-    private Cookie createCookie(String key, String value) {
-        Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(60 * 60 * 60);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true); // js가 접근 못하게 함
-//        cookie.setSecure(true); // https 사용
-
-        return cookie;
+        // 응답 설정
+        response.addHeader("access", accessToken);
+        response.addCookie(cookieUtil.createCookie("refresh", refreshToken));
+        response.setStatus(HttpStatus.OK.value());
     }
 }

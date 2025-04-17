@@ -20,7 +20,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     @Override
     public void addRefreshToken(String username, String refresh, Long expiredMs) {
-        Date date = new Date(System.currentTimeMillis()+ expiredMs);
+        Date date = new Date(System.currentTimeMillis() + expiredMs);
 
         RefreshToken refreshEntity = new RefreshToken(username, refresh, date.toString());
 
@@ -36,7 +36,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
             throw new CustomException(ErrorCode.USER_UNAUTHORIZED);
         }
 
-        Date date = new Date(System.currentTimeMillis()+ expiredMs);
+        Date date = new Date(System.currentTimeMillis() + expiredMs);
 
         optionalRefresh.get().updateRefreshToken(refresh, date.toString());
     }

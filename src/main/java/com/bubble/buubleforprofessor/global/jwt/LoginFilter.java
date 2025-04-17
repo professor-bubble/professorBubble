@@ -41,9 +41,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String username = obtainUsername(request);
         String password = obtainPassword(request);
 
-        System.out.println(username);
-        System.out.println(password);
-
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, password, null);
 
         return authenticationManager.authenticate(authToken);
@@ -69,7 +66,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String refreshToken = jwtUtil.createRefreshToken(username, role, userId);
 
         // 토큰 db 저장
-//        refreshTokenService
+        refreshTokenService.addRefreshToken(username, refreshToken, jwtUtil.getRefreshExpiration());
 
         // 응답 설정
         response.addHeader("access", accessToken);
