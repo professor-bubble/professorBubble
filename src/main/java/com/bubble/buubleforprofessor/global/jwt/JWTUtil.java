@@ -2,6 +2,7 @@ package com.bubble.buubleforprofessor.global.jwt;
 
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -13,9 +14,11 @@ import java.util.Date;
 public class JWTUtil {
 
     private SecretKey secretKey;
+    private final JWTExpirationProperties jwtExpirationProperties;
 
-    public JWTUtil(@Value("${jwt.secret}") String secret) {
+    public JWTUtil(@Value("${jwt.secret}") String secret, JWTExpirationProperties jwtExpirationProperties) {
         this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
+        this.jwtExpirationProperties = jwtExpirationProperties;
     }
 
     // 검증
@@ -33,8 +36,9 @@ public class JWTUtil {
     }
 
     // 생성
-    public String createJwt(String username, String role, String userId, Long expiredTime) {
+    private String createJwt(String category, String username, String role, String userId, Long expiredTime) {
         return Jwts.builder()
+                .claim("category", category)
                 .claim("username", username)
                 .claim("role", role)
                 .claim("userId", userId)
@@ -42,6 +46,14 @@ public class JWTUtil {
                 .expiration(new Date(System.currentTimeMillis() + expiredTime))
                 .signWith(secretKey)
                 .compact();
+    }
+
+    public String createAccessToken(String category, String username, String role, String userId) {
+        return createJwt(category, username, role, userId, jwtExpirationProperties.access);
+    }
+
+    public String createRefreshToken(String category, String username, String role, String userId) {
+        return createJwt(category, username, role, userId, jwtExpirationProperties.refresh);
     }
 }
 
