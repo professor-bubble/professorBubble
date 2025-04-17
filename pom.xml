@@ -153,6 +153,12 @@
 			<version>0.12.3</version>
 			<scope>runtime</scope>
 		</dependency>
+		<dependency>
+			<groupId>io.github.vaneproject</groupId>
+			<artifactId>badwordfiltering</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
