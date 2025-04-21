@@ -1,0 +1,20 @@
+package com.bubble.buubleforprofessor.user.repository;
+
+import com.bubble.buubleforprofessor.user.entity.Professor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+
+import java.util.Optional;
+import java.util.UUID;
+
+@Repository
+public interface ProfessorRepository extends JpaRepository<Professor, UUID> {
+    @EntityGraph(attributePaths = {"user", "user.university"})
+    Page<Professor> findAllByIsApprovedFalse(Pageable pageable);
+    @EntityGraph(attributePaths ={"user","professorImage"})
+    Optional<Professor> findAllDetailsById(UUID id);
+}
