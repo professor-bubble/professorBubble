@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  elasticsearch:
+    image: elasticsearch:8.15.5
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node  # 단일 노드 모드로 실행
+      - xpack.security.enabled=false  # 보안 비활성화
+    ports:
+      - "9200:9200"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data  # 데이터 영속성
+    networks:
+      - bubble
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9200" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  server:
+    build:
+      context: ../
+      dockerfile: ./docker/server-container/Dockerfile
+    container_name: bubbleforprofessor
+    depends_on:
+      elasticsearch: #elastic이 먼저 실행
+        condition: service_healthy
+    environment:
+      - SPRING_ELASTICSEARCH_URIS=http://elasticsearch:9200  # 컨테이너 이름으로 연결
+      - SPRING_PROFILES_ACTIVE=local
+    ports:
+      - "8080:8080"  # 애플리케이션 포트 매핑
+    networks:
+      - bubble
+
+volumes:
+  esdata:
+
+networks:
+  bubble:
+    driver: bridge
