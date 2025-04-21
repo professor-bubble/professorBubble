@@ -1,6 +1,6 @@
 package com.bubble.buubleforprofessor.domain.payment.service.ServiceImpl;
 
-import com.bubble.buubleforprofessor.domain.payment.service.PaymentReidsService;
+import com.bubble.buubleforprofessor.domain.payment.service.PaymentRedisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class PaymentRedisServiceImpl implements PaymentReidsService {
+public class PaymentRedisServiceImpl implements PaymentRedisService {
 
     private final RedisTemplate<String, Integer> redisTemplate;
 

@@ -19,7 +19,7 @@ public class Skin {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "skin_id")
-    private int id;
+    private Long Skinid;
 
     @Column(length = 20, nullable = false, unique = true)
     private String name;
