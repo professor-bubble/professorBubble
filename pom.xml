@@ -81,6 +81,13 @@
 			<version>2.14.1</version>
 		</dependency>
 
+		<!-- redis -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
+
+
 		<!-- DB 드라이버 -->
 		<dependency>
 			<groupId>com.h2database</groupId>
