@@ -11,6 +11,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -44,6 +45,8 @@ public class UniversityServiceImpl implements UniversityService {
 
     private final UniversityElasticSearchRepository esSearchRepository;
 
+    @Value("${universityApi.serviceKey}")
+    private String serviceKey;
 
     @PostConstruct
     public void init(){
@@ -67,17 +70,17 @@ public class UniversityServiceImpl implements UniversityService {
     public Mono<Void> saveAllUniversities(UniversityApiRequest uniRequest) {
         // Step 1: 초기 값 요청으로 totalCount 가져오기
         UniversityApiRequest initRequest = UniversityApiRequest.builder()
-                .serviceKey(uniRequest.getServiceKey())
+                .serviceKey(serviceKey)
                 .pageNo(uniRequest.getPageNo())
                 .dataType(uniRequest.getDataType())
                 .fcltyCd(uniRequest.getFcltyCd())
                 .numOfRows(1)
                 .build();
-
+        log.info("initRequest 생성 - pageNo: {}, fcltyCd; {}", initRequest.getPageNo(), initRequest.getFcltyCd());
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/data/getUniversity.do")
-                        .queryParam("serviceKey", initRequest.getServiceKey())
+                        .queryParam("serviceKey", serviceKey)
                         .queryParam("pageNo", initRequest.getPageNo())
                         .queryParam("numOfRows", initRequest.getNumOfRows())
                         .queryParam("dataType", initRequest.getDataType())
@@ -98,7 +101,7 @@ public class UniversityServiceImpl implements UniversityService {
                     int totalCount = initResponse.getBody().getTotalCount();
                     log.info("Total count: {}", totalCount);
                     UniversityApiRequest fullRequest = UniversityApiRequest.builder()
-                            .serviceKey(uniRequest.getServiceKey())
+                            .serviceKey(serviceKey)
                             .pageNo(uniRequest.getPageNo())
                             .dataType(uniRequest.getDataType())
                             .fcltyCd(uniRequest.getFcltyCd())
@@ -109,7 +112,7 @@ public class UniversityServiceImpl implements UniversityService {
                 return webClient.get()
                         .uri(uriBuilder -> uriBuilder
                                 .path("/data/getUniversity.do")
-                                .queryParam("serviceKey",fullRequest.getServiceKey())
+                                .queryParam("serviceKey",serviceKey)
                                 .queryParam("pageNo", fullRequest.getPageNo())
                                 .queryParam("numOfRows", fullRequest.getNumOfRows())
                                 .queryParam("dataType", fullRequest.getDataType())
@@ -135,7 +138,7 @@ public class UniversityServiceImpl implements UniversityService {
                                     .isDeleted(false)
                                     .build())
                             .collect(Collectors.toList());
-
+                    log.info("fullRequest 생성 - pageNo: {}, fcltyCd; {}", initRequest.getPageNo(), initRequest.getFcltyCd());
                     return Mono.fromRunnable(() -> saveToDb(universities))
                             .subscribeOn(Schedulers.boundedElastic())
                             .onErrorResume(e -> {

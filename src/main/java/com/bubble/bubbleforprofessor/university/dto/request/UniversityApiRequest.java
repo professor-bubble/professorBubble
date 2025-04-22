@@ -7,10 +7,8 @@ import org.springframework.beans.factory.annotation.Value;
 @Getter
 @AllArgsConstructor
 public class UniversityApiRequest {
-   // @Value("${universityApi.serviceKey}")
 
-    @Builder.Default
-    private String serviceKey="W9J4P7PW-W9J4-W9J4-W9J4-W9J4P7PW4Y";
+    private String serviceKey;
 
     @Builder.Default
     private int pageNo = 1;
