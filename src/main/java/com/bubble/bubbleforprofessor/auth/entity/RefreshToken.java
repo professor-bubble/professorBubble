@@ -13,6 +13,7 @@ public class RefreshToken {
     private long id;
 
     private String username;
+    @Column(length = 512)
     private String refresh;
     private String expiration;
 
