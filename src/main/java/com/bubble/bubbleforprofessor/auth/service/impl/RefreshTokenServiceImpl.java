@@ -40,4 +40,15 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
         optionalRefresh.get().updateRefreshToken(refresh, date.toString());
     }
+
+    @Override
+    public void removeRefreshToken(String refresh) {
+        Optional<RefreshToken> optionalRefresh = refreshTokenRepository.findByRefresh(refresh);
+
+        if (optionalRefresh.isEmpty()) {
+            throw new CustomException(ErrorCode.USER_UNAUTHORIZED);
+        }
+
+        refreshTokenRepository.delete(optionalRefresh.get());
+    }
 }
