@@ -6,11 +6,14 @@ import com.bubble.bubbleforprofessor.global.jwt.JWTFilter;
 import com.bubble.bubbleforprofessor.global.jwt.JWTUtil;
 import com.bubble.bubbleforprofessor.global.jwt.LoginFilter;
 import com.bubble.bubbleforprofessor.global.oauth2.CustomSuccessHandler;
+import com.bubble.bubbleforprofessor.user.repository.RoleRepository;
 import com.bubble.bubbleforprofessor.user.service.impl.CustomOAuth2UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -31,6 +34,21 @@ public class SecurityConfig {
     private final CustomOAuth2UserServiceImpl customOAuth2UserService;
     private final CustomSuccessHandler customSuccessHandler;
     private final RefreshTokenService refreshTokenService;
+    private final RoleRepository roleRepository;
+
+    @Bean
+    public RoleHierarchy roleHierarchy() {
+        RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
+
+        String hierarchy = """
+              ROLE_ADMIN > ROLE_UNIVERSITY_ADMIN
+              ROLE_ADMIN > ROLE_STUDENT
+              ROLE_ADMIN > ROLE_PROFESSOR
+              """;
+
+        roleHierarchy.setHierarchy(hierarchy);
+        return roleHierarchy;
+    }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
@@ -58,7 +76,7 @@ public class SecurityConfig {
         // JWT 필터 등록
         http
 //                .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
-                .addFilterAfter(new JWTFilter(jwtUtil), OAuth2LoginAuthenticationFilter.class);
+                .addFilterAfter(new JWTFilter(jwtUtil, roleRepository), OAuth2LoginAuthenticationFilter.class);
 
         // loginFilter 등록
         http
