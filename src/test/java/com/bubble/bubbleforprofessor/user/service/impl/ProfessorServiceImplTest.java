@@ -63,7 +63,9 @@ class ProfessorServiceImplTest {
     @BeforeEach
     void setUp() {
         userId = UUID.randomUUID();
-        University university = new University("Test University");
+        University university = University.builder()
+                .universityName("조선대학교")
+                .build();
 
         user = User.builder()
                 .id(userId)
@@ -132,7 +134,7 @@ class ProfessorServiceImplTest {
         // then
         assertEquals(1, result.getTotalElements());
         ApprovalRequestDto dto = result.getContent().get(0);
-        assertEquals("Test University", dto.getUniversityName());
+        assertEquals("조선대학교", dto.getUniversityName());
         assertEquals("Computer Science", dto.getDepartment());
         assertEquals(12345, dto.getProfessorNum());
         assertEquals("John Doe", dto.getProfessorName());
