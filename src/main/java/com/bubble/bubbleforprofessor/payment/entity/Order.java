@@ -1,6 +1,6 @@
 package com.bubble.bubbleforprofessor.payment.entity;
 
-import com.bubble.bubbleforprofessor.domain.user.entity.User;
+import com.bubble.bubbleforprofessor.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.elasticsearch.annotations.Document;
@@ -51,11 +51,17 @@ public class Order {
         this.orderStatus = OrderStatus.CANCELED;
     }
 
+    public void setTotalAmount(int totalAmount){
+        this.totalAmount = totalAmount;
+    }
+
     @Builder
     public Order(User user, Integer totalAmount) {
         this.user = user;
         this.totalAmount = totalAmount;
     }
+
+
 }
 
 //USER의 주문 활성 및 취소 상태표시

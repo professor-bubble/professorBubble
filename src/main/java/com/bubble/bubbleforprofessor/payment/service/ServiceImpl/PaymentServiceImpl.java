@@ -11,11 +11,14 @@ import com.bubble.bubbleforprofessor.payment.repository.OrderRepository;
 import com.bubble.bubbleforprofessor.payment.repository.PaymentRepository;
 
 import com.bubble.bubbleforprofessor.payment.service.PaymentRedisService;
-import com.bubble.bubbleforprofessor.domain.skin.entity.Skin;
-import com.bubble.bubbleforprofessor.domain.skin.repository.SkinRepository;
-import com.bubble.bubbleforprofessor.domain.user.entity.User;
+import com.bubble.bubbleforprofessor.skin.entity.Skin;
+import com.bubble.bubbleforprofessor.skin.repository.SkinRepository;
+import com.bubble.bubbleforprofessor.user.dto.CustomPrincipal;
+import com.bubble.bubbleforprofessor.user.entity.User;
 import com.bubble.bubbleforprofessor.global.config.CustomException;
 import com.bubble.bubbleforprofessor.global.config.ErrorCode;
+
+import com.bubble.bubbleforprofessor.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +28,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -38,96 +42,77 @@ public class PaymentServiceImpl {
     private final PaymentRedisService redisService;
     private final RestTemplate restTemplate;
     private final SkinRepository skinRepository;
+    private final UserRepository userRepository;
 
 
     @Value("${toss.secret-Key}")
     private String tossPaymentKey;
 
-    @Override
-    public InitPaymentResponseDto  initPayment(OrderRequestDto orderRequestDto) {
-        User user = getCurrentUser();
+    public InitPaymentResponseDto initPayment(OrderRequestDto orderRequestDto, CustomPrincipal customPrincipal) {
+        //1. 유저 조회
+        User user = userRepository.findById(UUID.fromString(customPrincipal.getUserId()))
+                .orElseThrow(() -> new CustomException(ErrorCode.NON_EXISTENT_USER));
 
-        // 사용자가 주문한 주문상세 skinId 추출
-        List<Long> skinId = orderRequestDto.getItmes().stream()
+        //2. 주문 항목에서 skinId리스트 추출
+        List<Integer> skinIds = orderRequestDto.getItmes().stream()
                 .map(OrderDetailRequestDto::getSkinId)
-                .collect(Collectors.toList());
+                .toList();
 
-        //DB에 있는 스킨 ID 리스트 불러옴
-        List<Skin> skins = skinRepository.findAllById(skinId);
+        //3. 스킨 조회 및 map 변환
+        List<Skin> skins = skinRepository.findAllById(skinIds);
+        Map<Integer, Skin> skinMap = skins.stream()
+                .collect(Collectors.toMap(Skin::getId, Function.identity())); //function.identity skin를 값을 그대로 사용
 
-
-
-        //스킨 리스트 map을 변환하여 검색 성능 최적화
-        Map<Long, Skin> skinMap = skins.stream()
-                .collect(Collectors.toMap(Skin::getSkinid, Function.identity()));
-
-        List<OrderDetail>  orderDetails = new ArrayList<>();
-        int totalAmount = 0;
-
-        Order order = Order.builder()
-                .user(user)
-                .totalAmount(totalAmount)
-                .build();
-
+        // 4. Order 생성
+        Order order = Order.builder().user(user).totalAmount(0).build();
         Order savedOrder = orderRepository.save(order);
 
-
-        for (OrderDetailRequestDto item : orderRequestDto.getItmes()){
+        // 5. OrderDetail 생성 + 가격 계산
+        int totalAmount = 0;
+        List<OrderDetail> details = new ArrayList<>();
+        for (OrderDetailRequestDto item : orderRequestDto.getItmes()) {
             Skin skin = skinMap.get(item.getSkinId());
 
-            //스킨 유효성 검상
-            if(skin == null){
-            throw new CustomException(ErrorCode.INVALID_SKIN_ID);
+            if (skin == null || skin.isDelete()) {
+                throw new CustomException(ErrorCode.NON_EXISTENT_SKIN);
             }
 
-            int itemPrice = skin.getPrice()*item.getQuantity();
-            totalAmount  += itemPrice;
+            int itemPrice = skin.getPrice() * item.getQuantity();
+            totalAmount += itemPrice;
 
-
-            OrderDetail orderDetail = OrderDetail.builder()
+            details.add(OrderDetail.builder()
+                    .order(savedOrder)
                     .skin(skin)
                     .price(skin.getPrice())
                     .quantity(item.getQuantity())
-                    .order(savedOrder)
-                    .build();
-            orderDetails.add(orderDetail);
+                    .build());
         }
+        orderDetailRepository.saveAll(details);
+
+        //계산되 총 값 order로 갱신
+        savedOrder.setTotalAmount(totalAmount);
+        orderRepository.save(savedOrder);
 
 
-
-        for (OrderDetail orderDetail : orderDetails) {
-            orderDetailRepository.save(orderDetail);
-        }
-
-
+        // 6. Payment 엔티티 생성
         Payment payment = Payment.builder()
                 .order(savedOrder)
                 .amount(totalAmount)
-
-                //이부분 수정 필요!!!
-                .paymentKey("temp_key_" + savedOrder.getOrderId()) // 실제 paymentKey를 받기 전이라 임시로 "temp_key_"를 사용
-                .paymentMethod("TOSS") //초기값 추후 갱신됨
+                .paymentKey("TEMP_" + savedOrder.getOrderId()) // Toss로부터 아직 안 받은 상태
+                .paymentMethod("PENDING")
                 .build();
         paymentRepository.save(payment);
 
+        // 7. Redis 저장
         String orderId = "ORDER_" + savedOrder.getOrderId();
         redisService.saveOrderAmount(orderId, totalAmount, 1800);
 
+        // 8. 응답
         return InitPaymentResponseDto.builder()
                 .orderId(orderId)
                 .amount(totalAmount)
                 .build();
-
+    }
     }
 
 
-    private User getCurrentUser () {
-        String token = request.getHeader("Authorization");
-        if (token == null || !token.startsWith("Bearer ")) {
-            throw new IllegalStateException("JWT 토큰이 없습니다.");
-        }
-        Long userId = jwtUtil.getUserIdFromToken(token);
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: userId=" + userId));
-    }
-}

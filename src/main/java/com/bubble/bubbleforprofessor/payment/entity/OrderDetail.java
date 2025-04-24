@@ -1,6 +1,6 @@
 package com.bubble.bubbleforprofessor.payment.entity;
 
-import com.bubble.bubbleforprofessor.domain.skin.entity.Skin;
+import com.bubble.bubbleforprofessor.skin.entity.Skin;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -40,4 +40,7 @@ public class OrderDetail {
         this.price = price;
         this.quantity = quantity;
     }
+
+
+
 }

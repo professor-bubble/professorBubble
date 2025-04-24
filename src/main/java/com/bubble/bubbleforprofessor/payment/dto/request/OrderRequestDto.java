@@ -7,6 +7,15 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class OrderRequestDto {
+    private List<Long> cartIds;
+
+    @Builder
+    public OrderRequestDto(List<Long> cartIds) {
+        this.cartIds = cartIds;
+    }
+
+
+/*    <기존 방식>
     private List<OrderDetailRequestDto> itmes;
 
 //todo 토스페이먼츠 결제 요청시 orderId, amount(=totalPrice) 필수
@@ -16,4 +25,6 @@ public class OrderRequestDto {
     public OrderRequestDto(List<OrderDetailRequestDto> itmes) {
         this.itmes = itmes;
     }
+
+ */
 }
