@@ -6,6 +6,7 @@ import com.bubble.bubbleforprofessor.university.dto.response.Body;
 import com.bubble.bubbleforprofessor.university.dto.response.UniversityApiResponse;
 import com.bubble.bubbleforprofessor.university.dto.response.UniversityList;
 import com.bubble.bubbleforprofessor.university.entity.University;
+import com.bubble.bubbleforprofessor.university.repository.es.UniversityElasticSearchRepository;
 import com.bubble.bubbleforprofessor.university.repository.jpa.UniversityRepository;
 
 import com.bubble.bubbleforprofessor.university.service.UniversityServiceImpl;
@@ -25,6 +26,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.when;
@@ -38,8 +40,8 @@ class UniversityServiceImplTest {
     UniversityRepository universityRepository;
 
     /*Mock :  가짜로 만든 객체
-    * InjectMoks : 테스트 대상에 Mock 주입
-    * Mockito는 when 설정을 테스트가 시작되기 전에 모두 메모리에 저장*/
+     * InjectMoks : 테스트 대상에 Mock 주입
+     * Mockito는 when 설정을 테스트가 시작되기 전에 모두 메모리에 저장*/
 
     @Mock
     private WebClient webClient;
@@ -53,6 +55,9 @@ class UniversityServiceImplTest {
 
     @Mock
     private WebClient.RequestHeadersUriSpec requestHeadersUriSpec;
+
+    @Mock
+    private UniversityElasticSearchRepository esSearchRepository;
 
     @Mock
     private WebClient.RequestHeadersSpec requestHeadersSpec;
@@ -72,22 +77,25 @@ class UniversityServiceImplTest {
     private UniversityServiceImpl universityServiceImplTest;
 
 
-
     @Test
     void onelist() {
         //give
-        UniversityApiRequest request = new UniversityApiRequest();
-        request.setServiceKey("test");
-        request.setPageNo(1);
-        request.setNumOfRows(10);
-        request.setDataType("xml");
-        request.setFcltyCd("50112");
+        UniversityApiRequest request = UniversityApiRequest.builder()
+                .serviceKey("test")
+                .pageNo(1)
+                .numOfRows(666)
+                .dataType("xml")
+                .fcltyCd("50112")
+                .build();
 
-        //가짜 응답 준비
-        UniversityApiResponse response = new UniversityApiResponse();
-        Body body = new Body();
-        body.setTotalCount(666);
-        response.setBody(body);
+        // given: 응답 DTO (Body + UniversityApiResponse) 도 Builder로 생성
+        Body body = Body.builder()
+                .totalCount(666)
+                .build();
+
+        UniversityApiResponse response = UniversityApiResponse.builder()
+                .body(body)
+                .build();
         when(responseSpec.bodyToMono(UniversityApiResponse.class)).thenReturn(Mono.just(response));
 
         //when (실행)
@@ -99,113 +107,68 @@ class UniversityServiceImplTest {
                 .verifyComplete(); //Mono가 끝났는지 확인
     }
 
-    /*
-    @Test
-    void saveAllUniversities() {
-        //give
-        //1. totalcount 값 얻어오기
-        UniversityApiRequest getTotalCount = new UniversityApiRequest();
-        getTotalCount.setServiceKey("test");
-        getTotalCount.setPageNo(1);
-        getTotalCount.setDataType("xml");
-        getTotalCount.setFcltyCd("50112");
-
-        //2. 가짜 TotalCount 준비
-        UniversityApiResponse initResponse = new UniversityApiResponse();
-        Body initBody = new Body();
-        initBody.setTotalCount(666);
-        initResponse.setBody(initBody);
-
-        //todo 가짜 데이터를 왜 아래 when을 사용할까?
-        //      그 데이터를 saveAllUniversities매서드에 전달할려면 webClient가 데이터를 넣어주도록 설정위해 필요 (비동기 처리위함)
-        //      responseSpec : 응답을 처리하는 객체, WebClient를 통해 HTTP 요청을 보내고, 그에 대한 HTTP 응답을 받을 때 사용
-        //      bodyToMono() :  HTTP 응답 본문을 특정 Java 객체로 변환하는 메소드
-        when(responseSpec.bodyToMono(UniversityApiResponse.class)).thenReturn(Mono.just(initResponse));
-
-        doNothing().when(universityRepository).deleteAll();
-
-        //3. 전체 대학교 데이터 요청준비
-        UniversityApiRequest allUniRequest = new UniversityApiRequest();
-        allUniRequest.setServiceKey("test");
-        allUniRequest.setPageNo(1);
-        allUniRequest.setDataType("xml");
-        allUniRequest.setNumOfRows(initBody.getTotalCount());
-        allUniRequest.setFcltyCd("50112");
-
-
-        //4. 전체 데이터 응답
-        UniversityApiResponse fullResponse = new UniversityApiResponse();
-        Body fullBody = new Body();
-        UniversityList items = new UniversityList();
-        items.setUniversityName("한국대학교");
-        fullBody.setItems(List.of(items));
-        fullResponse.setBody(fullBody);
-
-        when(responseSpec.bodyToMono(UniversityApiResponse.class)).thenReturn(Mono.just(fullResponse));
-        when(universityRepository.saveAll(anyList())).thenReturn(Collections.emptyList());
-
-        // When
-        Mono<Void> result = universityServiceImplTest.saveAllUniversities(allUniRequest);
-
-        // Then
-        StepVerifier.create(result)
-                .verifyComplete();
-        verify(universityRepository, times(1)).deleteAll(); // deleteAll 호출 확인
-        verify(universityRepository, times(1)).saveAll(anyList()); // saveAll 호출 확인
-    }
-*/
 
     @Test
     void saveAllUniversities() {
-        // 1. Total count 설정
-        UniversityApiResponse initResponse = new UniversityApiResponse();
-        Body initBody = new Body();
-        initBody.setTotalCount(666);
-        initResponse.setBody(initBody);
+        // given
+        // 1. totalCount 응답
+        Body initBody = Body.builder()
+                .totalCount(666)
+                .build();
+        UniversityApiResponse initResponse = UniversityApiResponse.builder()
+                .body(initBody)
+                .build();
         when(responseSpec.bodyToMono(UniversityApiResponse.class)).thenReturn(Mono.just(initResponse));
 
-        doNothing().when(universityRepository).deleteAll();
+        // 2. 기존 저장된 대학 목록 (1건 있음)
+        University existingUniversity = University.builder()
+                .universityId(1L)
+                .universityName("이전대학교")
+                .isDeleted(false)
+                .build();
+        when(universityRepository.findAll()).thenReturn(List.of(existingUniversity));
 
-        // 2. 전체 데이터 설정
-        UniversityApiResponse fullResponse = new UniversityApiResponse();
-        Body fullBody = new Body();
-        UniversityList items = new UniversityList();
-        items.setUniversityName("한국대학교");
-        items.setObjectId(1L);
-        fullBody.setItems(List.of(items));
-        fullResponse.setBody(fullBody);
+        // 3. 새로 받아올 데이터 (기존과 다른 이름으로 덮어쓰기 유도)
+        UniversityList newItem = UniversityList.builder()
+                .objectId(1L)
+                .universityName("한국대학교") // 이름 변경됨
+                .build();
+        Body fullBody = Body.builder()
+                .items(List.of(newItem))
+                .build();
+        UniversityApiResponse fullResponse = UniversityApiResponse.builder()
+                .body(fullBody)
+                .build();
         when(responseSpec.bodyToMono(UniversityApiResponse.class)).thenReturn(Mono.just(fullResponse));
-        when(universityRepository.findAll()).thenReturn(Collections.emptyList());
         when(universityRepository.saveAll(anyList())).thenReturn(Collections.emptyList());
 
-        UniversityApiRequest allUniRequest = new UniversityApiRequest();
-        allUniRequest.setServiceKey("test");
-        allUniRequest.setPageNo(1);
-        allUniRequest.setDataType("xml");
-        allUniRequest.setNumOfRows(666);
-        allUniRequest.setFcltyCd("50112");
+        UniversityApiRequest request = UniversityApiRequest.builder()
+                .serviceKey("test")
+                .pageNo(1)
+                .numOfRows(666)
+                .dataType("xml")
+                .fcltyCd("50112")
+                .build();
 
-        // When
-        Mono<Void> result = universityServiceImplTest.saveAllUniversities(allUniRequest);
+        // when
+        Mono<Void> result = universityServiceImplTest.saveAllUniversities(request);
 
-        // Then
+        // then
         StepVerifier.create(result).verifyComplete();
-        verify(universityRepository, times(1)).deleteAll();
-        verify(universityRepository, times(1)).saveAll(anyList());
 
+        verify(universityRepository, times(1)).findAll();
+        verify(universityRepository, times(1)).saveAll(anyList());
 
         ArgumentCaptor<List<University>> captor = ArgumentCaptor.forClass(List.class);
         verify(universityRepository).saveAll(captor.capture());
 
         List<University> savedUniversities = captor.getValue();
-        assertEquals(1, savedUniversities.size());
+        assertThat(savedUniversities).hasSize(1);
 
         University saved = savedUniversities.get(0);
-        assertEquals("한국대학교", saved.getUniversityName());
-        assertEquals(1L, saved.getUniversityId());
-        assertFalse(saved.isDeleted());
+        assertThat(saved.getUniversityId()).isEqualTo(1L);
+        assertThat(saved.getUniversityName()).isEqualTo("한국대학교");
     }
-
 
 
 }

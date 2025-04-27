@@ -19,6 +19,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -55,7 +56,10 @@ class ChatroomUserServiceImplTest {
     @Test
     void testCreateChatroomUser()
     {
-        University university = new University("example university");
+        University university = University.builder()
+                .universityName("조선대학교")
+                .build();
+
         Role professorRole = new Role("PROFESSOR");
         Role userRole = new Role("USER");
         //교수

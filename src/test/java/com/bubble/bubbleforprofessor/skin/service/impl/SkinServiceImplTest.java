@@ -47,7 +47,10 @@ class SkinServiceImplTest {
     private SkinImage skinImage2;
     private User user;
     private Role role = new Role("ROLE_USER");
-    private University university = new University("조선대학교");
+    private University university = University.builder()
+            .universityName("조선대학교")
+            .build();
+
     private Category category = new Category("글꼴");
     private UUID userId;
     private UserSkin userSkin;// UserSkin mock object

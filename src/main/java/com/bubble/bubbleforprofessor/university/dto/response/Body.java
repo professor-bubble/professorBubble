@@ -4,9 +4,7 @@ import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 
@@ -14,6 +12,7 @@ import java.util.List;
 @Getter
 @XmlAccessorType(XmlAccessType.FIELD)
 @NoArgsConstructor
+@Builder
 public class Body {
     @XmlElementWrapper(name = "items")
     @XmlElement(name = "item")
@@ -27,4 +26,11 @@ public class Body {
 
     @XmlElement(name = "totalCount")
     private int totalCount;
+
+    public Body(List<UniversityList> items, int numOfRows, int pageNo, int totalCount) {
+        this.items = items;
+        this.numOfRows = numOfRows;
+        this.pageNo = pageNo;
+        this.totalCount = totalCount;
+    }
 }
