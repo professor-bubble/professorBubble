@@ -2,6 +2,7 @@ package com.bubble.bubbleforprofessor.payment.controller;
 
 import com.bubble.bubbleforprofessor.payment.dto.request.OrderRequestDto;
 import com.bubble.bubbleforprofessor.payment.dto.response.InitPaymentResponseDto;
+import com.bubble.bubbleforprofessor.payment.dto.response.InitTossResponseDto;
 import com.bubble.bubbleforprofessor.payment.service.PaymentService;
 import com.bubble.bubbleforprofessor.user.dto.CustomPrincipal;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,11 +23,11 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @PostMapping("/initiate")
-    public ResponseEntity<InitPaymentResponseDto> initPayment(
+    public ResponseEntity<InitTossResponseDto> initPayment(
             @RequestBody OrderRequestDto orderRequestDto,
             @AuthenticationPrincipal CustomPrincipal principal
     ) {
-        InitPaymentResponseDto responseDto = paymentService.initPayment(orderRequestDto, principal);
+        InitTossResponseDto responseDto = paymentService.initPayment(orderRequestDto, principal);
         return ResponseEntity.ok(responseDto);
     }
 

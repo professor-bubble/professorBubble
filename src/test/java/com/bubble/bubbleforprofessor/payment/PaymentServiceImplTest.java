@@ -1,8 +1,11 @@
 package com.bubble.bubbleforprofessor.payment;
 
+import com.bubble.bubbleforprofessor.payment.Client.TossClient;
 import com.bubble.bubbleforprofessor.payment.dto.request.OrderDetailRequestDto;
 import com.bubble.bubbleforprofessor.payment.dto.request.OrderRequestDto;
 import com.bubble.bubbleforprofessor.payment.dto.response.InitPaymentResponseDto;
+import com.bubble.bubbleforprofessor.payment.dto.response.InitTossResponseDto;
+import com.bubble.bubbleforprofessor.payment.dto.response.TossInitResponseDto;
 import com.bubble.bubbleforprofessor.payment.entity.Order;
 import com.bubble.bubbleforprofessor.payment.entity.Payment;
 import com.bubble.bubbleforprofessor.payment.repository.OrderDetailRepository;
@@ -51,6 +54,9 @@ class PaymentServiceImplTest {
 
     @Mock
     private SkinRepository skinRepository;
+
+    @Mock
+    private TossClient tossClient;
 
     @Mock
     private UserRepository userRepository;
@@ -123,9 +129,12 @@ class PaymentServiceImplTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(skinRepository.findAllById(List.of(1, 2))).thenReturn(List.of(skin1, skin2));
         when(orderRepository.save(any(Order.class))).thenReturn(order);
+        when(tossClient.ready(anyString(), anyInt()))
+                .thenReturn(new TossInitResponseDto("mockPaymentKey", "mockCheckoutUrl"));
+
 
         // when
-        InitPaymentResponseDto result = paymentService.initPayment(requestDto, customPrincipal);
+        InitTossResponseDto result = paymentService.initPayment(requestDto, customPrincipal);
 
         // then
         assertThat(result.getOrderId()).startsWith("ORDER_"); // id 없이 orderId 형식만 확인
@@ -136,8 +145,6 @@ class PaymentServiceImplTest {
         verify(paymentRepository).save(any(Payment.class));
         verify(redisService).saveOrderAmount(any(), eq(4000), anyLong());
     }
-
-    @Test
 
 
 }
