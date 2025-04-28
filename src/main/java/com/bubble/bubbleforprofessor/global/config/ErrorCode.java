@@ -57,6 +57,15 @@ public enum ErrorCode {
     /**
      * payment
      */
+    INVALID_PAYMENT_AMOUNT("유효하지 않은 값입니다.", HttpStatus.BAD_REQUEST),
+
+    NON_EXISTENT_PAYMENT("결제정보가 존재 하지않습니다", HttpStatus.NOT_FOUND),
+
+    NON_EXISTENT_ORDER("주문이 존재 하지 않습니다.", HttpStatus.NOT_FOUND),
+
+    INVALID_AMOUNT("금액이 일치하지 않습니다", HttpStatus.BAD_REQUEST),
+
+    UNKNOWN_PAYMENT_STATUS("유요하지 않은 상태 값입니다", HttpStatus.BAD_REQUEST),
 
     /**
      * chat

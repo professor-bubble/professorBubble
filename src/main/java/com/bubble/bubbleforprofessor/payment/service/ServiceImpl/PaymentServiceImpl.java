@@ -3,11 +3,10 @@ package com.bubble.bubbleforprofessor.payment.service.ServiceImpl;
 import com.bubble.bubbleforprofessor.payment.Client.TossClient;
 import com.bubble.bubbleforprofessor.payment.dto.request.OrderDetailRequestDto;
 import com.bubble.bubbleforprofessor.payment.dto.request.OrderRequestDto;
-import com.bubble.bubbleforprofessor.payment.dto.response.InitPaymentResponseDto;
-import com.bubble.bubbleforprofessor.payment.dto.response.InitTossResponseDto;
-import com.bubble.bubbleforprofessor.payment.dto.response.TossInitResponseDto;
+import com.bubble.bubbleforprofessor.payment.dto.response.*;
 import com.bubble.bubbleforprofessor.payment.entity.Order;
 import com.bubble.bubbleforprofessor.payment.entity.OrderDetail;
+import com.bubble.bubbleforprofessor.payment.entity.OrderStatus;
 import com.bubble.bubbleforprofessor.payment.entity.Payment;
 import com.bubble.bubbleforprofessor.payment.repository.OrderDetailRepository;
 import com.bubble.bubbleforprofessor.payment.repository.OrderRepository;
@@ -24,8 +23,8 @@ import com.bubble.bubbleforprofessor.global.config.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -55,18 +54,21 @@ public class PaymentServiceImpl implements PaymentService {
         // 내부
         InitPaymentResponseDto init = prepareInternal(dto, principal);
 
+        // TossPayment경우 orderId 타입이 String이라 변환 필요
+        String orderId = String.valueOf(init.getOrderId());
+
         // TossPayments 준비 요청
         TossInitResponseDto tossResp = tossClient.ready(
-                init.getOrderId(),
+                orderId,
                 init.getAmount()
         );
 
         // 클라이언트에 최종 DTO 반환
         return InitTossResponseDto.builder()
-                .orderId(init.getOrderId())
+                .orderId(orderId)
                 .amount(init.getAmount())
                 .paymentKey(tossResp.getPaymentKey())
-                .checkoutUrl(tossResp.getCheckoutUrl())
+                .checkoutUrl(tossResp.getCheckoutUrl()) //결제 url 반환
                 .build();
     }
 
@@ -136,10 +138,55 @@ public class PaymentServiceImpl implements PaymentService {
                 .build();
     }
 
+    @Transactional
     @Override
-    public void completePayment(String paymentKey, String orderId, int amount) {
-        // 결제 성공 콜백 처리
-        // (웹훅/클라이언트로부터 받은 정보 검증 및 Payment.updateStatus 등)
+    public SuccessResponseDto completePayment(String paymentKey, Long orderId, int amount) {
+
+        String tossOrderId = String.valueOf(orderId);
+
+        // 토스페이먼츠 서버에 결제 승인 요청
+        TossConfirmResponseDto tossResponse = tossClient.confirm(paymentKey, tossOrderId, amount);
+
+        // Redis의 orderid의 amount 값을 불러옴
+        String redisOrderId = "ORDER_" + orderId;
+        Integer redisOrderAmount = redisService.getOrderAmount(redisOrderId);
+        if (redisOrderAmount == null) {
+            throw new CustomException(ErrorCode.NON_EXISTENT_ORDER);
+        }
+
+        if(redisOrderAmount != amount) {
+            //failPayment(paymentKey, orderId, amount);
+            throw new CustomException(ErrorCode.INVALID_AMOUNT);
+        }
+
+        String paymentStatus = tossResponse.getStatus();
+        String paymentTime = tossResponse.getApprovedAt();
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NON_EXISTENT_ORDER));
+
+        Payment payment = paymentRepository.findByOrder(order)
+                .orElseThrow(()->new CustomException(ErrorCode.NON_EXISTENT_PAYMENT));
+
+        payment.updatePaymentStatus(paymentStatus, paymentTime);
+
+        // 5. Order 상태 업데이트
+        if ("DONE".equals(paymentStatus)) {
+            order.updateOrderStatus(OrderStatus.SUCCEEDED);
+        } else if ("CANCELED".equals(paymentStatus)) {
+            order.updateOrderStatus(OrderStatus.CANCELED);
+        } else if ("FAILED".equals(paymentStatus)) {
+            order.updateOrderStatus(OrderStatus.FAILED);
+        } else {
+            throw new CustomException(ErrorCode.UNKNOWN_PAYMENT_STATUS);
+        }
+
+        paymentRepository.save(payment);
+        orderRepository.save(order);
+
+        redisService.deleteOrderAmount(redisOrderId);
+
+        return new SuccessResponseDto(paymentStatus, String.valueOf(orderId), paymentKey, amount, paymentStatus);
     }
 
     @Override

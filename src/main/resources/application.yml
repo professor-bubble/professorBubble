@@ -45,6 +45,7 @@ spring:
 
 server:
   port: 8080
+  timezone: Asia/Seoul
 
 
 logging:
@@ -58,3 +59,4 @@ logging:
 
 jwt:
   expirationtime: 216000
+

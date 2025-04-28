@@ -34,7 +34,7 @@ public class PaymentController {
     @GetMapping("/success")
     public ResponseEntity<String> success(
             @RequestParam String paymentKey,
-            @RequestParam String orderId,
+            @RequestParam Long orderId,
             @RequestParam int amount) {
         paymentService.completePayment(paymentKey, orderId, amount);
         return ResponseEntity.ok("success");
