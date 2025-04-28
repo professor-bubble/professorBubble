@@ -45,7 +45,6 @@ public class PaymentServiceImpl {
     private final UserRepository userRepository;
 
 
-    @Value("${toss.secret-Key}")
     private String tossPaymentKey;
 
     public InitPaymentResponseDto initPayment(OrderRequestDto orderRequestDto, CustomPrincipal customPrincipal) {
@@ -54,7 +53,7 @@ public class PaymentServiceImpl {
                 .orElseThrow(() -> new CustomException(ErrorCode.NON_EXISTENT_USER));
 
         //2. 주문 항목에서 skinId리스트 추출
-        List<Integer> skinIds = orderRequestDto.getItmes().stream()
+        List<Integer> skinIds = orderRequestDto.getItems().stream()
                 .map(OrderDetailRequestDto::getSkinId)
                 .toList();
 
@@ -70,7 +69,7 @@ public class PaymentServiceImpl {
         // 5. OrderDetail 생성 + 가격 계산
         int totalAmount = 0;
         List<OrderDetail> details = new ArrayList<>();
-        for (OrderDetailRequestDto item : orderRequestDto.getItmes()) {
+        for (OrderDetailRequestDto item : orderRequestDto.getItems()) {
             Skin skin = skinMap.get(item.getSkinId());
 
             if (skin == null || skin.isDelete()) {
