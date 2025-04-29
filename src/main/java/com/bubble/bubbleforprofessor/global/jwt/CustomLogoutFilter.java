@@ -34,7 +34,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
     private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
         // path and method verify
         String requestUri =request.getRequestURI();
-        if (!requestUri.equals("/api/auth")) {
+        if (!requestUri.equals("/api/auth/logout")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -55,7 +55,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
         }
 
         // 필터 넘기기
-        if (refreshToken == null || jwtUtil.getCategory(refreshToken).equals("refresh")) {
+        if (refreshToken == null || !jwtUtil.getCategory(refreshToken).equals("refresh")) {
             return;
         }
 

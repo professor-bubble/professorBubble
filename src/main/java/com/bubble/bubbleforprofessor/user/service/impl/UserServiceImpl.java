@@ -44,7 +44,7 @@ public class UserServiceImpl implements UserService {
 
         // Role 확인
         // TODO: 회원가입 방법 uri로 확인?
-        Role roleUser = roleRepository.findByName("ROLE_STUDENT").orElseThrow();
+        Role roleUser = roleRepository.findByName("STUDENT").orElseThrow();
 
         User user = User.builder()
                 .loginId(joinRequestDto.getLoginId())

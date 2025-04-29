@@ -27,7 +27,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.UUID;
 
 @RequestMapping("/api/users")
-@PreAuthorize("hasRole('USER')")
 @RequiredArgsConstructor
 @RestController
 public class UserController {
@@ -42,6 +41,7 @@ public class UserController {
         return userService.createUser(joinRequestDto);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/user")
     public String mainPage(@AuthenticationPrincipal CustomPrincipal customPrincipal) {
         return "user controller - " + customPrincipal.getUserId() + " - " + customPrincipal.getUsername() + " - " + customPrincipal.getRole();
