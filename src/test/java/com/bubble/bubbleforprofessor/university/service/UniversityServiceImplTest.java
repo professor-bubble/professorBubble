@@ -1,5 +1,6 @@
 package com.bubble.bubbleforprofessor.university.service;
 
+import com.bubble.bubbleforprofessor.university.document.UniversityDocument;
 import com.bubble.bubbleforprofessor.university.dto.request.UniversityApiRequest;
 
 import com.bubble.bubbleforprofessor.university.dto.response.Body;
@@ -123,7 +124,7 @@ class UniversityServiceImplTest {
         // 2. 기존 저장된 대학 목록 (1건 있음)
         University existingUniversity = University.builder()
                 .universityId(1L)
-                .universityName("이전대학교")
+                .universityName("한국대학교")
                 .isDeleted(false)
                 .build();
         when(universityRepository.findAll()).thenReturn(List.of(existingUniversity));
@@ -131,7 +132,7 @@ class UniversityServiceImplTest {
         // 3. 새로 받아올 데이터 (기존과 다른 이름으로 덮어쓰기 유도)
         UniversityList newItem = UniversityList.builder()
                 .objectId(1L)
-                .universityName("한국대학교") // 이름 변경됨
+                .universityName("조선대학교") // 이름 변경됨
                 .build();
         Body fullBody = Body.builder()
                 .items(List.of(newItem))
@@ -156,19 +157,20 @@ class UniversityServiceImplTest {
         // then
         StepVerifier.create(result).verifyComplete();
 
-        verify(universityRepository, times(1)).findAll();
-        verify(universityRepository, times(1)).saveAll(anyList());
-
-        ArgumentCaptor<List<University>> captor = ArgumentCaptor.forClass(List.class);
-        verify(universityRepository).saveAll(captor.capture());
-
-        List<University> savedUniversities = captor.getValue();
+        // DB 저장 검증
+        ArgumentCaptor<List<University>> universityCaptor = ArgumentCaptor.forClass(List.class);
+        verify(universityRepository, times(1)).saveAll(universityCaptor.capture());
+        List<University> savedUniversities = universityCaptor.getValue();
         assertThat(savedUniversities).hasSize(1);
+        assertThat(savedUniversities.get(0).getUniversityName()).isEqualTo("조선대학교");
 
-        University saved = savedUniversities.get(0);
-        assertThat(saved.getUniversityId()).isEqualTo(1L);
-        assertThat(saved.getUniversityName()).isEqualTo("한국대학교");
+        // Elasticsearch 색인 검증
+        ArgumentCaptor<List<UniversityDocument>> esCaptor = ArgumentCaptor.forClass(List.class);
+        verify(esSearchRepository, times(1)).saveAll(esCaptor.capture());
+        List<UniversityDocument> indexedDocuments = esCaptor.getValue();
+        assertThat(indexedDocuments).hasSize(1);
+        assertThat(indexedDocuments.get(0).getUniversityName()).isEqualTo("조선대학교");
+    }
     }
 
 
-}

@@ -1,5 +1,6 @@
 package com.bubble.bubbleforprofessor.university.service;
 
+import com.bubble.bubbleforprofessor.university.document.UniversityDocument;
 import com.bubble.bubbleforprofessor.university.dto.request.UniversityApiRequest;
 import com.bubble.bubbleforprofessor.university.dto.response.UniversityApiResponse;
 import com.bubble.bubbleforprofessor.university.entity.University;
@@ -205,17 +206,21 @@ public class UniversityServiceImpl implements UniversityService {
 
     //대학교list DB -> Elasticsearch에 저장
     private void indexUniversityies(List<University> universities){
-        esSearchRepository.saveAll(universities);
+        List<UniversityDocument> documents = universities.stream()
+                .map(UniversityDocument::fromEntity)   // University → UniversityDocument 변환
+                .collect(Collectors.toList());
+
+        esSearchRepository.saveAll(documents);
         log.info("색인된 대학교 갯수 : {} ", universities.size());
     }
 
 
     //검색 메서드
-    public List<University> searchUniversity(String uniname){
+    public List<UniversityDocument> searchUniversity(String uniname){
         if (uniname == null || uniname.trim().isEmpty()) { //null 확인 및  앞뒤 공백을 제거한 후 빈 문자열인지 확인
             throw new CustomException(ErrorCode.UNIVERSITYNAME_INVALID_REQUEST);
         }
-        List<University> universities = esSearchRepository.findByUniversityNameContaining(uniname);
+        List<UniversityDocument> universities = esSearchRepository.findByUniversityNameContaining(uniname);
         if (universities.isEmpty()) {
             throw new CustomException(ErrorCode.UNIVERSITY_NOT_FOUND);
         }
