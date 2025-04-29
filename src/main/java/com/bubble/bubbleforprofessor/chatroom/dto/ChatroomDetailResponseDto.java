@@ -1,10 +1,6 @@
 package com.bubble.bubbleforprofessor.chatroom.dto;
 
 import com.bubble.bubbleforprofessor.user.dto.ProfessorResponseDto;
-<<<<<<<< HEAD:src/main/java/com/bubble/bubbleforprofessor/chatroom/dto/ChatroomResponseDto.java
-import com.bubble.bubbleforprofessor.user.dto.UserSimpleResponseDto;
-========
->>>>>>>> origin/dev:src/main/java/com/bubble/bubbleforprofessor/chatroom/dto/ChatroomDetailResponseDto.java
 import lombok.Builder;
 import lombok.Data;
 
