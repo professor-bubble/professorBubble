@@ -3,7 +3,8 @@ package com.bubble.bubbleforprofessor.payment.entity;
 import com.bubble.bubbleforprofessor.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.elasticsearch.annotations.Document;
+import org.hibernate.annotations.Where;
+
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -12,8 +13,8 @@ import java.util.List;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@Document(indexName = "Order")
 @Table(name = "Orders")
+@Where(clause = "is_deleted = false") // 소프트 삭제된 데이터 제외
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,8 +27,14 @@ public class Order {
     @Column(name="total_amount", nullable = false)
     private Integer totalAmount;
 
-    @Column(name="create_at", nullable = false)
+    @Column(name="created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "is_deleted", nullable = false)
+    private boolean isDeleted = false;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 
     //주문 생성시 자동으로 값 저장 save()
     @PrePersist
@@ -61,12 +68,15 @@ public class Order {
         this.totalAmount = totalAmount;
     }
 
-
+    public void softDelete() {
+        this.isDeleted = true;
+        this.deletedAt = LocalDateTime.now();
+    }
 }
 
 //USER의 주문 활성 및 취소 상태표시
 //즉, 유저1이 주문을 넣었다가 취소할 수 있다는 가정하여 ORDER DB에서 주문을 삭제하지않고 아래 ENUM으로 수정
-public enum OrderStatus {
+public enum OrderStatus{
     PENDING,        //주문 대기
     SUCCEEDED,      //주문 완료
     FAILED,         //주문 실패

@@ -43,6 +43,12 @@ public class Payment {
     @Column(name = "payment_status", nullable = false)
     private String paymentStatus = "PENDING";
 
+    @Column(name = "is_deleted", nullable = false)
+    private boolean isDeleted = false;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
 
     public void updatePaymentStatus(String status, String approvedAt) {
         this.paymentStatus = status;
@@ -56,6 +62,10 @@ public class Payment {
         }
     }
 
+    public void softDelete() {
+        this.isDeleted = true;
+        this.deletedAt = LocalDateTime.now();
+    }
 
 
     @Builder

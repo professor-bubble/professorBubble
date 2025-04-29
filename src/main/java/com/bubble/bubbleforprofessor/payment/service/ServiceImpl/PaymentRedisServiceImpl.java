@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -31,6 +32,13 @@ public class PaymentRedisServiceImpl implements PaymentRedisService {
     @Override
     public void deleteOrderAmount(String orderId) {
         redisTemplate.delete(orderId);
+    }
+
+    @Override
+    public List<Boolean> existsMulti(List<String> keys) {
+        return keys.stream()
+                .map(key -> redisTemplate.hasKey(key))
+                .toList();
     }
 
 }

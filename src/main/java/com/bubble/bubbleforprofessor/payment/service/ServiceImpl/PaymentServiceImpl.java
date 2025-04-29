@@ -154,8 +154,8 @@ public class PaymentServiceImpl implements PaymentService {
             throw new CustomException(ErrorCode.NON_EXISTENT_ORDER);
         }
 
-        if(redisOrderAmount != amount) {
-            //failPayment(paymentKey, orderId, amount);
+        if(!redisOrderAmount.equals(tossResponse.getTotalAmount())) {
+           // failPayment(paymentKey, orderId, amount);
             throw new CustomException(ErrorCode.INVALID_AMOUNT);
         }
 
