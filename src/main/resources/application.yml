@@ -48,4 +48,6 @@ logging:
 
 
 jwt:
-  expirationtime: 216000
+  expirationtime:
+    refresh: 216000
+    access: 216000

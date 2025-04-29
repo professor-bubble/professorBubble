@@ -1,8 +1,12 @@
 package com.bubble.bubbleforprofessor.global.jwt;
 
+import com.bubble.bubbleforprofessor.global.config.CustomException;
+import com.bubble.bubbleforprofessor.global.config.ErrorCode;
 import com.bubble.bubbleforprofessor.user.dto.CustomPrincipal;
 import com.bubble.bubbleforprofessor.user.entity.Role;
 import com.bubble.bubbleforprofessor.user.entity.User;
+import com.bubble.bubbleforprofessor.user.repository.RoleRepository;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,50 +24,37 @@ import java.util.UUID;
 public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
-
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        String path = request.getRequestURI();
-        System.out.println("요청 경로: " + request.getRequestURI());
-        return path.equals("/api/users/join");
-    }
+    private final RoleRepository roleRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         // request에서 Authorization 헤더 추출
-        String authorization = request.getHeader("Authorization");
+        String accssToken = request.getHeader("access");
 
         // Authorization 검증
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
-            System.out.println("token null");
+        if (accssToken == null) {
             filterChain.doFilter(request, response);
 
             return;
         }
 
         // 토큰 검증 시작
-        System.out.println("Authorization now");
-        // 토큰 추출("Bearer " 제거)
-        String token = authorization.split(" ")[1];
-
-        // 만료시간 검증
-        if (jwtUtil.isExpired(token)) {
-            System.out.println("token expired");
-            filterChain.doFilter(request, response);
-
-            return;
+        try {
+            jwtUtil.isExpired(accssToken);
+        } catch (ExpiredJwtException e) {
+            throw new CustomException(ErrorCode.EXPIRED_JWT);
         }
 
         // 토큰에서 username과 role을 획득
-        String username = jwtUtil.getUsername(token);
-        String role = jwtUtil.getRole(token);
-        String userId = jwtUtil.getUserId(token);
+        String username = jwtUtil.getUsername(accssToken);
+        Role role = roleRepository.findByName(jwtUtil.getRole(accssToken)).orElseThrow(()-> new CustomException(ErrorCode.NON_EXISTENT_ROLE));
+        String userId = jwtUtil.getUserId(accssToken);
 
         // userEntity 생성
         User user = User.builder()
                 .id(UUID.fromString(userId))
                 .loginId(username)
-                .role(new Role(role))
+                .role(role)
                 .build();
 
         // UserDetails에 회원정보 객체 담기

@@ -35,8 +35,16 @@ public enum ErrorCode {
     // 이미 존재하는 교수
     EXISTENT_PROFESSOR("이미 존재하는 교수입니다", HttpStatus.CONFLICT),
 
+    /**
+     * Role
+     */
     // 존재하지않는 권한입니다.
     NON_EXISTENT_ROLE("존재하지 않는 권한입니다.", HttpStatus.NOT_FOUND),
+
+    /**
+     * JWT
+     */
+    EXPIRED_JWT("JWT의 유효기간이 만료되었습니다.", HttpStatus.UNAUTHORIZED),
 
     /**
      * UNIVERSITY

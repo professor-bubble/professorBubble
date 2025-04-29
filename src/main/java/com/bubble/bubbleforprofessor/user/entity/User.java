@@ -33,7 +33,7 @@ public class User {
     private Timestamp lastLoginAt;
     @Column(length = 20, nullable = false)
     private String name;
-    @Column(length = 15, nullable = false,unique = true)
+    @Column(length = 15, nullable = false, unique = true)
     private String phoneNumber;
     @Column(length = 50, nullable = false,unique = true)
     private String email;

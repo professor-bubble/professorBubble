@@ -33,7 +33,7 @@ public class CustomPrincipal implements OAuth2User, UserDetails {
         authorities.add(new GrantedAuthority() {
             @Override
             public String getAuthority() {
-                return user.getRole().getName();
+                return "ROLE_" + user.getRole().getName();
             }
         });
 
