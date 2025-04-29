@@ -20,6 +20,8 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(errorCode.getMsg(), errorCode.getStatus().value(), timeStamp);
         return new ResponseEntity<>(errorResponse, errorCode.getStatus());
 
+
+
         //todo illlecpxtipn 추가
 
     }

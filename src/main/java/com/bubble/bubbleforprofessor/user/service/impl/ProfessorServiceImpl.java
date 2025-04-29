@@ -2,6 +2,9 @@ package com.bubble.bubbleforprofessor.user.service.impl;
 
 
 
+import com.bubble.bubbleforprofessor.chatroom.entity.Chatroom;
+import com.bubble.bubbleforprofessor.chatroom.entity.ChatroomUser;
+import com.bubble.bubbleforprofessor.chatroom.repository.ChatroomUserRepository;
 import com.bubble.bubbleforprofessor.chatroom.service.ChatroomService;
 import com.bubble.bubbleforprofessor.global.config.CustomException;
 import com.bubble.bubbleforprofessor.global.config.ErrorCode;
@@ -35,6 +38,7 @@ public class ProfessorServiceImpl implements ProfessorService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final ChatroomService chatroomService;
+    private final ChatroomUserRepository chatroomUserRepository;
 
     //todo fetch type eager로 가져오면됨. queryDSL과 성능비교? ngrinder
 //    교수 승인 요청 리스트 반환
@@ -45,7 +49,7 @@ public class ProfessorServiceImpl implements ProfessorService {
                         .userId(Optional.ofNullable(professor.getUser()).map(User::getId).orElse(null))
                         .universityName(Optional.ofNullable(professor.getUser())
                                 .map(User::getUniversity)
-                                .map(University::getName)
+                                .map(University::getUniversityName)
                                 .orElse(null))
                         .department(professor.getDepartment())
                         .professorNum(professor.getProfessorNum())
@@ -78,7 +82,10 @@ public class ProfessorServiceImpl implements ProfessorService {
 
 
         // 교수 승인하면 채팅방 생성
-        chatroomService.createChatroom(professor);
+        Chatroom chatroom =chatroomService.createChatroom(professor);
+
+        ChatroomUser chatroomUser=new ChatroomUser(chatroom,user,user.getName());
+        chatroomUserRepository.save(chatroomUser);
 
     }
 //  승인거절하면 교수데이터 삭제

@@ -1,5 +1,7 @@
 package com.bubble.bubbleforprofessor.user.service.impl;
 
+import com.bubble.bubbleforprofessor.chatroom.entity.Chatroom;
+import com.bubble.bubbleforprofessor.chatroom.repository.ChatroomUserRepository;
 import com.bubble.bubbleforprofessor.chatroom.service.ChatroomService;
 import com.bubble.bubbleforprofessor.global.config.CustomException;
 import com.bubble.bubbleforprofessor.global.config.ErrorCode;
@@ -49,6 +51,9 @@ class ProfessorServiceImplTest {
     @InjectMocks
     private ProfessorServiceImpl professorService;
 
+    @Mock
+    private ChatroomUserRepository chatroomUserRepository;
+
     private UUID userId;
     private Professor professor;
     private User user;
@@ -58,7 +63,9 @@ class ProfessorServiceImplTest {
     @BeforeEach
     void setUp() {
         userId = UUID.randomUUID();
-        University university = new University("Test University");
+        University university = University.builder()
+                .universityName("조선대학교")
+                .build();
 
         user = User.builder()
                 .id(userId)
@@ -87,7 +94,9 @@ class ProfessorServiceImplTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(spyUser)); // spyUser 사용
         when(roleRepository.findByName("ROLE_PROFESSOR")).thenReturn(Optional.of(professorRole));
 
-        doNothing().when(chatroomService).createChatroom(professor);
+        Chatroom chatroom=new Chatroom(professor);
+
+        when(chatroomService.createChatroom(professor)).thenReturn(chatroom);
 
         // when
         professorService.setApprovalStatus(userId);
@@ -125,7 +134,7 @@ class ProfessorServiceImplTest {
         // then
         assertEquals(1, result.getTotalElements());
         ApprovalRequestDto dto = result.getContent().get(0);
-        assertEquals("Test University", dto.getUniversityName());
+        assertEquals("조선대학교", dto.getUniversityName());
         assertEquals("Computer Science", dto.getDepartment());
         assertEquals(12345, dto.getProfessorNum());
         assertEquals("John Doe", dto.getProfessorName());

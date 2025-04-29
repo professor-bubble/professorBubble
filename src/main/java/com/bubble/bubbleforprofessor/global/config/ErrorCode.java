@@ -16,6 +16,7 @@ public enum ErrorCode {
     // 이미 사용중인 이메일
     DUPLICATE_USER_EMAIL("이미 사용 중인 이메일입니다", HttpStatus.CONFLICT),
 
+
     // 존재하지않는 유저
     NON_EXISTENT_USER("존재하지 않는 유저입니다", HttpStatus.BAD_REQUEST),
 
@@ -50,7 +51,10 @@ public enum ErrorCode {
      */
     UNIVERSITY_API_CALL_FAILED("대학교 외부 API 호출에 실패했습니다", HttpStatus.BAD_REQUEST),
     INVALID_REQUEST("요청이 유효하지 않습니다", HttpStatus.BAD_REQUEST),
-
+    UNI_API_RESPONSE_NULL("대학교 외부API 응답이 없습니다", HttpStatus.INTERNAL_SERVER_ERROR),
+    BODY_MISSING("대학교 이름이 응답 본문이 없습니다", HttpStatus.BAD_GATEWAY),
+    UNIVERSITYNAME_INVALID_REQUEST("검색어(universityName)는 필수입니다", HttpStatus.BAD_REQUEST),
+    UNIVERSITY_NOT_FOUND("해당 검색어에 맞는 대학교를 찾을 수 없습니다",HttpStatus.NOT_FOUND),
     /**
     * skin
      */
@@ -72,7 +76,10 @@ public enum ErrorCode {
     NON_EXISTENT_CHATROOM("존재하지 않는 채팅방입니다.", HttpStatus.NOT_FOUND),
 
     //내 채팅방이 아닌경우
-    NON_EXISTENT_CHATROOM_USER("내가 존재하는 채팅방이 아닙니다.",HttpStatus.NOT_FOUND);
+    NON_EXISTENT_CHATROOM_USER("내가 존재하는 채팅방이 아닙니다.",HttpStatus.NOT_FOUND),
+
+    //내가 이미 존재하는 채팅방인경우
+    EXISTENT_CHATROOM_USER("내가 이미 존재하는 채팅방입니다.",HttpStatus.CONFLICT);
 
     private final String msg;
     private final HttpStatus status;

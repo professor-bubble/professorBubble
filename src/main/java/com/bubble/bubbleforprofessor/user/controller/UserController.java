@@ -1,7 +1,10 @@
 package com.bubble.bubbleforprofessor.user.controller;
 
+import com.bubble.bubbleforprofessor.chatroom.dto.ChatroomDetailResponseDto;
+import com.bubble.bubbleforprofessor.chatroom.dto.ChatroomEnterRequestDto;
 import com.bubble.bubbleforprofessor.chatroom.dto.ChatroomResponseDto;
 import com.bubble.bubbleforprofessor.chatroom.service.ChatroomService;
+import com.bubble.bubbleforprofessor.chatroom.service.ChatroomUserService;
 import com.bubble.bubbleforprofessor.skin.dto.SkinResponseDto;
 import com.bubble.bubbleforprofessor.skin.service.SkinService;
 import com.bubble.bubbleforprofessor.user.dto.ApprovalRequestCreateDto;
@@ -24,9 +27,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.UUID;
 
 @RequestMapping("/api/users")
+@PreAuthorize("hasRole('USER')")
 @RequiredArgsConstructor
 @RestController
 public class UserController {
@@ -35,13 +40,13 @@ public class UserController {
     private final SkinService skinService;
     private final ChatroomService chatroomService;
     private final UserService userService;
+    private final ChatroomUserService chatroomUserService;
 
     @PostMapping()
     public String join(@Valid @ModelAttribute JoinRequestDto joinRequestDto) {
         return userService.createUser(joinRequestDto);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/user")
     public String mainPage(@AuthenticationPrincipal CustomPrincipal customPrincipal) {
         return "user controller - " + customPrincipal.getUserId() + " - " + customPrincipal.getUsername() + " - " + customPrincipal.getRole();
@@ -82,11 +87,27 @@ public class UserController {
         skinService.modifySkinStatus(userId,skinId);
         return ResponseEntity.ok(true);
     }
-
+    //내 특정 채팅방 조회
     @GetMapping("/{userId}/chatroom/{chatroomId}")
-    public ResponseEntity<ChatroomResponseDto> getChatroom(@PathVariable UUID userId,
-                                                           @PathVariable int chatroomId) {
-        ChatroomResponseDto chatroomDto = chatroomService.findByUserIdAndChatRoomId(userId,chatroomId);
+    public ResponseEntity<ChatroomDetailResponseDto> getChatroom(@PathVariable UUID userId,
+                                                                 @PathVariable int chatroomId) {
+        ChatroomDetailResponseDto chatroomDto = chatroomService.findByUserIdAndChatRoomId(userId,chatroomId);
         return ResponseEntity.ok(chatroomDto);
+    }
+    //내 채팅방 리스트 조회
+    @GetMapping("/{userId}/chatrooms")
+    public ResponseEntity<List<ChatroomResponseDto>> getAllChatroomByUserId(@PathVariable UUID userId) {
+        List<ChatroomResponseDto> chatroomResponseDtoList = chatroomService.findAllChatroomByUserId(userId);
+        return ResponseEntity.ok(chatroomResponseDtoList);
+    }
+
+    //채팅방 생성(유저 최초 입장)
+    @PostMapping(value ="/{userId}/chatroom/{chatroomId}",produces = "application/json")
+    public ResponseEntity<Boolean> createChatroomUser(@PathVariable UUID userId,
+                                                      @PathVariable int chatroomId,
+                                                      @RequestBody ChatroomEnterRequestDto chatroomEnterRequestDto)
+    {
+        chatroomUserService.createChatroomUser(userId,chatroomId,chatroomEnterRequestDto);
+        return ResponseEntity.ok(true);
     }
 }
