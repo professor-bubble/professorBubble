@@ -1,13 +1,14 @@
 package com.bubble.bubbleforprofessor.university.repository.es;
 
+import com.bubble.bubbleforprofessor.university.document.UniversityDocument;
 import com.bubble.bubbleforprofessor.university.entity.University;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 @Repository("ElasticSearchRepository")
-public interface UniversityElasticSearchRepository extends ElasticsearchRepository<University, Long> {
-    List<University> findByUniversityNameContaining(String name);
+public interface UniversityElasticSearchRepository extends ElasticsearchRepository<UniversityDocument, Long> {
+    List<UniversityDocument> findByUniversityNameContaining(String name);
 
 
     // 부분 일치 검색으로 변경

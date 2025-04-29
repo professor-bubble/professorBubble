@@ -44,7 +44,7 @@ logging:
       glassfish:
         jaxb: debug
     root: INFO
-    com.bubble.buubleforprofessor: DEBUG
+    com.bubble.bubbleforprofessor: DEBUG
 
 
 jwt:
