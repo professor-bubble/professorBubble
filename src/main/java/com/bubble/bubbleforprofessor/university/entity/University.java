@@ -9,7 +9,6 @@ import org.springframework.data.annotation.Id;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Builder
-@Document(indexName = "universities") //indexName에 대문자 들어가면안됨, Elasticsearch는 HTTP 기반 API를 사용하는데, URL 경로에서 대소문자 문제를 방지하려고 소문자만 허용
 @Table(name="University")
 public class University {
 
