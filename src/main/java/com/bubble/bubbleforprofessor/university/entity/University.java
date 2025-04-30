@@ -7,11 +7,9 @@ import org.springframework.data.annotation.Id;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 @Getter
-@Document(indexName = "universities") //indexName에 대문자 들어가면안됨, Elasticsearch는 HTTP 기반 API를 사용하는데, URL 경로에서 대소문자 문제를 방지하려고 소문자만 허용
-@Table(name="University")
 @Builder
+@Table(name="University")
 public class University {
 
     @Id
@@ -24,6 +22,13 @@ public class University {
 
     @Column(name="is_deleted", nullable = false)
     private boolean isDeleted;
+
+
+    public University(Long universityId, String universityName, boolean isDeleted) {
+        this.universityId = universityId;
+        this.universityName = universityName;
+        this.isDeleted = isDeleted;
+    }
 
     public void updateNameIfChanged(String newName) {
         if (!this.universityName.equals(newName)) {
@@ -40,4 +45,5 @@ public class University {
     public void markAsDeleted() {
         this.isDeleted = true;
     }
+
 }

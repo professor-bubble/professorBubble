@@ -11,4 +11,3 @@ import org.springframework.stereotype.Repository;
 @Repository("UniversityRepository")
 public interface UniversityRepository extends JpaRepository<University, Long> {
 }
-

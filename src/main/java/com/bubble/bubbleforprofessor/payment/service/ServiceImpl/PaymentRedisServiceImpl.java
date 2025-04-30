@@ -30,15 +30,9 @@ public class PaymentRedisServiceImpl implements PaymentRedisService {
     }
 
     @Override
-    public void deleteOrderAmount(String orderId) {
+    public void deleteRedisOrder(String orderId) {
         redisTemplate.delete(orderId);
     }
 
-    @Override
-    public List<Boolean> existsMulti(List<String> keys) {
-        return keys.stream()
-                .map(key -> redisTemplate.hasKey(key))
-                .toList();
-    }
 
 }

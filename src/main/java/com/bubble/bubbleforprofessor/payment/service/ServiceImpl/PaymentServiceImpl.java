@@ -184,7 +184,7 @@ public class PaymentServiceImpl implements PaymentService {
         paymentRepository.save(payment);
         orderRepository.save(order);
 
-        redisService.deleteOrderAmount(redisOrderId);
+        redisService.deleteRedisOrder(redisOrderId);
 
         return new SuccessResponseDto(paymentStatus, String.valueOf(orderId), paymentKey, amount, paymentStatus);
     }

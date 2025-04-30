@@ -28,24 +28,11 @@ public class PaymentCleanupScheduler {
     @Scheduled(fixedRate = 5 * 60 * 1000) // 5분 간격
     @Transactional
     public void cleanUpExpiredPendingPayments() {
-        LocalDateTime cutoff = LocalDateTime.now().minusMinutes(30); //30분 전 시간
+        LocalDateTime cutoff = LocalDateTime.now().minusMinutes(15); //15분 전 시간
 
-        List<Order> expiredOrders = orderRepository.findAllByOrderStatusAndCreatedAtBefore(OrderStatus.PENDING, cutoff);
+        List<Order> expiredOrders = orderRepository.findExpiredOrders(OrderStatus.PENDING, cutoff);
 
-        List<String> redisKeys = expiredOrders.stream()
-                .map(order -> "ORDER_" + order.getOrderId())
-                .toList();
-
-        List<Boolean> existsList = redisService.existsMulti(redisKeys);
-
-        for (int i = 0; i < expiredOrders.size(); i++) {
-            Order order = expiredOrders.get(i);
-            boolean redisExists = existsList.get(i);
-
-            if (!redisExists) {
-                softDeleteOrderFlow(order);
-            }
-        }
+        expiredOrders.forEach(this :: softDeleteOrderFlow);
     }
 
     private void softDeleteOrderFlow(Order order) {
@@ -64,6 +51,9 @@ public class PaymentCleanupScheduler {
             paymentRepository.save(payment);
         });
 
-        log.info("[SoftDelete] orderId={} and related details/payment marked as deleted.", order.getOrderId());
+        String redisKey = "ORDER_" + order.getOrderId();
+        redisService.deleteRedisOrder(redisKey);
+
+        log.info("[SoftDelete] orderId={}및 관련 orderDetail/payment softdelet 완료", order.getOrderId());
     }
 }

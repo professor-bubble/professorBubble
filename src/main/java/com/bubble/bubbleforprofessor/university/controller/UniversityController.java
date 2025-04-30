@@ -1,5 +1,6 @@
 package com.bubble.bubbleforprofessor.university.controller;
 
+import com.bubble.bubbleforprofessor.university.document.UniversityDocument;
 import com.bubble.bubbleforprofessor.university.dto.request.UniversityApiRequest;
 import com.bubble.bubbleforprofessor.university.entity.University;
 import com.bubble.bubbleforprofessor.university.service.UniversityService;
@@ -41,11 +42,11 @@ public class UniversityController {
 
 
 
-  //  @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'SUB_ADMIN')")
+    //  @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'SUB_ADMIN')")
     @GetMapping("/search")
     public ResponseEntity<Map<String, Object>> universitySearch(@RequestParam String uniname) {
         try {
-            List<University> universities = universityService.searchUniversity(uniname);
+            List<UniversityDocument> universities = universityService.searchUniversity(uniname);
             Map<String, Object> response = new HashMap<>();
             response.put("status", 200);
             response.put("message", "대학교 조회 성공");

@@ -12,9 +12,7 @@ import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @XmlRootElement(name = "response")
 @Getter
@@ -25,10 +23,16 @@ import lombok.Setter;
 XmlAccessType.FIELD: 모든 필드(심지어 private도 포함)를 직접 접근해서 데이터를 넣어줘, getter/setter가 없어도 필드 자체를 사용할 수 있게 해줌
 * */
 @NoArgsConstructor
+@Builder
 public class UniversityApiResponse {
     @XmlElement(name = "header")
     private Header header;
 
     @XmlElement(name = "body")
     private Body body;
+
+    public UniversityApiResponse(Header header, Body body) {
+        this.header = header;
+        this.body = body;
+    }
 }

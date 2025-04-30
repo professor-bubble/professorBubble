@@ -5,12 +5,9 @@ import org.springframework.beans.factory.annotation.Value;
 
 @Builder
 @Getter
-@AllArgsConstructor
 public class UniversityApiRequest {
-   // @Value("${universityApi.serviceKey}")
 
-    @Builder.Default
-    private String serviceKey="W9J4P7PW-W9J4-W9J4-W9J4-W9J4P7PW4Y";
+    private String serviceKey;
 
     @Builder.Default
     private int pageNo = 1;
@@ -21,6 +18,14 @@ public class UniversityApiRequest {
 
     @Builder.Default
     private String fcltyCd = "502040";
+
+    public UniversityApiRequest(String serviceKey, int pageNo, int numOfRows, String dataType, String fcltyCd) {
+        this.serviceKey = serviceKey;
+        this.pageNo = pageNo;
+        this.numOfRows = numOfRows;
+        this.dataType = dataType;
+        this.fcltyCd = fcltyCd;
+    }
 
 
 }

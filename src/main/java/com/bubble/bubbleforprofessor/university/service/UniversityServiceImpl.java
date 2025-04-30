@@ -1,5 +1,6 @@
 package com.bubble.bubbleforprofessor.university.service;
 
+import com.bubble.bubbleforprofessor.university.document.UniversityDocument;
 import com.bubble.bubbleforprofessor.university.dto.request.UniversityApiRequest;
 import com.bubble.bubbleforprofessor.university.dto.response.UniversityApiResponse;
 import com.bubble.bubbleforprofessor.university.entity.University;
@@ -11,6 +12,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -44,6 +46,8 @@ public class UniversityServiceImpl implements UniversityService {
 
     private final UniversityElasticSearchRepository esSearchRepository;
 
+    @Value("${universityApi.serviceKey}")
+    private String serviceKey;
 
     @PostConstruct
     public void init(){
@@ -67,17 +71,17 @@ public class UniversityServiceImpl implements UniversityService {
     public Mono<Void> saveAllUniversities(UniversityApiRequest uniRequest) {
         // Step 1: 초기 값 요청으로 totalCount 가져오기
         UniversityApiRequest initRequest = UniversityApiRequest.builder()
-                .serviceKey(uniRequest.getServiceKey())
+                .serviceKey(serviceKey)
                 .pageNo(uniRequest.getPageNo())
                 .dataType(uniRequest.getDataType())
                 .fcltyCd(uniRequest.getFcltyCd())
                 .numOfRows(1)
                 .build();
-
+        log.info("initRequest 생성 - pageNo: {}, fcltyCd; {}", initRequest.getPageNo(), initRequest.getFcltyCd());
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/data/getUniversity.do")
-                        .queryParam("serviceKey", initRequest.getServiceKey())
+                        .queryParam("serviceKey", serviceKey)
                         .queryParam("pageNo", initRequest.getPageNo())
                         .queryParam("numOfRows", initRequest.getNumOfRows())
                         .queryParam("dataType", initRequest.getDataType())
@@ -98,26 +102,26 @@ public class UniversityServiceImpl implements UniversityService {
                     int totalCount = initResponse.getBody().getTotalCount();
                     log.info("Total count: {}", totalCount);
                     UniversityApiRequest fullRequest = UniversityApiRequest.builder()
-                            .serviceKey(uniRequest.getServiceKey())
+                            .serviceKey(serviceKey)
                             .pageNo(uniRequest.getPageNo())
                             .dataType(uniRequest.getDataType())
                             .fcltyCd(uniRequest.getFcltyCd())
                             .numOfRows(totalCount)
                             .build();
 
-                // Step 3: 전체 데이터 요청
-                return webClient.get()
-                        .uri(uriBuilder -> uriBuilder
-                                .path("/data/getUniversity.do")
-                                .queryParam("serviceKey",fullRequest.getServiceKey())
-                                .queryParam("pageNo", fullRequest.getPageNo())
-                                .queryParam("numOfRows", fullRequest.getNumOfRows())
-                                .queryParam("dataType", fullRequest.getDataType())
-                                .queryParam("Fclty_Cd", fullRequest.getFcltyCd())
-                                .build())
-                        .retrieve()
-                        .bodyToMono(UniversityApiResponse.class);
-            })
+                    // Step 3: 전체 데이터 요청
+                    return webClient.get()
+                            .uri(uriBuilder -> uriBuilder
+                                    .path("/data/getUniversity.do")
+                                    .queryParam("serviceKey",serviceKey)
+                                    .queryParam("pageNo", fullRequest.getPageNo())
+                                    .queryParam("numOfRows", fullRequest.getNumOfRows())
+                                    .queryParam("dataType", fullRequest.getDataType())
+                                    .queryParam("Fclty_Cd", fullRequest.getFcltyCd())
+                                    .build())
+                            .retrieve()
+                            .bodyToMono(UniversityApiResponse.class);
+                })
                 .flatMap(fullResponse -> {
                     // null 체크
                     if (fullResponse == null) {
@@ -135,7 +139,7 @@ public class UniversityServiceImpl implements UniversityService {
                                     .isDeleted(false)
                                     .build())
                             .collect(Collectors.toList());
-
+                    log.info("fullRequest 생성 - pageNo: {}, fcltyCd; {}", initRequest.getPageNo(), initRequest.getFcltyCd());
                     return Mono.fromRunnable(() -> saveToDb(universities))
                             .subscribeOn(Schedulers.boundedElastic())
                             .onErrorResume(e -> {
@@ -202,17 +206,21 @@ public class UniversityServiceImpl implements UniversityService {
 
     //대학교list DB -> Elasticsearch에 저장
     private void indexUniversityies(List<University> universities){
-        esSearchRepository.saveAll(universities);
+        List<UniversityDocument> documents = universities.stream()
+                .map(UniversityDocument::fromEntity)   // University → UniversityDocument 변환
+                .collect(Collectors.toList());
+
+        esSearchRepository.saveAll(documents);
         log.info("색인된 대학교 갯수 : {} ", universities.size());
     }
 
 
     //검색 메서드
-    public List<University> searchUniversity(String uniname){
+    public List<UniversityDocument> searchUniversity(String uniname){
         if (uniname == null || uniname.trim().isEmpty()) { //null 확인 및  앞뒤 공백을 제거한 후 빈 문자열인지 확인
             throw new CustomException(ErrorCode.UNIVERSITYNAME_INVALID_REQUEST);
         }
-        List<University> universities = esSearchRepository.findByUniversityNameContaining(uniname);
+        List<UniversityDocument> universities = esSearchRepository.findByUniversityNameContaining(uniname);
         if (universities.isEmpty()) {
             throw new CustomException(ErrorCode.UNIVERSITY_NOT_FOUND);
         }
