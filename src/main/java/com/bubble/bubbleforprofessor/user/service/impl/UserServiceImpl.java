@@ -2,6 +2,7 @@ package com.bubble.bubbleforprofessor.user.service.impl;
 
 import com.bubble.bubbleforprofessor.global.config.CustomException;
 import com.bubble.bubbleforprofessor.global.config.ErrorCode;
+import com.bubble.bubbleforprofessor.user.dto.JoinProfessorRequestDto;
 import com.bubble.bubbleforprofessor.user.dto.JoinRequestDto;
 import com.bubble.bubbleforprofessor.user.entity.Role;
 import com.bubble.bubbleforprofessor.user.entity.User;
@@ -66,5 +67,11 @@ public class UserServiceImpl implements UserService {
         }
 
         return "join Success";
+    }
+
+    @Override
+    public String createUser1(JoinRequestDto joinRequestDto, JoinProfessorRequestDto joinProfessorRequestDto) {
+
+        return "";
     }
 }
