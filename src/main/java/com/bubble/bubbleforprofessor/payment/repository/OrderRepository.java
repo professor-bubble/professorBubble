@@ -29,8 +29,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
 
     @Modifying
-    @Query("DELETE FROM Order o WHERE o.isDeleted = true AND o.deletedAt < :cutoff")
-    void hardDeleteOldSoftDeletedOrders(@Param("cutoff") LocalDateTime cutoff);
+    @Query("DELETE FROM Order o WHERE o.orderId IN :ids")
+    void hardDeleteByOrderIds(@Param("ids") List<Long> ids);
+
 
     @Query("SELECT o.orderId FROM Order o WHERE o.isDeleted = true AND o.deletedAt < :cutoff")
     List<Long> findIdsBySoftDeletedBefore(@Param("cutoff") LocalDateTime cutoff);

@@ -21,6 +21,8 @@ public class PaymentHardDeleteScheduler {
     private final OrderDetailRepository orderDetailRepository;
     private final PaymentRepository paymentRepository;
 
+    private static final int CHUNK_SIZE = 100;
+
     /**
      * 매일 새벽 3시에 실행됨
      * 30일이 지난 soft-deleted 주문 관련 데이터 완전 삭제
@@ -37,10 +39,21 @@ public class PaymentHardDeleteScheduler {
             return;
         }
 
-        orderDetailRepository.hardDeleteByOrderIds(orderIdsToDelete);
-        paymentRepository.hardDeleteByOrderIds(orderIdsToDelete);
-        orderRepository.hardDeleteOldSoftDeletedOrders(cutoff);
+        log.info("[HardDelete] 총 삭제 대상 주문 수: {}", orderIdsToDelete.size());
 
-        log.info("[HardDelete] {}건의 주문/주문상세/결제 정보를 영구 삭제 완료", orderIdsToDelete.size());
+        for (int i = 0; i < orderIdsToDelete.size(); i += CHUNK_SIZE) {
+            List<Long> chunk = orderIdsToDelete.subList(
+                    i,
+                    Math.min(i + CHUNK_SIZE, orderIdsToDelete.size())
+            );
+
+            orderDetailRepository.hardDeleteByOrderIds(chunk);
+            paymentRepository.hardDeleteByOrderIds(chunk);
+            orderRepository.hardDeleteByOrderIds(chunk);
+
+            log.info("[HardDelete] {} ~ {}번 주문 삭제 처리 완료", i + 1, i + chunk.size());
+        }
+
+        log.info("[HardDelete] 모든 soft-deleted 주문 완전 삭제 완료");
     }
 }

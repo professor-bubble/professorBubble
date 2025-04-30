@@ -12,6 +12,11 @@ import java.util.List;
 @Repository
 public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> {
 
+    /*
+    * Query 어노테이션은 SELECT 용
+    * 수정/삭제 쿼리 직접 사용시 Modifying 어노테이션 붙여줘야함
+    * */
+
     @Modifying
     @Query("UPDATE OrderDetail od SET od.isDeleted = true, od.deletedAt = CURRENT_TIMESTAMP WHERE od.order.orderId = :orderId")
     void softDeleteByOrderId(@Param("orderId") Long orderId);
