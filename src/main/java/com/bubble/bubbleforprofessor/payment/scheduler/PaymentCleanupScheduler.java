@@ -8,6 +8,8 @@ import com.bubble.bubbleforprofessor.payment.repository.PaymentRepository;
 import com.bubble.bubbleforprofessor.payment.service.PaymentRedisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,17 +27,29 @@ public class PaymentCleanupScheduler {
     private final OrderDetailRepository orderDetailRepository;
     private final PaymentRedisService redisService;
 
+    private static final int PAGE_SIZE = 100;
+
     @Scheduled(fixedRate = 5 * 60 * 1000) // 5분 간격
     @Transactional
     public void cleanUpExpiredPendingPayments() {
         LocalDateTime cutoff = LocalDateTime.now().minusMinutes(15); //15분 전 시간
+        int pageNumber = 0;
 
-        List<Order> expiredOrders = orderRepository.findExpiredOrders(OrderStatus.PENDING, cutoff);
+        Page<Order> expiredOrdersPage;
 
-        expiredOrders.forEach(this :: softDeleteOrderFlow);
+        do {
+            PageRequest pageRequest = PageRequest.of(pageNumber++, PAGE_SIZE);
+            expiredOrdersPage = orderRepository.findByOrderStatusAndCreatedAtBeforeAndIsDeletedFalse(
+                    OrderStatus.PENDING, cutoff, pageRequest
+            );
+
+            expiredOrdersPage.forEach(this::softDeleteOrderFlow);
+
+        } while (!expiredOrdersPage.isEmpty());
     }
 
-    private void softDeleteOrderFlow(Order order) {
+    @Transactional
+    public void softDeleteOrderFlow(Order order) {
         log.info("[SoftDelete] orderId={} soft deleting...", order.getOrderId());
 
         // 1. 주문 soft delete

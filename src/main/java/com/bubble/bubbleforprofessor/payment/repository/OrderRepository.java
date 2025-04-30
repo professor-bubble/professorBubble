@@ -2,6 +2,8 @@ package com.bubble.bubbleforprofessor.payment.repository;
 
 import com.bubble.bubbleforprofessor.payment.entity.Order;
 import com.bubble.bubbleforprofessor.payment.entity.OrderStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -14,10 +16,17 @@ import java.util.Optional;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
-    List<Order> findAllByOrderStatusAndCreatedAtBefore(OrderStatus orderStatus, LocalDateTime createdAt);
 
     @Query("SELECT o FROM Order o WHERE o.orderStatus = :status AND o.createdAt < :cutoff AND o.isDeleted = false")
     List<Order> findExpiredOrders(@Param("status") OrderStatus status, @Param("cutoff") LocalDateTime cutoff);
+
+    @Query("SELECT o FROM Order o WHERE o.orderStatus = :status AND o.createdAt < :cutoff AND o.isDeleted = false")
+    Page<Order> findByOrderStatusAndCreatedAtBeforeAndIsDeletedFalse(
+            @Param("status") OrderStatus status,
+            @Param("cutoff") LocalDateTime cutoff,
+            Pageable pageable
+    );
+
 
     @Modifying
     @Query("DELETE FROM Order o WHERE o.isDeleted = true AND o.deletedAt < :cutoff")
