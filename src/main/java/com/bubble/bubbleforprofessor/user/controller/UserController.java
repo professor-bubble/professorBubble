@@ -50,7 +50,7 @@ public class UserController {
 
     @PostMapping("/join")
     public String join(@Valid @ModelAttribute JoinRequestDto joinRequestDto, @ModelAttribute JoinProfessorRequestDto joinProfessorRequestDto) {
-        userService.createUser1(joinRequestDto, joinProfessorRequestDto);
+        return userService.createUser1(joinRequestDto, joinProfessorRequestDto);
     }
 
     @GetMapping("/user")

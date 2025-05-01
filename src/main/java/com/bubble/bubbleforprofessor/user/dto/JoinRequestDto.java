@@ -27,6 +27,9 @@ public class JoinRequestDto {
     @Size(max = 11, message = "핸드폰 번호를 '-'없이 숫자로 11자 입력해주세요")
     String phoneNumber;
 
-//    @NotBlank(message = "대학번호는 필수입니다.")
+    //    @NotBlank(message = "대학번호는 필수입니다.")
     int universityId;
+
+    @NotBlank(message = "유저 유형은 필수입니다.")
+    String role;
 }
