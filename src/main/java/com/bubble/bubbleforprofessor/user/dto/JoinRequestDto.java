@@ -32,4 +32,9 @@ public class JoinRequestDto {
 
     @NotBlank(message = "유저 유형은 필수입니다.")
     String role;
+
+    // 교수 정보 입력
+    String description;
+    int professorNumber;
+    String department;
 }

@@ -10,7 +10,6 @@ import com.bubble.bubbleforprofessor.skin.service.SkinService;
 import com.bubble.bubbleforprofessor.user.dto.ApprovalRequestCreateDto;
 
 import com.bubble.bubbleforprofessor.user.dto.CustomPrincipal;
-import com.bubble.bubbleforprofessor.user.dto.JoinProfessorRequestDto;
 import com.bubble.bubbleforprofessor.user.service.ProfessorService;
 import jakarta.validation.Valid;
 import com.bubble.bubbleforprofessor.user.dto.JoinRequestDto;
@@ -44,13 +43,8 @@ public class UserController {
     private final ChatroomUserService chatroomUserService;
 
     @PostMapping()
-    public String join(@Valid @ModelAttribute JoinRequestDto joinRequestDto) {
+    public String join(@Valid @RequestBody JoinRequestDto joinRequestDto) {
         return userService.createUser(joinRequestDto);
-    }
-
-    @PostMapping("/join")
-    public String join(@Valid @ModelAttribute JoinRequestDto joinRequestDto, @ModelAttribute JoinProfessorRequestDto joinProfessorRequestDto) {
-        return userService.createUser1(joinRequestDto, joinProfessorRequestDto);
     }
 
     @GetMapping("/user")
