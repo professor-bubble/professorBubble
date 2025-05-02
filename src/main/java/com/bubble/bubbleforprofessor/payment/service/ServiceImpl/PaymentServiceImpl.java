@@ -68,43 +68,44 @@ public class PaymentServiceImpl implements PaymentService {
                 .orderId(orderId)
                 .amount(init.getAmount())
                 .paymentKey(tossResp.getPaymentKey())
-                .checkoutUrl(tossResp.getCheckoutUrl()) //결제 url 반환
                 .build();
     }
 
     /**
      * Order, OrderDetail, Payment 엔티티 저장 및 Redis 보관
      */
-    private InitPaymentResponseDto prepareInternal(OrderRequestDto orderRequestDto,
+    @Transactional
+    public InitPaymentResponseDto prepareInternal(OrderRequestDto orderRequestDto,
                                                    CustomPrincipal customPrincipal) {
-        // 1. User 조회
+        // 1. 사용자 조회
         User user = userRepository.findById(UUID.fromString(customPrincipal.getUserId()))
                 .orElseThrow(() -> new CustomException(ErrorCode.NON_EXISTENT_USER));
 
-        // 2. skinId 리스트 추출
+        // 2. 요청에서 skinId 리스트 추출
         List<Integer> skinIds = orderRequestDto.getItems().stream()
                 .map(OrderDetailRequestDto::getSkinId)
                 .toList();
 
-        // 3. Skin 조회 및 맵 변환
+        // 3. Skin 정보 미리 조회 (price 확인용)
         List<Skin> skins = skinRepository.findAllById(skinIds);
         Map<Integer, Skin> skinMap = skins.stream()
                 .collect(Collectors.toMap(Skin::getId, Function.identity()));
 
-        // 4. Order 생성
-        Order order = Order.builder().user(user).totalAmount(0).build();
+        // 4. Order 먼저 생성 및 저장 (orderId 확보)
+        Order order = Order.builder()
+                .user(user)
+                .totalAmount(0) // 나중에 업데이트할 예정
+                .build();
         Order savedOrder = orderRepository.save(order);
 
-        // 5. OrderDetail 생성 및 가격 계산
-        int totalAmount = 0;
+        // 5. OrderDetail 생성 및 저장
         List<OrderDetail> details = new ArrayList<>();
         for (OrderDetailRequestDto item : orderRequestDto.getItems()) {
             Skin skin = skinMap.get(item.getSkinId());
             if (skin == null || skin.isDelete()) {
                 throw new CustomException(ErrorCode.NON_EXISTENT_SKIN);
             }
-            int itemPrice = skin.getPrice() * item.getQuantity();
-            totalAmount += itemPrice;
+
             details.add(OrderDetail.builder()
                     .order(savedOrder)
                     .skin(skin)
@@ -114,11 +115,14 @@ public class PaymentServiceImpl implements PaymentService {
         }
         orderDetailRepository.saveAll(details);
 
-        // 6. totalAmount 업데이트
+        // 6. DB에서 총 결제 금액 계산 (SUM(price * quantity))
+        int totalAmount = orderDetailRepository.calculateTotalAmount(savedOrder.getOrderId());
+
+        // 7. Order에 금액 반영 후 저장
         savedOrder.setTotalAmount(totalAmount);
         orderRepository.save(savedOrder);
 
-        // 7. Payment(PENDING) 생성 및 저장
+        // 8. Payment 생성 및 저장
         Payment payment = Payment.builder()
                 .order(savedOrder)
                 .amount(totalAmount)
@@ -127,16 +131,17 @@ public class PaymentServiceImpl implements PaymentService {
                 .build();
         paymentRepository.save(payment);
 
-        // 8. Redis 저장
-        String orderId = "ORDER_" + savedOrder.getOrderId();
-        redisService.saveOrderAmount(orderId, totalAmount, 1800);
+        // 9. Redis에 결제 금액 저장 (1800초 = 30분 TTL)
+        String redisKey = "ORDER_" + savedOrder.getOrderId();
+        redisService.saveOrderAmount(redisKey, totalAmount, 1800);
 
-        // 9. InitPaymentResponseDto 반환
+        // 10. 사용자에게 반환
         return InitPaymentResponseDto.builder()
-                .orderId(orderId)
+                .orderId(String.valueOf(savedOrder.getOrderId())) // orderID는 long 타입이라 형변환 필요
                 .amount(totalAmount)
                 .build();
     }
+
 
     @Transactional
     @Override

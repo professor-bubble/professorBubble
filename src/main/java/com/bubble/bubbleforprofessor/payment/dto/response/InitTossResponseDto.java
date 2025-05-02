@@ -11,5 +11,4 @@ public class InitTossResponseDto {
     private String orderId;
     private int amount;
     private String paymentKey;
-    private String checkoutUrl;
 }

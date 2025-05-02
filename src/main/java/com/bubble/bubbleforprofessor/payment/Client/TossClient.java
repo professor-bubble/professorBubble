@@ -23,7 +23,10 @@ public class TossClient {
 
     // 아래 toss url로 결제 요청 -> 결제페이지 url 반환
     public TossInitResponseDto ready(String orderId, int amount) {
-        String url = "https://api.tosspayments.com/v1/payments/ready";
+
+
+        String successUrl = "https://your-backend.com/success";
+        String failUrl = "https://your-backend.com/fail";
 
         // 1) 요청 바디 준비
         Map<String, Object> body = Map.of(

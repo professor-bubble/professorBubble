@@ -25,4 +25,6 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> 
     @Query("DELETE FROM OrderDetail od WHERE od.order.orderId IN :orderIds")
     void hardDeleteByOrderIds(@Param("orderIds") List<Long> orderIds);
 
+    @Query("SELECT SUM(od.price * od.quantity) FROM OrderDetail od WHERE od.order.orderId = :orderId")
+    Integer calculateTotalAmount(@Param("orderId") Long orderId);
 }

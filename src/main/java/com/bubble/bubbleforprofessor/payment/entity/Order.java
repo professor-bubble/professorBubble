@@ -64,7 +64,7 @@ public class Order {
     }
 
     @Builder
-    public Order(User user, Integer totalAmount) {
+    public Order(Long orderId, User user, Integer totalAmount) {
         this.user = user;
         this.totalAmount = totalAmount;
     }

@@ -31,6 +31,7 @@ public class PaymentController {
         return ResponseEntity.ok(responseDto);
     }
 
+    // 결제확인
     @GetMapping("/success")
     public ResponseEntity<String> success(
             @RequestParam String paymentKey,
