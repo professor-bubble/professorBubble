@@ -8,6 +8,6 @@ import com.bubble.bubbleforprofessor.user.dto.CustomPrincipal;
 
 public interface PaymentService {
     InitTossResponseDto initPayment(OrderRequestDto orderRequest, CustomPrincipal principal);
-    SuccessResponseDto completePayment(String paymentKey, Long orderId, int amount);
+    SuccessResponseDto completePayment(String paymentKey, String orderId, int amount);
     void failPayment(String paymentKey, String orderId, int amount);
 }

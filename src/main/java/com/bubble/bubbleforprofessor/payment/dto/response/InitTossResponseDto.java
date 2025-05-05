@@ -10,5 +10,9 @@ import lombok.Getter;
 public class InitTossResponseDto {
     private String orderId;
     private int amount;
-    private String paymentKey;
+    private String orderName;
+    private String userName;
+    private String successUrl;
+    private String customerKey;
+    private String failUrl;
 }

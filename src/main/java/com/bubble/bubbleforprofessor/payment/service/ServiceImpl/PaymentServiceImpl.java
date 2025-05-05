@@ -22,6 +22,7 @@ import com.bubble.bubbleforprofessor.global.config.CustomException;
 import com.bubble.bubbleforprofessor.global.config.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,31 +45,43 @@ public class PaymentServiceImpl implements PaymentService {
     private final UserRepository userRepository;
     private final TossClient tossClient;
 
-    /**
-     * 1) 내부 DB/Redis에 PENDING 상태로 저장
-     * 2) TossPayments ready 호출 후 클라이언트에 결제URL 반환
-     */
+
+
+    @Value("${app.base-url}")
+    private String baseUrl;
+
     @Override
-    public InitTossResponseDto initPayment(OrderRequestDto dto, CustomPrincipal principal) {
+    public InitTossResponseDto initPayment(OrderRequestDto orderRequestDto, CustomPrincipal principal) {
 
         // 내부
-        InitPaymentResponseDto init = prepareInternal(dto, principal);
+        InitPaymentResponseDto init = prepareInternal(orderRequestDto, principal);
 
-        // TossPayment경우 orderId 타입이 String이라 변환 필요
-        String orderId = String.valueOf(init.getOrderId());
-
-        // TossPayments 준비 요청
-        TossInitResponseDto tossResp = tossClient.ready(
-                orderId,
-                init.getAmount()
-        );
+        User user = getUserByPrincipal(principal);
+        String orderName = buildOrderName(init.getSkins());
 
         // 클라이언트에 최종 DTO 반환
         return InitTossResponseDto.builder()
-                .orderId(orderId)
+                .orderId(init.getOrderId())
                 .amount(init.getAmount())
-                .paymentKey(tossResp.getPaymentKey())
+                .orderName(orderName)
+                .userName(user.getName())
+                .customerKey(user.getId().toString())
+                .successUrl(baseUrl + "/api/payment/success")
+                .failUrl(baseUrl + "/api/payment/fail")
                 .build();
+    }
+
+    // 유저 정보가져오기
+    private User getUserByPrincipal(CustomPrincipal principal) {
+        return userRepository.findById(UUID.fromString(principal.getUserId()))
+                .orElseThrow(() -> new CustomException(ErrorCode.NON_EXISTENT_USER));
+    }
+
+    // 상품 이름 생성
+    private String buildOrderName(List<Skin> skins) {
+        return skins.size() == 1
+                ? skins.get(0).getName()
+                : skins.get(0).getName() + " 외 " + (skins.size() - 1) + "개";
     }
 
     /**
@@ -78,8 +91,7 @@ public class PaymentServiceImpl implements PaymentService {
     public InitPaymentResponseDto prepareInternal(OrderRequestDto orderRequestDto,
                                                    CustomPrincipal customPrincipal) {
         // 1. 사용자 조회
-        User user = userRepository.findById(UUID.fromString(customPrincipal.getUserId()))
-                .orElseThrow(() -> new CustomException(ErrorCode.NON_EXISTENT_USER));
+        User user = getUserByPrincipal(customPrincipal);
 
         // 2. 요청에서 skinId 리스트 추출
         List<Integer> skinIds = orderRequestDto.getItems().stream()
@@ -135,22 +147,20 @@ public class PaymentServiceImpl implements PaymentService {
         String redisKey = "ORDER_" + savedOrder.getOrderId();
         redisService.saveOrderAmount(redisKey, totalAmount, 1800);
 
-        // 10. 사용자에게 반환
         return InitPaymentResponseDto.builder()
                 .orderId(String.valueOf(savedOrder.getOrderId())) // orderID는 long 타입이라 형변환 필요
                 .amount(totalAmount)
+                .skins(skins)
                 .build();
     }
 
 
     @Transactional
     @Override
-    public SuccessResponseDto completePayment(String paymentKey, Long orderId, int amount) {
-
-        String tossOrderId = String.valueOf(orderId);
+    public SuccessResponseDto completePayment(String paymentKey, String orderId, int amount) {
 
         // 토스페이먼츠 서버에 결제 승인 요청
-        TossConfirmResponseDto tossResponse = tossClient.confirm(paymentKey, tossOrderId, amount);
+        TossConfirmResponseDto tossResponse = tossClient.confirm(paymentKey, orderId, amount);
 
         // Redis의 orderid의 amount 값을 불러옴
         String redisOrderId = "ORDER_" + orderId;
@@ -167,7 +177,8 @@ public class PaymentServiceImpl implements PaymentService {
         String paymentStatus = tossResponse.getStatus();
         String paymentTime = tossResponse.getApprovedAt();
 
-        Order order = orderRepository.findById(orderId)
+        Long parsedOrderId = Long.valueOf(orderId);
+        Order order = orderRepository.findById(parsedOrderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NON_EXISTENT_ORDER));
 
         Payment payment = paymentRepository.findByOrder(order)
@@ -191,7 +202,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         redisService.deleteRedisOrder(redisOrderId);
 
-        return new SuccessResponseDto(paymentStatus, String.valueOf(orderId), paymentKey, amount, paymentStatus);
+        return new SuccessResponseDto(paymentStatus, paymentKey, orderId ,amount, paymentStatus);
     }
 
     @Override
