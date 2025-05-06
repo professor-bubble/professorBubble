@@ -43,10 +43,11 @@ public class PaymentController {
 
     @GetMapping("/fail")
     public ResponseEntity<String> fail(
-            @RequestParam String paymentKey,
-            @RequestParam String orderId,
-            @RequestParam int amount) {
-        paymentService.failPayment(paymentKey, orderId, amount);
+            @RequestParam String code,
+            @RequestParam String message,
+            @RequestParam String orderId
+    ) {
+        paymentService.failPayment(code, message, orderId);
         return ResponseEntity.ok("fail");
     }
 }

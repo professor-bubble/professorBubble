@@ -232,9 +232,22 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
 
-
+    @Transactional
     @Override
-    public void failPayment(String paymentKey, String orderId, int amount) {
-        // 결제 실패 콜백 처리
+    public void failPayment(String code, String message, String orderId) {
+
+        Long parsedOrderId = Long.valueOf(orderId);
+        Order order = orderRepository.findById(parsedOrderId)
+                .orElseThrow(()-> new CustomException(ErrorCode.NON_EXISTENT_ORDER));
+
+        Payment payment = paymentRepository.findByOrder(order)
+                .orElseThrow(()-> new CustomException(ErrorCode.NON_EXISTENT_PAYMENT));
+
+        order.updateOrderStatus(OrderStatus.FAILED);
+        payment.updatePaymentStatus("FAILED", LocalDateTime.now().toString());
+
+        redisService.deleteRedisOrder("ORDER_" + orderId);
+
+        log.info("결제 실패: orderId: {}, code: {}, message: {}", orderId, code, message);
     }
 }
