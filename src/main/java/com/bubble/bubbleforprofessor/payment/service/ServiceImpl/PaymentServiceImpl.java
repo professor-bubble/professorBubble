@@ -4,12 +4,10 @@ import com.bubble.bubbleforprofessor.payment.Client.TossClient;
 import com.bubble.bubbleforprofessor.payment.dto.request.OrderDetailRequestDto;
 import com.bubble.bubbleforprofessor.payment.dto.request.OrderRequestDto;
 import com.bubble.bubbleforprofessor.payment.dto.response.*;
-import com.bubble.bubbleforprofessor.payment.entity.Order;
-import com.bubble.bubbleforprofessor.payment.entity.OrderDetail;
-import com.bubble.bubbleforprofessor.payment.entity.OrderStatus;
-import com.bubble.bubbleforprofessor.payment.entity.Payment;
+import com.bubble.bubbleforprofessor.payment.entity.*;
 import com.bubble.bubbleforprofessor.payment.repository.OrderDetailRepository;
 import com.bubble.bubbleforprofessor.payment.repository.OrderRepository;
+import com.bubble.bubbleforprofessor.payment.repository.PaymentCancelInfoRepository;
 import com.bubble.bubbleforprofessor.payment.repository.PaymentRepository;
 import com.bubble.bubbleforprofessor.payment.service.PaymentRedisService;
 import com.bubble.bubbleforprofessor.payment.service.PaymentService;
@@ -45,6 +43,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final SkinRepository skinRepository;
     private final UserRepository userRepository;
     private final TossClient tossClient;
+    private final PaymentCancelInfoRepository paymentCancelInfoRepository;
 
 
 
@@ -206,6 +205,7 @@ public class PaymentServiceImpl implements PaymentService {
         return new SuccessResponseDto(paymentStatus, paymentKey, orderId ,amount, paymentStatus);
     }
 
+    @Transactional
     @Override
     public void cancelPayment(String paymentKey, String orderId, String reason) {
         Long parsedOrderId = Long.valueOf(orderId);
@@ -220,9 +220,12 @@ public class PaymentServiceImpl implements PaymentService {
         payment.updatePaymentStatus("CANCELED", LocalDateTime.now().toString());
         order.updateOrderStatus(OrderStatus.CANCELED);
 
-        paymentRepository.save(payment);
-        orderRepository.save(order);
+        PaymentCancelInfo cancelInfo = PaymentCancelInfo.builder()
+                    .cancelReason(reason)
+                    .payment(payment)
+                    .build();
 
+        paymentCancelInfoRepository.save(cancelInfo);
         redisService.deleteRedisOrder("ORDER_" + orderId);
 
         log.info("결제 취소 완료: orderId= {}, paymentKey= {}", orderId, paymentKey);

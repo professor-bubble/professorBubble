@@ -2,6 +2,7 @@ package com.bubble.bubbleforprofessor.payment.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -22,4 +23,10 @@ public class PaymentCancelInfo {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "payment_id", nullable = false, referencedColumnName = "payment_id")
     private Payment payment;
+
+    @Builder
+    public PaymentCancelInfo(String cancelReason, Payment payment) {
+        this.cancelReason = cancelReason;
+        this.payment = payment;
+    }
 }
