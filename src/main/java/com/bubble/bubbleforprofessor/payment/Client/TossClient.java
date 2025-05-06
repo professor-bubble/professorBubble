@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -42,8 +43,25 @@ public class TossClient {
                 .postForEntity(url, request, TossConfirmResponseDto.class); //응답 타입 지정
 
         return response.getBody();
-
     }
+
+    public void cancel(String paymentKey, String reason) {
+        String url = "https://api.tosspayments.com/v1/payments/" + paymentKey+ "/cancel";
+
+        Map<String, String> body = Map.of("cancelReason", reason);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth(secretKey, "");
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        // 멱등키 (paymentKey 자체로 설정, 중복 취소 방지)
+        headers.set("Idempotency-Key", paymentKey);
+
+        HttpEntity<Map<String, String>> request = new HttpEntity<>(body, headers);
+
+        restTemplate.postForEntity(url, request, Void.class);
+    }
+
 }
 
 

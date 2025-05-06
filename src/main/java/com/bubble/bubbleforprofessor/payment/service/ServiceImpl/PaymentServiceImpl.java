@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -170,7 +171,7 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         if(!redisOrderAmount.equals(tossResponse.getTotalAmount())) {
-           // failPayment(paymentKey, orderId, amount);
+            cancelPayment(paymentKey, orderId, "금액 위조 감지");
             throw new CustomException(ErrorCode.INVALID_AMOUNT);
         }
 
@@ -204,6 +205,30 @@ public class PaymentServiceImpl implements PaymentService {
 
         return new SuccessResponseDto(paymentStatus, paymentKey, orderId ,amount, paymentStatus);
     }
+
+    @Override
+    public void cancelPayment(String paymentKey, String orderId, String reason) {
+        Long parsedOrderId = Long.valueOf(orderId);
+
+        Order order = orderRepository.findById(parsedOrderId)
+                .orElseThrow(()-> new CustomException(ErrorCode.NON_EXISTENT_ORDER));
+        Payment payment = paymentRepository.findByOrder(order)
+                .orElseThrow(()-> new CustomException(ErrorCode.NON_EXISTENT_PAYMENT));
+
+        tossClient.cancel(paymentKey, reason);
+
+        payment.updatePaymentStatus("CANCELED", LocalDateTime.now().toString());
+        order.updateOrderStatus(OrderStatus.CANCELED);
+
+        paymentRepository.save(payment);
+        orderRepository.save(order);
+
+        redisService.deleteRedisOrder("ORDER_" + orderId);
+
+        log.info("결제 취소 완료: orderId= {}, paymentKey= {}", orderId, paymentKey);
+    }
+
+
 
     @Override
     public void failPayment(String paymentKey, String orderId, int amount) {

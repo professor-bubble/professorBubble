@@ -10,4 +10,5 @@ public interface PaymentService {
     InitTossResponseDto initPayment(OrderRequestDto orderRequest, CustomPrincipal principal);
     SuccessResponseDto completePayment(String paymentKey, String orderId, int amount);
     void failPayment(String paymentKey, String orderId, int amount);
+    void cancelPayment(String paymentKey, String orderid, String reason);
 }
