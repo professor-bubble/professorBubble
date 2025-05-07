@@ -3,9 +3,11 @@ package com.bubble.buubleforprofessor.chatroom.service.impl;
 import com.bubble.buubleforprofessor.chatroom.doc.MessageMongo;
 import com.bubble.buubleforprofessor.chatroom.dto.MessageRequestDto;
 import com.bubble.buubleforprofessor.chatroom.dto.MessageSimpleDto;
+import com.bubble.buubleforprofessor.chatroom.entity.Chatroom;
 import com.bubble.buubleforprofessor.chatroom.entity.ChatroomUser;
 import com.bubble.buubleforprofessor.chatroom.entity.Message;
 import com.bubble.buubleforprofessor.chatroom.entity.MessageImage;
+import com.bubble.buubleforprofessor.chatroom.mapper.MessageSimpleDtoMapper;
 import com.bubble.buubleforprofessor.chatroom.repository.*;
 import com.bubble.buubleforprofessor.chatroom.service.ChatroomUserService;
 import com.bubble.buubleforprofessor.chatroom.service.MessageService;
@@ -100,7 +102,7 @@ public class MessageServiceImpl implements MessageService {
         MessageMongo messageMongo = MessageMongo.builder()
                 .userId(chatroomUser.getUser().getId())
                 .chatroomId(chatroomUser.getChatroom().getId())
-                .userName(chatroomUser.getUser().getName())
+                .userName(message.getUserName())
                 .messageType(messageType)
                 .sendTime(LocalDateTime.now())
                 .content(content)
@@ -136,6 +138,44 @@ public class MessageServiceImpl implements MessageService {
         }
         return messageRequestDto;
     }
+    @Override
+    public MessageSimpleDto sendAndHandleRead(MessageRequestDto messageDto, boolean isProfessorOnline) {
+        // filtering
+        MessageRequestDto filtered = filtering(messageDto);
+
+        // 저장
+        MessageMongo message = save(filtered);
+
+        Chatroom chatroom = chatroomRepository.findById(message.getChatroomId()).orElse(null);
+        // 읽음 처리
+        if (isProfessorOnline) {
+            assert chatroom != null;
+            message.getReadByUserIds().add(chatroom.getProfessor().getUser().getId());
+            messageMongoRepository.save(message);
+        }
+
+        // DTO 변환
+        MessageSimpleDto simpleDto = MessageSimpleDtoMapper.toDto(message, isProfessorOnline);
+
+        // 메시지 전송
+        send(message.getChatroomId(), simpleDto);
+
+        return simpleDto;
+    }
+    @Override
+    public void markMessagesAsReadByProfessor(Long chatRoomId, UUID professorId) {
+        //todo 데이터 잘 가져오는건가?
+        List<MessageMongo> unreadMessages = messageMongoRepository.findMessagesUnreadByAnyone(chatRoomId);
+        for (MessageMongo message : unreadMessages) {
+            message.getReadByUserIds().add(professorId);
+            messageMongoRepository.save(message);
+        }
+
+        // 🔔 실시간 클라이언트 알림 (프론트에 1 사라지게)
+        messagingTemplate.convertAndSend("/sub/chatroom/" + chatRoomId + "/read-update", "read_update");
+    }
+
+
     @Scheduled(fixedRate = 300000)
     public void transferMessagesToRdb() {
         log.info("transferMessagesToRdb 시작: {}", LocalDateTime.now());
@@ -157,7 +197,6 @@ public class MessageServiceImpl implements MessageService {
                 .collect(Collectors.toSet());
 
         // 2. userId와 chatroomId에 해당하는 ChatroomUser들을 한 번에 조회
-        // repository에 아래와 같이 메서드를 추가했다고 가정합니다.
         // List<ChatroomUser> findByUserIdInAndChatroomIdIn(Set<UUID> userIds, Set<Integer> chatroomIds);
         List<ChatroomUser> chatroomUsers = chatroomUserRepository.findByUserIdInAndChatroomIdIn(userIds, chatroomIds);
 

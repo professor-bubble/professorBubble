@@ -9,6 +9,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Document(collection = "messages")
@@ -27,6 +29,7 @@ public class MessageMongo {
     private LocalDateTime sendTime;
 
     private String content;
+    private Set<UUID> readByUserIds = new HashSet<>(); // ✅ 읽은 사용자 ID 저장
 
     @Builder
     public MessageMongo(UUID userId,int chatroomId, String userName,Message.MessageType messageType,LocalDateTime sendTime, String content) {
