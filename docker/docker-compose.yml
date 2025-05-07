@@ -20,6 +20,24 @@ services:
       retries: 5
       start_period: 30s
 
+  mongodb:
+    image: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${SPRING_DATA_MONGODB_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${SPRING_DATA_MONGODB_PASSWORD}
+      MONGO_INITDB_DATABASE: ${SPRING_DATA_MONGODB_DATABASE}
+    ports:
+      - 27017:27017
+    volumes:
+      - ./mongodb_data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 5s
+      timeout: 10s
+      retries: 5
+    networks:
+      - bubble
+
   server:
     build:
       context: ../
@@ -28,9 +46,12 @@ services:
     depends_on:
       elasticsearch: #elastic이 먼저 실행
         condition: service_healthy
+      mongodb:
+        condition: service_healthy
     environment:
       - SPRING_ELASTICSEARCH_URIS=http://elasticsearch:9200  # 컨테이너 이름으로 연결
       - SPRING_PROFILES_ACTIVE=local
+      - SPRING_DATA_MONGODB_URI=${SPRING_DATA_MONGODB_URI}
     ports:
       - "8080:8080"  # 애플리케이션 포트 매핑
     networks:

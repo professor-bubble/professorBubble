@@ -1,9 +1,11 @@
-package com.bubble.bubbleforprofessor.chatroom.service;
+package com.bubble.buubleforprofessor.chatroom.service;
 
-import com.bubble.bubbleforprofessor.chatroom.dto.ChatroomEnterRequestDto;
+import com.bubble.buubleforprofessor.chatroom.entity.Chatroom;
+import com.bubble.buubleforprofessor.chatroom.entity.ChatroomUser;
 
 import java.util.UUID;
 
 public interface ChatroomUserService {
-    void createChatroomUser(UUID userId, int chatroomId, ChatroomEnterRequestDto chatroomEnterRequestDto);
+    void exists(UUID userId, int RoomId);
+    ChatroomUser getUserByUserIdAndChatroomId(UUID userId, int chatroomId);
 }

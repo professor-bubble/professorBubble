@@ -20,9 +20,6 @@ public class SubAdminController {
 
     public final ProfessorService professorService;
 
-    //컨트롤러에서는 디코딩된 userId 값이 들어오는거.
-    //교수 승인요청 리스트를 모두 봄
-    //todo 페이징 처리로 바꿀것
     @GetMapping("/approve-requests")
     public ResponseEntity<Page<ApprovalRequestDto>> approveRequests(
             @RequestParam int pageNum) {

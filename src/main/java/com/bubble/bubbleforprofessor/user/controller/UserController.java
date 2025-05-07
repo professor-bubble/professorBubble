@@ -58,7 +58,6 @@ public class UserController {
         return "user controller - " + customPrincipal.getUserId() + " - " + customPrincipal.getUsername() + " - " + customPrincipal.getRole();
     }
 
-
     //교수 승인 요청. 교수데이터생성
     @PostMapping("/{userId}/approve-request")
     public ResponseEntity<Void> approveRequest(@PathVariable("userId") UUID userId,

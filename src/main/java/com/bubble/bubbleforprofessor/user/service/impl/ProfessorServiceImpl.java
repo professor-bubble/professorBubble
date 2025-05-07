@@ -40,7 +40,7 @@ public class ProfessorServiceImpl implements ProfessorService {
     private final ChatroomService chatroomService;
     private final ChatroomUserRepository chatroomUserRepository;
 
-    //todo fetch type eager로 가져오면됨. queryDSL과 성능비교? ngrinder
+    //todo Entity Graph로 해결 했지만 queryDSL과 성능비교?
 //    교수 승인 요청 리스트 반환
     @Override
     public Page<ApprovalRequestDto> getApproveRequests(Pageable pageable) {

@@ -1,12 +1,17 @@
 spring:
   application:
     name: bubbleforprofessor
-
+  web:
+    resources:
+      static-locations: file:uploads/
   profiles:
     active: local
     group:
         "prod": "prod, secret"
         "local" : "local, secret"
+jwt:
+  secret: "ssssssssssssssssssssssssssssssssss"
+
 
   security:
     oauth2:

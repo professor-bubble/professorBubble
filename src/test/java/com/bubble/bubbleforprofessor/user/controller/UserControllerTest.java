@@ -187,18 +187,17 @@ class UserControllerTest {
                 .userName("사용자 이름")
                 .build();
 
-        MessageDto messageDto = MessageDto.builder()
-                .messageId(1L)
+        MessageResponseDto messageDto = MessageResponseDto.builder()
                 .sendUser(userDto)
                 .sendTime(LocalDateTime.now())
                 .content("메시지 내용")
                 .build();
 
-        ChatroomDetailResponseDto chatroomResponse = ChatroomDetailResponseDto.builder()
+        ChatroomResponseDto chatroomResponse = ChatroomResponseDto.builder()
                 .chatroomId(chatroomId)
                 .professorDto(professorDto)
                 .createdAt(LocalDateTime.now())
-                .users(1)
+                .users(Collections.singletonList(userDto))
                 .messages(Collections.singletonList(messageDto))
                 .build();
 
@@ -213,8 +212,8 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.professorDto.professorId").value(professorDto.getProfessorId().toString()))
                 .andExpect(jsonPath("$.professorDto.professorName").value(professorDto.getProfessorName()))
                 .andExpect(jsonPath("$.professorDto.professorImageUrl").value(professorDto.getProfessorImageUrl()))
-                .andExpect(jsonPath("$.users").value(1))
-                .andExpect(jsonPath("$.messages[0].messageId").value(messageDto.getMessageId()))
+                .andExpect(jsonPath("$.users[0].userId").value(userDto.getUserId().toString()))
+                .andExpect(jsonPath("$.users[0].userName").value(userDto.getUserName()))
                 .andExpect(jsonPath("$.messages[0].sendUser.userId").value(userDto.getUserId().toString()))
                 .andExpect(jsonPath("$.messages[0].sendUser.userName").value(userDto.getUserName()))
                 .andExpect(jsonPath("$.messages[0].content").value(messageDto.getContent()));

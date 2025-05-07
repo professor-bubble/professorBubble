@@ -1,18 +1,23 @@
-package com.bubble.bubbleforprofessor.chatroom.repository;
+package com.bubble.buubleforprofessor.chatroom.repository;
 
-import com.bubble.bubbleforprofessor.chatroom.entity.ChatroomUser;
+import com.bubble.buubleforprofessor.chatroom.entity.ChatroomUser;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Repository
 public interface ChatroomUserRepository extends JpaRepository<ChatroomUser, Long> {
     boolean existsByUserIdAndChatroomId(UUID userId, int chatroomId);
-    @EntityGraph(attributePaths = {"chatroom","chatroom.professor","chatroom.professor.user"})
-    List<ChatroomUser> findAllByUserId(UUID userId);
+    @EntityGraph(attributePaths = {"user"})
+    List<ChatroomUser> findByChatroomId(int chatroomId);
+    Optional<ChatroomUser> findByUserIdAndChatroomId(UUID userId, int chatroomId);
+    List<ChatroomUser> findByUserIdInAndChatroomIdIn(Set<UUID> userIds, Set<Integer> chatroomIds);
 
-    long countByChatroomId(int chatroomId);
+    List<ChatroomUser> findByUserIdInAndChatroomId(Set<UUID> userIds,int chatroomId);
+
 }
