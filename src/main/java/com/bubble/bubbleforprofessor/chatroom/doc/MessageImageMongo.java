@@ -1,4 +1,4 @@
-package com.bubble.buubleforprofessor.chatroom.doc;
+package com.bubble.bubbleforprofessor.chatroom.doc;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

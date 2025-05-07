@@ -1,7 +1,6 @@
-package com.bubble.buubleforprofessor.chatroom.doc;
+package com.bubble.bubbleforprofessor.chatroom.doc;
 
-import com.bubble.buubleforprofessor.chatroom.entity.ChatroomUser;
-import com.bubble.buubleforprofessor.chatroom.entity.Message;
+import com.bubble.bubbleforprofessor.chatroom.entity.Message;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

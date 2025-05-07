@@ -1,4 +1,4 @@
-package com.bubble.buubleforprofessor.global.config;
+package com.bubble.bubbleforprofessor.global.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;

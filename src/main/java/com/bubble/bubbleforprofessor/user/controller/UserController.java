@@ -1,8 +1,8 @@
 package com.bubble.bubbleforprofessor.user.controller;
 
 import com.bubble.bubbleforprofessor.chatroom.dto.ChatroomDetailResponseDto;
-import com.bubble.bubbleforprofessor.chatroom.dto.ChatroomEnterRequestDto;
 import com.bubble.bubbleforprofessor.chatroom.dto.ChatroomResponseDto;
+import com.bubble.bubbleforprofessor.chatroom.dto.ChatroomEnterRequestDto;
 import com.bubble.bubbleforprofessor.chatroom.service.ChatroomService;
 import com.bubble.bubbleforprofessor.chatroom.service.ChatroomUserService;
 import com.bubble.bubbleforprofessor.skin.dto.SkinResponseDto;
@@ -94,15 +94,15 @@ public class UserController {
     }
     //내 특정 채팅방 조회
     @GetMapping("/{userId}/chatroom/{chatroomId}")
-    public ResponseEntity<ChatroomDetailResponseDto> getChatroom(@PathVariable UUID userId,
-                                                                 @PathVariable int chatroomId) {
-        ChatroomDetailResponseDto chatroomDto = chatroomService.findByUserIdAndChatRoomId(userId,chatroomId);
+    public ResponseEntity<ChatroomResponseDto> getChatroom(@PathVariable UUID userId,
+                                                           @PathVariable int chatroomId) {
+        ChatroomResponseDto chatroomDto = chatroomService.findByUserIdAndChatRoomId(userId,chatroomId);
         return ResponseEntity.ok(chatroomDto);
     }
     //내 채팅방 리스트 조회
     @GetMapping("/{userId}/chatrooms")
-    public ResponseEntity<List<ChatroomResponseDto>> getAllChatroomByUserId(@PathVariable UUID userId) {
-        List<ChatroomResponseDto> chatroomResponseDtoList = chatroomService.findAllChatroomByUserId(userId);
+    public ResponseEntity<List<ChatroomDetailResponseDto>> getAllChatroomByUserId(@PathVariable UUID userId) {
+        List<ChatroomDetailResponseDto> chatroomResponseDtoList = chatroomService.findAllChatroomByUserId(userId);
         return ResponseEntity.ok(chatroomResponseDtoList);
     }
 

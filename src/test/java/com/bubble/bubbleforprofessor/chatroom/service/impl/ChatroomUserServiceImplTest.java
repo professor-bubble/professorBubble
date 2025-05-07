@@ -1,35 +1,21 @@
 package com.bubble.bubbleforprofessor.chatroom.service.impl;
 
-import com.bubble.bubbleforprofessor.chatroom.dto.ChatroomEnterRequestDto;
-import com.bubble.bubbleforprofessor.chatroom.entity.Chatroom;
 import com.bubble.bubbleforprofessor.chatroom.entity.ChatroomUser;
-import com.bubble.bubbleforprofessor.chatroom.repository.ChatroomRepository;
-import com.bubble.bubbleforprofessor.university.entity.University;
-import com.bubble.bubbleforprofessor.user.entity.Professor;
-import com.bubble.bubbleforprofessor.user.entity.Role;
-import com.bubble.bubbleforprofessor.user.entity.User;
-import com.bubble.bubbleforprofessor.user.repository.ProfessorRepository;
-import com.bubble.bubbleforprofessor.user.repository.UserRepository;
-import com.bubble.buubleforprofessor.chatroom.repository.ChatroomUserRepository;
-import com.bubble.buubleforprofessor.chatroom.service.impl.ChatroomUserServiceImpl;
-import org.junit.jupiter.api.BeforeEach;
+import com.bubble.bubbleforprofessor.chatroom.repository.ChatroomUserRepository;
+import com.bubble.bubbleforprofessor.global.config.CustomException;
+import com.bubble.bubbleforprofessor.global.config.ErrorCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
