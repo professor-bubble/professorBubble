@@ -1,6 +1,6 @@
-package com.bubble.buubleforprofessor.chatroom.service;
+package com.bubble.bubbleforprofessor.chatroom.service;
 
-import com.bubble.buubleforprofessor.chatroom.entity.MessageImage;
+import com.bubble.bubbleforprofessor.chatroom.entity.MessageImage;
 
 public interface MessageImageService {
     void save(MessageImage image);

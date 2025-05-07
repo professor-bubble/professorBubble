@@ -1,2 +1,3 @@
-package com.bubble.buubleforprofessor.chatroom.controller;public class ViewController {
+package com.bubble.bubbleforprofessor.chatroom.controller;
+public class ViewController {
 }

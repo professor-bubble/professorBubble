@@ -1,7 +1,7 @@
-package com.bubble.buubleforprofessor.chatroom.mapper;
+package com.bubble.bubbleforprofessor.chatroom.mapper;
 
-import com.bubble.buubleforprofessor.chatroom.doc.MessageMongo;
-import com.bubble.buubleforprofessor.chatroom.dto.MessageSimpleDto;
+import com.bubble.bubbleforprofessor.chatroom.doc.MessageMongo;
+import com.bubble.bubbleforprofessor.chatroom.dto.MessageSimpleDto;
 
 public class MessageSimpleDtoMapper {
     public static MessageSimpleDto toDto(MessageMongo message, boolean isRead) {

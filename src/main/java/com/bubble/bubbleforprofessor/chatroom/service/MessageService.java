@@ -1,9 +1,8 @@
-package com.bubble.buubleforprofessor.chatroom.service;
+package com.bubble.bubbleforprofessor.chatroom.service;
 
-import com.bubble.buubleforprofessor.chatroom.doc.MessageMongo;
-import com.bubble.buubleforprofessor.chatroom.dto.MessageRequestDto;
-import com.bubble.buubleforprofessor.chatroom.dto.MessageSimpleDto;
-import com.bubble.buubleforprofessor.chatroom.entity.Message;
+import com.bubble.bubbleforprofessor.chatroom.doc.MessageMongo;
+import com.bubble.bubbleforprofessor.chatroom.dto.MessageRequestDto;
+import com.bubble.bubbleforprofessor.chatroom.dto.MessageSimpleDto;
 
 import java.util.UUID;
 

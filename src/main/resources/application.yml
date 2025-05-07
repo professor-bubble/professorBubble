@@ -9,8 +9,6 @@ spring:
     group:
         "prod": "prod, secret"
         "local" : "local, secret"
-jwt:
-  secret: "ssssssssssssssssssssssssssssssssss"
 
 
   security:

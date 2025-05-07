@@ -4,12 +4,13 @@ import com.bubble.bubbleforprofessor.user.dto.UserSimpleResponseDto;
 import lombok.Builder;
 import lombok.Data;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
 @Builder
-public class ChatroomDetailResponseDto {
+public class ChatroomResponseDto {
     private int chatroomId;
     private ProfessorResponseDto professorDto;
     private LocalDateTime createdAt;

@@ -95,7 +95,7 @@ class ChatroomServiceImplTest {
                 .url("abc.png")
                 .professor(professor).build();
         professor.modifyProfessorImage(professorImage);
-        chatroomUser =new ChatroomUser(chatroom,user);
+        chatroomUser =new ChatroomUser(chatroom,user,"닉네임");
         message = Message.builder()
                 .chatroomUser(chatroomUser)
                 .sendTime(LocalDateTime.now())

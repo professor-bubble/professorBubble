@@ -1,23 +1,23 @@
-package com.bubble.buubleforprofessor.chatroom.service.impl;
+package com.bubble.bubbleforprofessor.chatroom.service.impl;
 
-import com.bubble.buubleforprofessor.chatroom.doc.MessageMongo;
-import com.bubble.buubleforprofessor.chatroom.dto.ChatroomResponseDto;
-import com.bubble.buubleforprofessor.chatroom.dto.MessageResponseDto;
-import com.bubble.buubleforprofessor.chatroom.entity.Chatroom;
-import com.bubble.buubleforprofessor.chatroom.entity.ChatroomUser;
-import com.bubble.buubleforprofessor.chatroom.repository.ChatroomRepository;
-import com.bubble.buubleforprofessor.chatroom.repository.ChatroomUserRepository;
-import com.bubble.buubleforprofessor.chatroom.repository.MessageMongoRepository;
-import com.bubble.buubleforprofessor.chatroom.repository.MessageRepository;
-import com.bubble.buubleforprofessor.chatroom.service.ChatroomService;
-import com.bubble.buubleforprofessor.global.config.CustomException;
-import com.bubble.buubleforprofessor.global.config.ErrorCode;
-import com.bubble.buubleforprofessor.user.dto.ProfessorResponseDto;
-import com.bubble.buubleforprofessor.user.dto.UserSimpleResponseDto;
-import com.bubble.buubleforprofessor.user.entity.Professor;
-import com.bubble.buubleforprofessor.user.entity.User;
-import com.bubble.buubleforprofessor.user.repository.ProfessorRepository;
-import com.bubble.buubleforprofessor.user.repository.UserRepository;
+import com.bubble.bubbleforprofessor.chatroom.doc.MessageMongo;
+import com.bubble.bubbleforprofessor.chatroom.dto.ChatroomDetailResponseDto;
+import com.bubble.bubbleforprofessor.chatroom.repository.ChatroomUserRepository;
+import com.bubble.bubbleforprofessor.chatroom.repository.MessageRepository;
+import com.bubble.bubbleforprofessor.chatroom.dto.ChatroomResponseDto;
+import com.bubble.bubbleforprofessor.chatroom.dto.MessageResponseDto;
+import com.bubble.bubbleforprofessor.chatroom.entity.Chatroom;
+import com.bubble.bubbleforprofessor.chatroom.entity.ChatroomUser;
+import com.bubble.bubbleforprofessor.chatroom.repository.ChatroomRepository;
+import com.bubble.bubbleforprofessor.chatroom.repository.MessageMongoRepository;
+import com.bubble.bubbleforprofessor.chatroom.service.ChatroomService;
+import com.bubble.bubbleforprofessor.global.config.CustomException;
+import com.bubble.bubbleforprofessor.global.config.ErrorCode;
+import com.bubble.bubbleforprofessor.user.dto.ProfessorResponseDto;
+import com.bubble.bubbleforprofessor.user.dto.UserSimpleResponseDto;
+import com.bubble.bubbleforprofessor.user.entity.Professor;
+import com.bubble.bubbleforprofessor.user.repository.ProfessorRepository;
+import com.bubble.bubbleforprofessor.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,13 +42,13 @@ public class ChatroomServiceImpl implements ChatroomService {
 
     @Override
     @Transactional
-    public void createChatroom(Professor professor) {
+    public Chatroom createChatroom(Professor professor) {
         if(chatroomRepository.existsChatroomByProfessor(professor))
         {
             throw new CustomException(ErrorCode.EXISTENT_CHATROOM);
         }
         Chatroom chatroom = new Chatroom(professor);
-        chatroomRepository.save(chatroom);
+        return chatroomRepository.save(chatroom);
     }
 
     @Override
@@ -107,4 +107,23 @@ public class ChatroomServiceImpl implements ChatroomService {
         return chatroomResponseDto;
     }
 
+    //채팅방 리스트 조회
+    @Override
+    public List<ChatroomDetailResponseDto> findAllChatroomByUserId(UUID userID) {
+        List<ChatroomUser> chatroomList = chatroomUserRepository.findAllByUserId(userID);
+        List<ChatroomDetailResponseDto> chatroomResponseDtoList = chatroomList.stream()
+                .map(chatroomUser ->
+                        ChatroomDetailResponseDto.builder()
+                                .chatroomId(chatroomUser.getChatroom().getId())
+                                .createTime(chatroomUser.getChatroom().getCreatedAt())
+                                .lastSeenAt(chatroomUser.getChatroom().getLastSeenAt())
+                                .professor(ProfessorResponseDto.builder()
+                                        .professorId(userID)
+                                        .professorName(chatroomUser.getChatroom().getProfessor().getUser().getName())
+                                        .professorImageUrl(chatroomUser.getChatroom().getProfessor().getProfessorImage().getUrl())
+                                        .build())
+                                .build()
+                ).toList();
+        return chatroomResponseDtoList;
+    }
 }

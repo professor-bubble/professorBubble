@@ -1,6 +1,6 @@
-package com.bubble.buubleforprofessor.chatroom.repository;
+package com.bubble.bubbleforprofessor.chatroom.repository;
 
-import com.bubble.buubleforprofessor.chatroom.entity.ChatroomUser;
+import com.bubble.bubbleforprofessor.chatroom.entity.ChatroomUser;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -19,5 +19,6 @@ public interface ChatroomUserRepository extends JpaRepository<ChatroomUser, Long
     List<ChatroomUser> findByUserIdInAndChatroomIdIn(Set<UUID> userIds, Set<Integer> chatroomIds);
 
     List<ChatroomUser> findByUserIdInAndChatroomId(Set<UUID> userIds,int chatroomId);
+    List<ChatroomUser> findAllByUserId(UUID userID);
 
 }

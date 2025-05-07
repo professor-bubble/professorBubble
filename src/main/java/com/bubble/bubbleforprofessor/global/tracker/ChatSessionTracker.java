@@ -1,4 +1,4 @@
-package com.bubble.buubleforprofessor.global.tracker;
+package com.bubble.bubbleforprofessor.global.tracker;
 
 import org.springframework.stereotype.Component;
 

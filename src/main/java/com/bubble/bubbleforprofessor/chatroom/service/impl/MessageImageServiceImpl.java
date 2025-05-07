@@ -1,8 +1,8 @@
-package com.bubble.buubleforprofessor.chatroom.service.impl;
+package com.bubble.bubbleforprofessor.chatroom.service.impl;
 
-import com.bubble.buubleforprofessor.chatroom.entity.MessageImage;
-import com.bubble.buubleforprofessor.chatroom.repository.MessageImageRepository;
-import com.bubble.buubleforprofessor.chatroom.service.MessageImageService;
+import com.bubble.bubbleforprofessor.chatroom.service.MessageImageService;
+import com.bubble.bubbleforprofessor.chatroom.entity.MessageImage;
+import com.bubble.bubbleforprofessor.chatroom.repository.MessageImageRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
