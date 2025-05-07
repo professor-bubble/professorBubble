@@ -1,0 +1,118 @@
+package com.bubble.bubbleforprofessor.user.controller;
+
+import com.bubble.bubbleforprofessor.chatroom.dto.ChatroomDetailResponseDto;
+import com.bubble.bubbleforprofessor.chatroom.dto.ChatroomEnterRequestDto;
+import com.bubble.bubbleforprofessor.chatroom.dto.ChatroomResponseDto;
+import com.bubble.bubbleforprofessor.chatroom.service.ChatroomService;
+import com.bubble.bubbleforprofessor.chatroom.service.ChatroomUserService;
+import com.bubble.bubbleforprofessor.skin.dto.SkinResponseDto;
+import com.bubble.bubbleforprofessor.skin.service.SkinService;
+import com.bubble.bubbleforprofessor.user.dto.ApprovalRequestCreateDto;
+
+import com.bubble.bubbleforprofessor.user.dto.CustomPrincipal;
+import com.bubble.bubbleforprofessor.user.dto.JoinProfessorRequestDto;
+import com.bubble.bubbleforprofessor.user.service.ProfessorService;
+import jakarta.validation.Valid;
+import com.bubble.bubbleforprofessor.user.dto.JoinRequestDto;
+import com.bubble.bubbleforprofessor.user.service.UserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+import java.util.UUID;
+
+@RequestMapping("/api/users")
+@PreAuthorize("hasRole('USER')")
+@RequiredArgsConstructor
+@RestController
+public class UserController {
+
+    private final ProfessorService professorService;
+    private final SkinService skinService;
+    private final ChatroomService chatroomService;
+    private final UserService userService;
+    private final ChatroomUserService chatroomUserService;
+
+    @PostMapping()
+    public String join(@Valid @ModelAttribute JoinRequestDto joinRequestDto) {
+        return userService.createUser(joinRequestDto);
+    }
+
+    @PostMapping("/join")
+    public String join(@Valid @ModelAttribute JoinRequestDto joinRequestDto, @ModelAttribute JoinProfessorRequestDto joinProfessorRequestDto) {
+        return userService.createUser1(joinRequestDto, joinProfessorRequestDto);
+    }
+
+    @GetMapping("/user")
+    public String mainPage(@AuthenticationPrincipal CustomPrincipal customPrincipal) {
+        return "user controller - " + customPrincipal.getUserId() + " - " + customPrincipal.getUsername() + " - " + customPrincipal.getRole();
+    }
+
+    //교수 승인 요청. 교수데이터생성
+    @PostMapping("/{userId}/approve-request")
+    public ResponseEntity<Void> approveRequest(@PathVariable("userId") UUID userId,
+                                               @Valid @RequestBody ApprovalRequestCreateDto approvalRequestCreateDto,
+                                               BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return ResponseEntity.badRequest().build();
+        }
+        professorService.createProfessor(userId, approvalRequestCreateDto);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+
+    @GetMapping("/{userId}/skin")
+    public ResponseEntity<Page<SkinResponseDto>> findSkinsByUserId(@PathVariable(value = "userId",required = true)UUID userId,
+                                                                   @RequestParam(value = "pageNum",defaultValue = "0") int pageNum)
+    {
+        PageRequest pageRequest=PageRequest.of(pageNum, 10);
+        Page<SkinResponseDto> skins= skinService.getSkinsByUserId(userId, pageRequest);
+        if(skins==null || skins.isEmpty())
+        {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(skins);
+    }
+
+    //스킨 적용 여부 변경
+    @PatchMapping(value = "/{userId}/skin/{skinId}",produces = "application/json")
+    public ResponseEntity<Boolean> modifySkinStatus(@PathVariable(required = true) UUID userId,
+                                                    @PathVariable(required = true) int skinId)
+    {
+        skinService.modifySkinStatus(userId,skinId);
+        return ResponseEntity.ok(true);
+    }
+    //내 특정 채팅방 조회
+    @GetMapping("/{userId}/chatroom/{chatroomId}")
+    public ResponseEntity<ChatroomDetailResponseDto> getChatroom(@PathVariable UUID userId,
+                                                                 @PathVariable int chatroomId) {
+        ChatroomDetailResponseDto chatroomDto = chatroomService.findByUserIdAndChatRoomId(userId,chatroomId);
+        return ResponseEntity.ok(chatroomDto);
+    }
+    //내 채팅방 리스트 조회
+    @GetMapping("/{userId}/chatrooms")
+    public ResponseEntity<List<ChatroomResponseDto>> getAllChatroomByUserId(@PathVariable UUID userId) {
+        List<ChatroomResponseDto> chatroomResponseDtoList = chatroomService.findAllChatroomByUserId(userId);
+        return ResponseEntity.ok(chatroomResponseDtoList);
+    }
+
+    //채팅방 생성(유저 최초 입장)
+    @PostMapping(value ="/{userId}/chatroom/{chatroomId}",produces = "application/json")
+    public ResponseEntity<Boolean> createChatroomUser(@PathVariable UUID userId,
+                                                      @PathVariable int chatroomId,
+                                                      @RequestBody ChatroomEnterRequestDto chatroomEnterRequestDto)
+    {
+        chatroomUserService.createChatroomUser(userId,chatroomId,chatroomEnterRequestDto);
+        return ResponseEntity.ok(true);
+    }
+}

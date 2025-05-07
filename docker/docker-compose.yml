@@ -1,22 +1,25 @@
+version: '3.8'
+
 services:
-  my-server:
-    #도커 컴포즈 파일 기준 도커파일의 위치
-    build:
-      context: ../
-      dockerfile: ./docker/server-container/Dockerfile
-    ports:
-      - 8080:8080
+  elasticsearch:
+    image: elasticsearch:8.15.5
+    container_name: elasticsearch
     environment:
-      - SPRING_ELASTICSEARCH_URIS=http://elasticsearch:9200
-      - SPRING_PROFILES_ACTIVE=local
-      - SPRING_DATA_MONGODB_URI=${SPRING_DATA_MONGODB_URI}
-    depends_on:
-      mongodb:
-        condition: service_healthy
-      elasticsearch:
-        condition: service_healthy
+      - discovery.type=single-node  # 단일 노드 모드로 실행
+      - xpack.security.enabled=false  # 보안 비활성화
+    ports:
+      - "9200:9200"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data  # 데이터 영속성
     networks:
       - bubble
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9200" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
   mongodb:
     image: mongo
     environment:
@@ -35,29 +38,28 @@ services:
     networks:
       - bubble
 
-  elasticsearch:
-    image: elasticsearch:8.15.5
-    container_name: elasticsearch
+  server:
+    build:
+      context: ../
+      dockerfile: ./docker/server-container/Dockerfile
+    container_name: bubbleforprofessor
+    depends_on:
+      elasticsearch: #elastic이 먼저 실행
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
     environment:
-      - discovery.type=single-node  # 단일 노드 모드로 실행
-      - xpack.security.enabled=false  # 보안 비활성화
+      - SPRING_ELASTICSEARCH_URIS=http://elasticsearch:9200  # 컨테이너 이름으로 연결
+      - SPRING_PROFILES_ACTIVE=local
+      - SPRING_DATA_MONGODB_URI=${SPRING_DATA_MONGODB_URI}
     ports:
-      - 9200:9200
-    volumes:
-      - esdata:/usr/share/elasticsearch/data  # 데이터 영속성
+      - "8080:8080"  # 애플리케이션 포트 매핑
     networks:
       - bubble
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:9200" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
 
+volumes:
+  esdata:
 
 networks:
   bubble:
     driver: bridge
-
-volumes:
-  esdata:
