@@ -2,12 +2,14 @@ package com.bubble.bubbleforprofessor.user.dto;
 
 import com.bubble.bubbleforprofessor.user.entity.User;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 
 import java.sql.Timestamp;
 
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserResponseDto {

@@ -2,11 +2,13 @@ package com.bubble.bubbleforprofessor.user.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 @Setter
 @Getter
+@AllArgsConstructor
 public class JoinRequestDto {
     @NotBlank(message = "아이디는 필수입니다.")
     @Size(max = 10, message = "아이디는 10자 이하여야 합니다.")
