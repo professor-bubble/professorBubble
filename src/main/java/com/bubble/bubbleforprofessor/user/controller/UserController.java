@@ -7,12 +7,10 @@ import com.bubble.bubbleforprofessor.chatroom.service.ChatroomService;
 import com.bubble.bubbleforprofessor.chatroom.service.ChatroomUserService;
 import com.bubble.bubbleforprofessor.skin.dto.SkinResponseDto;
 import com.bubble.bubbleforprofessor.skin.service.SkinService;
-import com.bubble.bubbleforprofessor.user.dto.ApprovalRequestCreateDto;
+import com.bubble.bubbleforprofessor.user.dto.*;
 
-import com.bubble.bubbleforprofessor.user.dto.CustomPrincipal;
 import com.bubble.bubbleforprofessor.user.service.ProfessorService;
 import jakarta.validation.Valid;
-import com.bubble.bubbleforprofessor.user.dto.JoinRequestDto;
 import com.bubble.bubbleforprofessor.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -42,16 +40,30 @@ public class UserController {
     private final UserService userService;
     private final ChatroomUserService chatroomUserService;
 
-    @PostMapping()
-    public String join(@Valid @RequestBody JoinRequestDto joinRequestDto) {
-        return userService.createUser(joinRequestDto);
-    }
-
     @GetMapping("/user")
     public String mainPage(@AuthenticationPrincipal CustomPrincipal customPrincipal) {
         return "user controller - " + customPrincipal.getUserId() + " - " + customPrincipal.getUsername() + " - " + customPrincipal.getRole();
     }
 
+    @PostMapping()
+    public String join(@Valid @RequestBody JoinRequestDto joinRequestDto) {
+        return userService.createUser(joinRequestDto);
+    }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<UserResponseDto> getUser(@PathVariable String userId) {
+        return ResponseEntity.ok(userService.getUser(userId));
+    }
+
+    @PatchMapping("/{userId}")
+    public void updateUser(@PathVariable String userId, @Valid @RequestBody UserRequestDto userRequestDto) {
+        userService.updateUser(userId, userRequestDto);
+    }
+
+    @DeleteMapping("/{userId}")
+    public void DeleteUser(@PathVariable String userId) {
+        userService.deleteUser(userId);
+    }
 
     //교수 승인 요청. 교수데이터생성
     @PostMapping("/{userId}/approve-request")

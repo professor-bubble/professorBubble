@@ -3,6 +3,8 @@ package com.bubble.bubbleforprofessor.user.service.impl;
 import com.bubble.bubbleforprofessor.global.config.CustomException;
 import com.bubble.bubbleforprofessor.global.config.ErrorCode;
 import com.bubble.bubbleforprofessor.user.dto.JoinRequestDto;
+import com.bubble.bubbleforprofessor.user.dto.UserRequestDto;
+import com.bubble.bubbleforprofessor.user.dto.UserResponseDto;
 import com.bubble.bubbleforprofessor.user.entity.Professor;
 import com.bubble.bubbleforprofessor.user.entity.Role;
 import com.bubble.bubbleforprofessor.user.entity.User;
@@ -18,6 +20,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -82,5 +85,36 @@ public class UserServiceImpl implements UserService {
         }
 
         return "new join Success";
+    }
+
+    @Override
+    public UserResponseDto getUser(String id) {
+        UUID uuid = UUID.fromString(id);
+
+        User userEntity = userRepository.findById(uuid)
+                .orElseThrow(() -> new CustomException(ErrorCode.NON_EXISTENT_USER));
+
+        return UserResponseDto.fromUserEntity(userEntity);
+    }
+
+    @Override
+    public void updateUser(String id, UserRequestDto userRequestDto) {
+        if (!id.equals(userRequestDto.getId())) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        }
+
+        UUID uuid = UUID.fromString(userRequestDto.getId());
+
+        User userEntity = userRepository.findById(uuid)
+                .orElseThrow(() -> new CustomException(ErrorCode.NON_EXISTENT_USER));
+
+        userEntity.userFromDto(userRequestDto);
+    }
+
+    @Override
+    public void deleteUser(String id) {
+        UUID uuid = UUID.fromString(id);
+
+        userRepository.deleteById(uuid);
     }
 }

@@ -3,6 +3,7 @@ package com.bubble.bubbleforprofessor.user.entity;
 import com.bubble.bubbleforprofessor.university.entity.University;
 import com.bubble.bubbleforprofessor.user.converter.UUIDConverter;
 import com.bubble.bubbleforprofessor.user.dto.JoinRequestDto;
+import com.bubble.bubbleforprofessor.user.dto.UserRequestDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -84,6 +85,15 @@ public class User {
         this.email = "email@email.com";
         this.university = null;
         this.role = null;
+
+        return this;
+    }
+
+    public User userFromDto(UserRequestDto userRequestDto) {
+        if (userRequestDto.getName() != null) this.name = userRequestDto.getName();
+        if (userRequestDto.getPassword() != null) this.password = userRequestDto.getPassword();
+        if (userRequestDto.getPhoneNumber() != null) this.phoneNumber = userRequestDto.getPhoneNumber();
+        if (userRequestDto.getEmail() != null) this.email = userRequestDto.getEmail();
 
         return this;
     }
